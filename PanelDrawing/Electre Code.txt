@@ -1,0 +1,74 @@
+02-09-2025
+wIRE CODE OPTIMIZATION FOR ALL TYPES OF WIRES LIKE MONO,TP,STP,COAX,TRIAX,QUODRAX FOR Z LINE
+FILTERED DUPLICATE WIRING UNDER "CONNECTIONREQUIRED" FUNCTION
+MULTIPLE SYMBOL DISPLAYED AND ORGANIZED ITS POSITIONS
+04-09-2025
+Male,Female Break connectors placement or positions updated in code level along with its pin info
+For CB family fetching dynamically along with pins and all attribute info,code updated for that
+10-09-2025
+Tested with multiple scenarios and sent to prod testing with this patch
+13-09-2025
+CB pins issue resolved and pins duplicate issue also resolved
+for break con pins symbol issue and placing issue resolved,
+components placing diagnally
+15-09-2025
+Group id update issue resolved for same ref disignator name for components and and pins for cb family
+smashing for customer components
+gri 0.5,2; changed
+wire code placing issue for source pins 
+
+Terminal Block (OOTB)
+
+$$ TB =Terminal
+$$ Contact Number =10
+LET IROT 0;
+$$ x_loc=142   y_loc=206
+$$ Harnais 
+ADD I1 sth_tb_head_t :R (IROT) 142,206;
+ADD I0 sth_tb_body2 :R (IROT) 142,206;
+$$ x_loc=142
+$$ y_loc=202
+ADD I0 sth_tb_body2 :R (IROT) 142,202;
+$$ x_loc=142
+$$ y_loc=198
+ADD I0 sth_tb_body2 :R (IROT) 142,198;
+$$ x_loc=142
+$$ y_loc=194
+ADD I0 sth_tb_body2 :R (IROT) 142,194;
+$$ x_loc=142
+$$ y_loc=190
+ADD I0 sth_tb_body2 :R (IROT) 142,190;
+$$ x_loc=142
+$$ y_loc=186
+ADD I0 sth_tb_body2 :R (IROT) 142,186;
+$$ x_loc=142
+$$ y_loc=182
+ADD I0 sth_tb_body2 :R (IROT) 142,182;
+$$ x_loc=142
+$$ y_loc=178
+ADD I0 sth_tb_body2 :R (IROT) 142,178;
+$$ x_loc=142
+$$ y_loc=174
+ADD I0 sth_tb_body2 :R (IROT) 142,174;
+$$ x_loc=142
+$$ y_loc=170
+ADD I0 sth_tb_body2 :R (IROT) 142,170;
+ADD I1 sth_tb_foot_new_t :R (IROT) 142,170;
+$$ x_loc=142
+$$ y_loc=170
+ADD L101 136,206 136,170;;;;NOP
+ADD L101 148,206 148,170;;;;NOP
+ADD R254  136,212 148,158 ;
+ADD N53 :T1001 :F4.0 :R0 :D :J4 :AC R254 142,212 'Terminal' 142,214;
+ADD info_sth_cmd 136,156;
+MOD N2 136,156 0,0 STOR_MID :F1.0:L253 :E'Terminal' JU ;
+MOD N52 136,156 0,0 STOR_MID :E'PN' JU ;
+TESTDIS_OFF;;
+pm_files_sav;
+;;NOP;
+UNDO :E;
+
+•	Please Note : Shunt value need to be added
+•	Orientation need to be added
+
+
