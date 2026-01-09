@@ -86,7 +86,7 @@ namespace PanelDrawing.Services.P2
 
             // Straight horizontal/overlap case
             // if(p1y == p2y)
-            if (false)
+         /*   if (false)
             {
                 if (c1 == c2 && p1x == p2x)
                 {
@@ -122,7 +122,7 @@ namespace PanelDrawing.Services.P2
                 }
             }
             else
-            {
+            {*/
                 // If either orientation is Top/Bottom, original code had commented Simple3PointConnection call.
                 if (iF_Ori == "T" || iF_Ori == "B" || iT_Ori == "T" || iT_Ori == "B")
                 {
@@ -131,13 +131,11 @@ namespace PanelDrawing.Services.P2
                 else
                 {
                     // Z-line optimized routing (main path for non-horizontal)
-                    WireDrawing.Simple4PointConnection_ZLine_Optimized(
+                    WireDrawing.DrawWire(
                         p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number, iF_Ori, iT_Ori);
                 }
-            }
-        }
-
-     
+          //  }
+        }   
 
     }
 }

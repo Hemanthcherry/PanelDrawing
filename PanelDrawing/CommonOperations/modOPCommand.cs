@@ -42,7 +42,7 @@ namespace PanelDrawing.CommonOperations
                 writer.WriteLine("ADD I2 " + iSymbolname + " " + X0 + "," + Y0 + ";NOP;");
                 if (iSymbolname.StartsWith("macro"))
                 {
-                    writer.WriteLine("SMA I2 " + iSymbolname + " " + X0 + ", " + Y0 + ";");
+                    writer.WriteLine("SMA I2 " + iSymbolname + " " + X0 + "," + Y0 + ";");
                 }
             }
         }

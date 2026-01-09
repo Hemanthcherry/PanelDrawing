@@ -39,11 +39,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\HKK5\\Downloads\\PanelDrawing_Dec_16_2025\\PanelDrawing\\PanelDrawing.csproj",
+      "projectUniqueName": "C:\\Users\\HKK5\\Desktop\\PanelDrawing\\PanelDrawing\\PanelDrawing.csproj",
       "projectName": "PanelDrawing",
-      "projectPath": "C:\\Users\\HKK5\\Downloads\\PanelDrawing_Dec_16_2025\\PanelDrawing\\PanelDrawing.csproj",
+      "projectPath": "C:\\Users\\HKK5\\Desktop\\PanelDrawing\\PanelDrawing\\PanelDrawing.csproj",
       "packagesPath": "C:\\Users\\HKK5\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\HKK5\\Downloads\\PanelDrawing_Dec_16_2025\\PanelDrawing\\obj\\",
+      "outputPath": "C:\\Users\\HKK5\\Desktop\\PanelDrawing\\PanelDrawing\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\HKK5\\AppData\\Roaming\\NuGet\\NuGet.Config",

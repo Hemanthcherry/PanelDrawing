@@ -99,6 +99,7 @@ namespace Panel_Drawing.Forms
             bool IsComponentsWiringCreated = false;
             #region//Environment Variable Settings
             //Electre_Proj_Path
+            Constants.Env_Variable_Electre_Proj_Path = "C:\\ELECTRE\\electre_projects\\PANELDRAWING_JAN07\\";
             //Constants.Env_Variable_Electre_Proj_Path = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ELECTRE_PROJ", EnvironmentVariableTarget.Machine)) ? null : Environment.GetEnvironmentVariable("ELECTRE_PROJ", EnvironmentVariableTarget.Machine); //Environment.GetEnvironmentVariable("ELECTRE_PROJ", EnvironmentVariableTarget.Machine);//string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ELECTRE_PROJ")) ? null : Environment.GetEnvironmentVariable("ELECTRE_PROJ");
             if (string.IsNullOrEmpty(Constants.Env_Variable_Electre_Proj_Path))
             {
