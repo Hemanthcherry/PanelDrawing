@@ -10,379 +10,380 @@ namespace PanelDrawing.Services.P2
 {
     public static class WireDrawing
     {
-        public static void DrawStraightLineConnection(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2,
-            string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Number)
-        {
-            // MASTER LISTS (you can add more types any time)
-            var monoTypes = new List<string> { "86A9S", "86A9SS", "S", "S0", "S00", "SS", "COAX", "TRIAX" };
-            var tpTypes = new List<string> { "TP", "QUADRAX" };
-            var stpTypes = new List<string> { "STP" };
+        #region old code commented on Jan, 12
+        //public static void DrawStraightLineConnection(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2,
+        //    string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Number)
+        //{
+        //    // MASTER LISTS (you can add more types any time)
+        //    var monoTypes = new List<string> { "86A9S", "86A9SS", "S", "S0", "S00", "SS", "COAX", "TRIAX" };
+        //    var tpTypes = new List<string> { "TP", "QUADRAX" };
+        //    var stpTypes = new List<string> { "STP" };
 
-            // Decide which block to execute
-            if (monoTypes.Contains(wire_Type))
-            {
-                double X3 = (p1x + p2x) / 2;
-                string mono_wire_symbol = string.Empty;
+        //    // Decide which block to execute
+        //    if (monoTypes.Contains(wire_Type))
+        //    {
+        //        double X3 = (p1x + p2x) / 2;
+        //        string mono_wire_symbol = string.Empty;
 
-                if (wire_Type.Equals("COAX"))
-                    mono_wire_symbol = "sth_coax";
-                else if (wire_Type.Equals("SS"))
-                    mono_wire_symbol = "sth_ss";
-                else if (wire_Type.Equals("COAX"))
-                    mono_wire_symbol = "sth_coax";
-                //else if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00"))
-                //    mono_wire_symbol = "sth_s";
-                else
-                    mono_wire_symbol = "sth_s";
+        //        if (wire_Type.Equals("COAX"))
+        //            mono_wire_symbol = "sth_coax";
+        //        else if (wire_Type.Equals("SS"))
+        //            mono_wire_symbol = "sth_ss";
+        //        else if (wire_Type.Equals("COAX"))
+        //            mono_wire_symbol = "sth_coax";
+        //        //else if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00"))
+        //        //    mono_wire_symbol = "sth_s";
+        //        else
+        //            mono_wire_symbol = "sth_s";
 
-                using (var writer = File.AppendText(Constants.el_ExecFilePath))
-                {
-                    writer.WriteLine($"GRI 2.0, 2;");
-                    writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
-                    writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
-                    writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
-                    writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Number}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
-                    writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
-                    writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
-                    writer.WriteLine($"ADD L154 :W0");
-                    writer.WriteLine($"{p1x},{p1y - 4}");
-                    writer.WriteLine($"{p2x},{p2y - 4}");
-                    writer.WriteLine($";;NOP;;");
-                    writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
-                    writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
-                    writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p2y - 4} '{wire_Type_Core_Number}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
-                    writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
-                    writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
-                    writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {p1x + 16},{p1y};");
-                    writer.WriteLine($"TESTDIS;");
-                    writer.WriteLine($"TESTDIS_OFF;");
+        //        using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //        {
+        //            writer.WriteLine($"GRI 2.0, 2;");
+        //            writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
+        //            writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
+        //            writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
+        //            writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Number}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
+        //            writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
+        //            writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
+        //            writer.WriteLine($"ADD L154 :W0");
+        //            writer.WriteLine($"{p1x},{p1y - 4}");
+        //            writer.WriteLine($"{p2x},{p2y - 4}");
+        //            writer.WriteLine($";;NOP;;");
+        //            writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
+        //            writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
+        //            writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p2y - 4} '{wire_Type_Core_Number}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
+        //            writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
+        //            writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
+        //            writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {p1x + 16},{p1y};");
+        //            writer.WriteLine($"TESTDIS;");
+        //            writer.WriteLine($"TESTDIS_OFF;");
 
-                    writer.WriteLine($":RAW");
-                    writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
-                    if (wire_Type.Equals("SS"))
-                        writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
-                    writer.WriteLine($":GRI");
+        //            writer.WriteLine($":RAW");
+        //            writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
+        //            if (wire_Type.Equals("SS"))
+        //                writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
+        //            writer.WriteLine($":GRI");
 
-                    writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {p2x - 16},{p2y};");
-                    writer.WriteLine($"TESTDIS;");
-                    writer.WriteLine($"TESTDIS_OFF;");
+        //            writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {p2x - 16},{p2y};");
+        //            writer.WriteLine($"TESTDIS;");
+        //            writer.WriteLine($"TESTDIS_OFF;");
 
-                    writer.WriteLine($":RAW");
-                    writer.WriteLine($"ADD N58 :J7: T3003: D: F1: R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p1y + 0.5}; NOP;");
-                    if (wire_Type.Equals("SS") || wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))
-                        writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{iWireCode}' JU; NOP;");
-                    writer.WriteLine($":GRI");
+        //            writer.WriteLine($":RAW");
+        //            writer.WriteLine($"ADD N58 :J7: T3003: D: F1: R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p1y + 0.5}; NOP;");
+        //            if (wire_Type.Equals("SS") || wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))
+        //                writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{iWireCode}' JU; NOP;");
+        //            writer.WriteLine($":GRI");
 
-                    writer.WriteLine($"pm_files_sav;;");
-                    writer.WriteLine($"GRI ELECTRE_GRID_STH;");
-                }
-                return;
-            }
+        //            writer.WriteLine($"pm_files_sav;;");
+        //            writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+        //        }
+        //        return;
+        //    }
 
-            // TP ORIGINAL BLOCK
-            else if (tpTypes.Contains(wire_Type))
-            {
-                double X3 = (p1x + p2x) / 2;
-                string twisted_symbol = wire_Type.Equals("TP") ? "sth_tp4" : "sth_quadrax4";
-                int coreNum = Convert.ToInt16(wire_Type_Core_Number);
+        //    // TP ORIGINAL BLOCK
+        //    else if (tpTypes.Contains(wire_Type))
+        //    {
+        //        double X3 = (p1x + p2x) / 2;
+        //        string twisted_symbol = wire_Type.Equals("TP") ? "sth_tp4" : "sth_quadrax4";
+        //        int coreNum = Convert.ToInt16(wire_Type_Core_Number);
 
-                using (var writer = File.AppendText(Constants.el_ExecFilePath))
-                {
-                    writer.WriteLine($"GRI 2.0, 2;");
-                    writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
-                    writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
-                    writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
-                    writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Number}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
-                    writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
-                    writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
-                    writer.WriteLine($"ADD L154 :W0");
-                    writer.WriteLine($"{p1x},{p1y - 4}");
-                    writer.WriteLine($"{p2x},{p2y - 4}");
-                    writer.WriteLine($";;NOP;;");
-                    writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p2x},{p2y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
-                    writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p2x},{p2y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
-                    writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p2x},{p2y - 4} '{wire_Type_Core_Number + 1}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
-                    writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
-                    writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
-                    writer.WriteLine($"ADD I2 {twisted_symbol} :R0 {p1x + 16},{p1y};");
-                    writer.WriteLine($"TESTDIS;");
-                    writer.WriteLine($"MOD N250 {p1x + 16},{p1y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                    writer.WriteLine($"MOD N250 {p1x + 16},{p1y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                    writer.WriteLine($"TESTDIS_OFF;");
-                    writer.WriteLine($":RAW");
-                    writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
-                    writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
-                    writer.WriteLine($":GRI");
-                    writer.WriteLine($"ADD I2 {twisted_symbol} :R0 {p2x - 16},{p2y};");
-                    writer.WriteLine($"TESTDIS;");
-                    writer.WriteLine($"MOD N250 {p2x - 16},{p2y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                    writer.WriteLine($"MOD N250 {p2x - 16},{p2y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                    writer.WriteLine($"TESTDIS_OFF;");
-                    writer.WriteLine($":RAW");
-                    writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p2y + 0.5};NOP;");
-                    writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
-                    writer.WriteLine($":GRI");
-                    writer.WriteLine($"pm_files_sav;;");
-                    writer.WriteLine($"GRI ELECTRE_GRID_STH;");
-                }
-                return;
-            }
+        //        using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //        {
+        //            writer.WriteLine($"GRI 2.0, 2;");
+        //            writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
+        //            writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
+        //            writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
+        //            writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Number}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
+        //            writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
+        //            writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
+        //            writer.WriteLine($"ADD L154 :W0");
+        //            writer.WriteLine($"{p1x},{p1y - 4}");
+        //            writer.WriteLine($"{p2x},{p2y - 4}");
+        //            writer.WriteLine($";;NOP;;");
+        //            writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p2x},{p2y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
+        //            writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p2x},{p2y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
+        //            writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p2x},{p2y - 4} '{wire_Type_Core_Number + 1}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
+        //            writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
+        //            writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
+        //            writer.WriteLine($"ADD I2 {twisted_symbol} :R0 {p1x + 16},{p1y};");
+        //            writer.WriteLine($"TESTDIS;");
+        //            writer.WriteLine($"MOD N250 {p1x + 16},{p1y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //            writer.WriteLine($"MOD N250 {p1x + 16},{p1y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //            writer.WriteLine($"TESTDIS_OFF;");
+        //            writer.WriteLine($":RAW");
+        //            writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
+        //            writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
+        //            writer.WriteLine($":GRI");
+        //            writer.WriteLine($"ADD I2 {twisted_symbol} :R0 {p2x - 16},{p2y};");
+        //            writer.WriteLine($"TESTDIS;");
+        //            writer.WriteLine($"MOD N250 {p2x - 16},{p2y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //            writer.WriteLine($"MOD N250 {p2x - 16},{p2y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //            writer.WriteLine($"TESTDIS_OFF;");
+        //            writer.WriteLine($":RAW");
+        //            writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p2y + 0.5};NOP;");
+        //            writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
+        //            writer.WriteLine($":GRI");
+        //            writer.WriteLine($"pm_files_sav;;");
+        //            writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+        //        }
+        //        return;
+        //    }
 
-            // STP ORIGINAL BLOCK
-            else if (stpTypes.Contains(wire_Type))
-            {
-                double X3 = (p1x + p2x) / 2;
-                int coreNum = Convert.ToInt16(wire_Type_Core_Number);
+        //    // STP ORIGINAL BLOCK
+        //    else if (stpTypes.Contains(wire_Type))
+        //    {
+        //        double X3 = (p1x + p2x) / 2;
+        //        int coreNum = Convert.ToInt16(wire_Type_Core_Number);
 
-                using (var writer = File.AppendText(Constants.el_ExecFilePath))
-                {
-                    writer.WriteLine($"GRI 2.0, 2;");
-                    writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
-                    writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
-                    writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
-                    writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Number}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
-                    writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
-                    writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
-                    writer.WriteLine($"ADD L154 :W0");
-                    writer.WriteLine($"{p1x},{p1y - 4}");
-                    writer.WriteLine($"{p2x},{p2y - 4}");
-                    writer.WriteLine($";;NOP;;");
-                    writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
-                    writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
-                    writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p2y - 4} '{wire_Type_Core_Number + 1}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
-                    writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
-                    writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
-                    writer.WriteLine($"ADD I2 sth_stp4 :R0 {p1x + 16},{p1y};");
-                    writer.WriteLine($"TESTDIS;");
-                    writer.WriteLine($"MOD N250 {p1x + 16},{p1y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                    writer.WriteLine($"MOD N250 {p1x + 16},{p1y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                    writer.WriteLine($"TESTDIS_OFF;");
-                    writer.WriteLine($":RAW");
-                    writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
-                    writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
-                    writer.WriteLine($":GRI");
-                    writer.WriteLine($"ADD I2 sth_stp4 :R0 {p2x - 16},{p2y};");
-                    writer.WriteLine($"TESTDIS;");
-                    writer.WriteLine($"MOD N250 {p2x - 16},{p2y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                    writer.WriteLine($"MOD N250 {p2x - 16},{p2y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                    writer.WriteLine($"TESTDIS_OFF;");
-                    writer.WriteLine($":RAW");
-                    writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p2y + 0.5};NOP;");
-                    writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
-                    writer.WriteLine($":GRI");
-                    writer.WriteLine($"pm_files_sav;;");
-                    writer.WriteLine($"GRI ELECTRE_GRID_STH;");
-                }
-                return;
-            }
-            else
-            {
-                double X3 = (p1x + p2x) / 2;
-                string mono_wire_symbol = "sth_s";
+        //        using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //        {
+        //            writer.WriteLine($"GRI 2.0, 2;");
+        //            writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
+        //            writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
+        //            writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
+        //            writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Number}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
+        //            writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
+        //            writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
+        //            writer.WriteLine($"ADD L154 :W0");
+        //            writer.WriteLine($"{p1x},{p1y - 4}");
+        //            writer.WriteLine($"{p2x},{p2y - 4}");
+        //            writer.WriteLine($";;NOP;;");
+        //            writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
+        //            writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
+        //            writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p2y - 4} '{wire_Type_Core_Number + 1}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
+        //            writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
+        //            writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
+        //            writer.WriteLine($"ADD I2 sth_stp4 :R0 {p1x + 16},{p1y};");
+        //            writer.WriteLine($"TESTDIS;");
+        //            writer.WriteLine($"MOD N250 {p1x + 16},{p1y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //            writer.WriteLine($"MOD N250 {p1x + 16},{p1y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //            writer.WriteLine($"TESTDIS_OFF;");
+        //            writer.WriteLine($":RAW");
+        //            writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
+        //            writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
+        //            writer.WriteLine($":GRI");
+        //            writer.WriteLine($"ADD I2 sth_stp4 :R0 {p2x - 16},{p2y};");
+        //            writer.WriteLine($"TESTDIS;");
+        //            writer.WriteLine($"MOD N250 {p2x - 16},{p2y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //            writer.WriteLine($"MOD N250 {p2x - 16},{p2y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //            writer.WriteLine($"TESTDIS_OFF;");
+        //            writer.WriteLine($":RAW");
+        //            writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p2y + 0.5};NOP;");
+        //            writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
+        //            writer.WriteLine($":GRI");
+        //            writer.WriteLine($"pm_files_sav;;");
+        //            writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+        //        }
+        //        return;
+        //    }
+        //    else
+        //    {
+        //        double X3 = (p1x + p2x) / 2;
+        //        string mono_wire_symbol = "sth_s";
 
-                using (var writer = File.AppendText(Constants.el_ExecFilePath))
-                {
-                    writer.WriteLine($"GRI 2.0, 2;");
-                    writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
-                    writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
-                    writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
-                    writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Number}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
-                    writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
-                    writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
-                    writer.WriteLine($"ADD L154 :W0");
-                    writer.WriteLine($"{p1x},{p1y - 4}");
-                    writer.WriteLine($"{p2x},{p2y - 4}");
-                    writer.WriteLine($";;NOP;;");
-                    writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
-                    writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
-                    writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p2y - 4} '{wire_Type_Core_Number}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
-                    writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
-                    writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
-                    writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {p1x + 16},{p1y};");
-                    writer.WriteLine($"TESTDIS;");
-                    writer.WriteLine($"TESTDIS_OFF;");
+        //        using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //        {
+        //            writer.WriteLine($"GRI 2.0, 2;");
+        //            writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
+        //            writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
+        //            writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
+        //            writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Number}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
+        //            writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
+        //            writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
+        //            writer.WriteLine($"ADD L154 :W0");
+        //            writer.WriteLine($"{p1x},{p1y - 4}");
+        //            writer.WriteLine($"{p2x},{p2y - 4}");
+        //            writer.WriteLine($";;NOP;;");
+        //            writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
+        //            writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
+        //            writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p2y - 4} '{wire_Type_Core_Number}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
+        //            writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
+        //            writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
+        //            writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {p1x + 16},{p1y};");
+        //            writer.WriteLine($"TESTDIS;");
+        //            writer.WriteLine($"TESTDIS_OFF;");
 
-                    writer.WriteLine($":RAW");
-                    writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
-                    if (wire_Type.Equals("SS"))
-                        writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
-                    writer.WriteLine($":GRI");
+        //            writer.WriteLine($":RAW");
+        //            writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
+        //            if (wire_Type.Equals("SS"))
+        //                writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
+        //            writer.WriteLine($":GRI");
 
-                    writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {p2x - 16},{p2y};");
-                    writer.WriteLine($"TESTDIS;");
-                    writer.WriteLine($"TESTDIS_OFF;");
+        //            writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {p2x - 16},{p2y};");
+        //            writer.WriteLine($"TESTDIS;");
+        //            writer.WriteLine($"TESTDIS_OFF;");
 
-                    writer.WriteLine($":RAW");
-                    writer.WriteLine($"ADD N58 :J7: T3003: D: F1: R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p1y + 0.5}; NOP;");
-                    if (wire_Type.Equals("SS") || wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))
-                        writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{iWireCode}' JU; NOP;");
-                    writer.WriteLine($":GRI");
+        //            writer.WriteLine($":RAW");
+        //            writer.WriteLine($"ADD N58 :J7: T3003: D: F1: R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p1y + 0.5}; NOP;");
+        //            if (wire_Type.Equals("SS") || wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))
+        //                writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{iWireCode}' JU; NOP;");
+        //            writer.WriteLine($":GRI");
 
-                    writer.WriteLine($"pm_files_sav;;");
-                    writer.WriteLine($"GRI ELECTRE_GRID_STH;");
-                }
-                return;
-            }
-        }
+        //            writer.WriteLine($"pm_files_sav;;");
+        //            writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+        //        }
+        //        return;
+        //    }
+        //}
 
-        public static void Simple2PointConnection_Mono_StraightLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Number)
-        {
-            double X3 = (p1x + p2x) / 2;
-            string mono_wire_symbol = string.Empty;
-            //if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00"))
-            //{ mono_wire_symbol = "sth_s"; }
-            if (wire_Type.Equals("SS")) { mono_wire_symbol = "sth_ss"; }
-            else if (wire_Type.Equals("COAX")) { mono_wire_symbol = "sth_coax"; }
-            else if (wire_Type.Equals("TRIAX")) { mono_wire_symbol = "sth_triax"; }
-            else { mono_wire_symbol = "sth_s"; }
+        //public static void Simple2PointConnection_Mono_StraightLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Number)
+        //{
+        //    double X3 = (p1x + p2x) / 2;
+        //    string mono_wire_symbol = string.Empty;
+        //    //if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00"))
+        //    //{ mono_wire_symbol = "sth_s"; }
+        //    if (wire_Type.Equals("SS")) { mono_wire_symbol = "sth_ss"; }
+        //    else if (wire_Type.Equals("COAX")) { mono_wire_symbol = "sth_coax"; }
+        //    else if (wire_Type.Equals("TRIAX")) { mono_wire_symbol = "sth_triax"; }
+        //    else { mono_wire_symbol = "sth_s"; }
 
-            using (var writer = File.AppendText(Constants.el_ExecFilePath))
-            {
-                writer.WriteLine($"GRI 2.0, 2;");
-                writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
-                writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
-                writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
-                if (!string.IsNullOrEmpty(wire_Type_Core_Number))
-                {
-                    writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Number}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
-                }
-                writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
-                writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
+        //    using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //    {
+        //        writer.WriteLine($"GRI 2.0, 2;");
+        //        writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
+        //        writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
+        //        writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
+        //        if (!string.IsNullOrEmpty(wire_Type_Core_Number))
+        //        {
+        //            writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Number}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
+        //        }
+        //        writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
+        //        writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
 
-                //writer.WriteLine($"ADD L154 :W0");
-                //writer.WriteLine($"{p1x},{p1y - 4}");
-                //writer.WriteLine($"{p2x},{p2y - 4}");
-                //writer.WriteLine($";;NOP;;");
-                //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
-                //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
-                //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p2y - 4} '{wire_Type_Core_Number}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
-                //writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
-                //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
+        //        //writer.WriteLine($"ADD L154 :W0");
+        //        //writer.WriteLine($"{p1x},{p1y - 4}");
+        //        //writer.WriteLine($"{p2x},{p2y - 4}");
+        //        //writer.WriteLine($";;NOP;;");
+        //        //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
+        //        //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
+        //        //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p2y - 4} '{wire_Type_Core_Number}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
+        //        //writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
+        //        //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
 
-                writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {p1x + 16},{p1y};");
-                writer.WriteLine($"TESTDIS;");
-                writer.WriteLine($"TESTDIS_OFF;");
-                writer.WriteLine($":RAW");
-                writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
-                if (wire_Type.Equals("SS"))
-                {
-                    writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
-                }
-                writer.WriteLine($":GRI");
-                writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {p2x - 16},{p2y};");
-                writer.WriteLine($"TESTDIS;");
-                writer.WriteLine($"TESTDIS_OFF;");
-                writer.WriteLine($":RAW");
-                writer.WriteLine($"ADD N58 :J7: T3003: D: F1: R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p1y + 0.5}; NOP;");
-                if (wire_Type.Equals("SS") || wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))
-                {
-                    writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{iWireCode}' JU; NOP;");
-                }
-                writer.WriteLine($":GRI");
-                writer.WriteLine($"pm_files_sav;;");
-                writer.WriteLine($"GRI ELECTRE_GRID_STH;");
-            }
-        }
+        //        writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {p1x + 16},{p1y};");
+        //        writer.WriteLine($"TESTDIS;");
+        //        writer.WriteLine($"TESTDIS_OFF;");
+        //        writer.WriteLine($":RAW");
+        //        writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
+        //        if (wire_Type.Equals("SS"))
+        //        {
+        //            writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
+        //        }
+        //        writer.WriteLine($":GRI");
+        //        writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {p2x - 16},{p2y};");
+        //        writer.WriteLine($"TESTDIS;");
+        //        writer.WriteLine($"TESTDIS_OFF;");
+        //        writer.WriteLine($":RAW");
+        //        writer.WriteLine($"ADD N58 :J7: T3003: D: F1: R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p1y + 0.5}; NOP;");
+        //        if (wire_Type.Equals("SS") || wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))
+        //        {
+        //            writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{iWireCode}' JU; NOP;");
+        //        }
+        //        writer.WriteLine($":GRI");
+        //        writer.WriteLine($"pm_files_sav;;");
+        //        writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+        //    }
+        //}
 
-        public static void Simple2PointConnection_TP_StraightLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Num)
-        {
-            string twisted_wire_symbol = string.Empty;
-            if (wire_Type.Equals("TP")) { twisted_wire_symbol = "sth_tp4"; }
-            else if (wire_Type.Equals("QUADRAX")) { twisted_wire_symbol = "sth_quadrax4"; }
-            double X3 = (p1x + p2x) / 2;
-            //int wire_Type_Core_Number = Convert.ToInt16(wire_Type_Core_Num);
-            using (var writer = File.AppendText(Constants.el_ExecFilePath))
-            {
-                writer.WriteLine($"GRI 2.0, 2;");
-                writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
-                writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
-                writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
-                if (!string.IsNullOrEmpty(wire_Type_Core_Num))
-                {
-                    writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Num}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
-                }
-                writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
-                writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
+        //public static void Simple2PointConnection_TP_StraightLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Num)
+        //{
+        //    string twisted_wire_symbol = string.Empty;
+        //    if (wire_Type.Equals("TP")) { twisted_wire_symbol = "sth_tp4"; }
+        //    else if (wire_Type.Equals("QUADRAX")) { twisted_wire_symbol = "sth_quadrax4"; }
+        //    double X3 = (p1x + p2x) / 2;
+        //    //int wire_Type_Core_Number = Convert.ToInt16(wire_Type_Core_Num);
+        //    using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //    {
+        //        writer.WriteLine($"GRI 2.0, 2;");
+        //        writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
+        //        writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
+        //        writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
+        //        if (!string.IsNullOrEmpty(wire_Type_Core_Num))
+        //        {
+        //            writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Num}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
+        //        }
+        //        writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
+        //        writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
 
-                //writer.WriteLine($"ADD L154 :W0");
-                //writer.WriteLine($"{p1x},{p1y - 4}");
-                //writer.WriteLine($"{p2x},{p2y - 4}");
-                //writer.WriteLine($";;NOP;;");
-                //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p2x},{p2y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
-                //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p2x},{p2y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
-                //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p2x},{p2y - 4} '{wire_Type_Core_Num + 1}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
-                //writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
-                //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
+        //        //writer.WriteLine($"ADD L154 :W0");
+        //        //writer.WriteLine($"{p1x},{p1y - 4}");
+        //        //writer.WriteLine($"{p2x},{p2y - 4}");
+        //        //writer.WriteLine($";;NOP;;");
+        //        //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p2x},{p2y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
+        //        //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p2x},{p2y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
+        //        //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p2x},{p2y - 4} '{wire_Type_Core_Num + 1}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
+        //        //writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
+        //        //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
 
-                writer.WriteLine($"ADD I2 {twisted_wire_symbol} :R0 {p1x + 16},{p1y};");
-                writer.WriteLine($"TESTDIS;");
-                writer.WriteLine($"MOD N250 {p1x + 16},{p1y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                writer.WriteLine($"MOD N250 {p1x + 16},{p1y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                writer.WriteLine($"TESTDIS_OFF;");
-                writer.WriteLine($":RAW");
-                writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
-                writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
-                writer.WriteLine($":GRI");
-                writer.WriteLine($"ADD I2 {twisted_wire_symbol} :R0 {p2x - 16},{p2y};");
-                writer.WriteLine($"TESTDIS;");
-                writer.WriteLine($"MOD N250 {p2x - 16},{p2y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                writer.WriteLine($"MOD N250 {p2x - 16},{p2y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                writer.WriteLine($"TESTDIS_OFF;");
-                writer.WriteLine($":RAW");
-                writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p2y + 0.5};NOP;");
-                writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
-                writer.WriteLine($":GRI");
-                writer.WriteLine($"pm_files_sav;;");
-                writer.WriteLine($"GRI ELECTRE_GRID_STH;");
-            }
-        }
+        //        writer.WriteLine($"ADD I2 {twisted_wire_symbol} :R0 {p1x + 16},{p1y};");
+        //        writer.WriteLine($"TESTDIS;");
+        //        writer.WriteLine($"MOD N250 {p1x + 16},{p1y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        writer.WriteLine($"MOD N250 {p1x + 16},{p1y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        writer.WriteLine($"TESTDIS_OFF;");
+        //        writer.WriteLine($":RAW");
+        //        writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
+        //        writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
+        //        writer.WriteLine($":GRI");
+        //        writer.WriteLine($"ADD I2 {twisted_wire_symbol} :R0 {p2x - 16},{p2y};");
+        //        writer.WriteLine($"TESTDIS;");
+        //        writer.WriteLine($"MOD N250 {p2x - 16},{p2y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        writer.WriteLine($"MOD N250 {p2x - 16},{p2y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        writer.WriteLine($"TESTDIS_OFF;");
+        //        writer.WriteLine($":RAW");
+        //        writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p2y + 0.5};NOP;");
+        //        writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
+        //        writer.WriteLine($":GRI");
+        //        writer.WriteLine($"pm_files_sav;;");
+        //        writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+        //    }
+        //}
 
-        public static void Simple2PointConnection_STP_StraightLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Num)
-        {
-            double X3 = (p1x + p2x) / 2;
-            //int wire_Type_Core_Number = Convert.ToInt16(wire_Type_Core_Num);
-            using (var writer = File.AppendText(Constants.el_ExecFilePath))
-            {
-                writer.WriteLine($"GRI 2.0, 2;");
-                writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
-                writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
-                writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
-                if (!string.IsNullOrEmpty(wire_Type_Core_Num))
-                {
-                    writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Num}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
-                }
-                writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
-                writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
+        //public static void Simple2PointConnection_STP_StraightLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Num)
+        //{
+        //    double X3 = (p1x + p2x) / 2;
+        //    //int wire_Type_Core_Number = Convert.ToInt16(wire_Type_Core_Num);
+        //    using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //    {
+        //        writer.WriteLine($"GRI 2.0, 2;");
+        //        writer.WriteLine($"ADD L154 :W0 {p1x},{p1y} {p2x},{p2y} ;;NOP;;");
+        //        writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y} '{iWireCode}' {p1x * 2},{p1y} ;NOP;");
+        //        writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y} '#{iWireGauge}' {p1x * 2 + 2},{p1y} ;");
+        //        if (!string.IsNullOrEmpty(wire_Type_Core_Num))
+        //        {
+        //            writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p1y} '{wire_Type_Core_Num}' {p1x * 2 + 2 + 8},{p1y - 1} ;");
+        //        }
+        //        writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {p1x},{p1y} '{wire_Length}' {p1x * 2 + 2 + 8},{p1y} ;");
+        //        writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p1y} '' {p1x * 2 + 2 + 8},{p1y} ;");
 
-                //writer.WriteLine($"ADD L154 :W0 {p1x},{ p1y - 4} {p2x},{p2y - 4} ;;NOP;;");
-                //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
-                //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
-                //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p2y - 4} '{wire_Type_Core_Number + 1}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
-                //writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
-                //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
+        //        //writer.WriteLine($"ADD L154 :W0 {p1x},{ p1y - 4} {p2x},{p2y - 4} ;;NOP;;");
+        //        //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {p1x},{p1y - 4} '{iWireCode}' {X3},{p2y - 4} ;NOP;");
+        //        //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {p1x},{p1y - 4} '#{iWireGauge}' {X3 + 2},{p2y - 4} ;");
+        //        //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {p1x},{p2y - 4} '{wire_Type_Core_Number + 1}' {X3 + 2 + 8},{p2y - 4 - 1} ;");
+        //        //writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {p1x},{p2y - 4} '{wire_Length}' {X3 + 2 + 8},{p2y - 4} ;");
+        //        //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {p1x},{p2y - 4} '' {X3 + 2 + 8},{p2y - 4} ;");
 
-                writer.WriteLine($"ADD I2 sth_stp4 :R0 {p1x + 16},{p1y};");
-                writer.WriteLine($"TESTDIS;");
-                writer.WriteLine($"MOD N250 {p1x + 16},{p1y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                writer.WriteLine($"MOD N250 {p1x + 16},{p1y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                writer.WriteLine($"TESTDIS_OFF;");
-                writer.WriteLine($":RAW");
-                writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
-                writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
-                writer.WriteLine($":GRI");
-                writer.WriteLine($"ADD I2 sth_stp4 :R0 {p2x - 16},{p2y};");
-                writer.WriteLine($"TESTDIS;");
-                writer.WriteLine($"MOD N250 {p2x - 16},{p2y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                writer.WriteLine($"MOD N250 {p2x - 16},{p2y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                writer.WriteLine($"TESTDIS_OFF;");
-                writer.WriteLine($":RAW");
-                writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p2y + 0.5};NOP;");
-                writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
-                writer.WriteLine($":GRI");
-                writer.WriteLine($"pm_files_sav;;");
-                writer.WriteLine($"GRI ELECTRE_GRID_STH;");
-            }
-        }
+        //        writer.WriteLine($"ADD I2 sth_stp4 :R0 {p1x + 16},{p1y};");
+        //        writer.WriteLine($"TESTDIS;");
+        //        writer.WriteLine($"MOD N250 {p1x + 16},{p1y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        writer.WriteLine($"MOD N250 {p1x + 16},{p1y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        writer.WriteLine($"TESTDIS_OFF;");
+        //        writer.WriteLine($":RAW");
+        //        writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p1x + 16},{p1y} {p1x + 16 - 1.5},{p1y + 0.5};NOP;");
+        //        writer.WriteLine($"MOD N253 {p1x + 16},{p1y} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
+        //        writer.WriteLine($":GRI");
+        //        writer.WriteLine($"ADD I2 sth_stp4 :R0 {p2x - 16},{p2y};");
+        //        writer.WriteLine($"TESTDIS;");
+        //        writer.WriteLine($"MOD N250 {p2x - 16},{p2y} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        writer.WriteLine($"MOD N250 {p2x - 16},{p2y - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        writer.WriteLine($"TESTDIS_OFF;");
+        //        writer.WriteLine($":RAW");
+        //        writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {p2x - 16},{p2y} {p2x - 16 - 1.5},{p2y + 0.5};NOP;");
+        //        writer.WriteLine($"MOD N253 {p2x - 16},{p2y} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
+        //        writer.WriteLine($":GRI");
+        //        writer.WriteLine($"pm_files_sav;;");
+        //        writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+        //    }
+        //}
 
         #region //old method
         //public static void Simple4PointConnection_ZLine_Optimized(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Number, string FromOrientation, string ToOrientation)
@@ -401,7 +402,7 @@ namespace PanelDrawing.Services.P2
         //    Y4 = Y2;           
 
         //    string wire_symbol = Constants.GetWireSymbol(wire_Type);
-           
+
         //    using (var writer = File.AppendText(Constants.el_ExecFilePath))
         //    {
         //        writer.WriteLine($"GRI 0.5, 2;");
@@ -451,7 +452,7 @@ namespace PanelDrawing.Services.P2
         //        writer.WriteLine($"{X3},{Y3}");
         //        writer.WriteLine($"{X4},{Y4}");
         //        writer.WriteLine($"{X2},{Y2}");
-              
+
         //        //Source
         //        writer.WriteLine($";;NOP;;");
         //        writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X1},{Y1} '{iWireCode}' {X1 + 48},{Y1} ;NOP;");
@@ -508,6 +509,7 @@ namespace PanelDrawing.Services.P2
         //}
         #endregion
 
+        #endregion
         public static double GetX3Value(string FromOrientation, string ToOrientation, double X1)
         {
             double Offset = 80;
@@ -612,8 +614,8 @@ namespace PanelDrawing.Services.P2
             {
                 int Direction = FromOrientation.Equals("R", StringComparison.OrdinalIgnoreCase) || ToOrientation.Equals("R", StringComparison.OrdinalIgnoreCase) ? -1 : +1;
 
-                DrawWireEndSymbol(writer, X1, Y1, Direction, wire_symbol, wire_Type, groupId);
-                DrawWireEndSymbol(writer, X2, Y2, Direction, wire_symbol, wire_Type, groupId);
+                DrawWireEndSymbol(writer, X1, Y1, Direction, wire_symbol, wire_Type, groupId); //source
+                DrawWireEndSymbol(writer, X2, Y2, Direction, wire_symbol, wire_Type, groupId); // destination
             }
         }
 
@@ -643,9 +645,9 @@ namespace PanelDrawing.Services.P2
             // Source end symbols
             if (!Constants.lst_WireCodes_Info_Processed.Contains(iWireCode))
             {
-                DrawWireEndSymbol(writer, X1, Y1, +1, wire_symbol, wire_Type, groupId);
+                DrawWireEndSymbol(writer, X1, Y1, +1, wire_symbol, wire_Type, groupId); // source
                 writer.WriteLine($":GRI");
-                DrawWireEndSymbol(writer, X2, Y2, -1, wire_symbol, wire_Type, groupId);
+                DrawWireEndSymbol(writer, X2, Y2, -1, wire_symbol, wire_Type, groupId); //destination
             }  
         }
 
