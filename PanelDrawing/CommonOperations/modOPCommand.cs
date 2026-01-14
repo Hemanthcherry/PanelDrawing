@@ -23,7 +23,8 @@ namespace PanelDrawing.CommonOperations
                 //EDI mytemp_new_a4; SAV(CHR(34) + 'C:\ELECTRE\electre_projects\PANEL_DR03\Schem\CCCCC_12345' + CHR(34));
                 writer.WriteLine("EDI " + SheetTemplateName + "; SAV (CHR(34)+" + Constants.quotationMark + "" + Constants.Elec_Proj_Schem_Folder_Path + "\\" + pnlnum + "" + Constants.quotationMark + "+CHR(34));");
                 //Open the new drawing
-                writer.WriteLine("NEW_OPEN_DRAWING " + Constants.quotationMark + pnlnum + Constants.quotationMark + ";"); //'Open the new drawing
+               // writer.WriteLine("NEW_OPEN_DRAWING " + Constants.quotationMark + pnlnum + Constants.quotationMark + ";"); //'Open the new drawing
+                writer.WriteLine($"EDI {pnlnum}");
                 writer.WriteLine("MOD_TAG 2012 '" + pnlnum + "'; ");// 'Modify the titleblock attributes
                 writer.WriteLine("MOD_TAG 2011 '" + strnum + "'; ");
                 writer.WriteLine("MOD_TAG 2013 '" + pnlnum + "'; ");
@@ -369,7 +370,7 @@ namespace PanelDrawing.CommonOperations
             }
         }
 
-        public static void AddCBSymbolAttributes(double iX0, double iY0,string refname,string loc,string PartNumber,string volt,string NoMeggerOrYesMegger,string filePath,string comptype)
+        public static void AddCBSymbolAttributes(double iX0, double iY0,string refname,string loc,string PartNumber,string volt,string filePath,string comptype)
         {
             using (var writer = File.AppendText(filePath))
             {
@@ -399,7 +400,7 @@ namespace PanelDrawing.CommonOperations
                 if (!comptype.Equals("SCB"))
                 {
                     writer.WriteLine($"MOD N254 {iX0},{iY0 - 4 - 4 - 4} 0,0 :E '{volt}';NOP;");
-                    writer.WriteLine($"MOD N55 {iX0},{iY0 - 4 - 4 - 4 - 4} 0,0 :E '{NoMeggerOrYesMegger}';NOP;");
+                   // writer.WriteLine($"MOD N55 {iX0},{iY0 - 4 - 4 - 4 - 4} 0,0 :E '{NoMeggerOrYesMegger}';NOP;");
                 }
 
                 writer.WriteLine($"SHOW #E;");

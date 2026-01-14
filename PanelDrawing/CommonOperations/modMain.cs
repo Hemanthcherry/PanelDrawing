@@ -123,7 +123,7 @@ namespace PanelDrawing.CommonOperations
             //// Move Y downward for next EQU component
             //Constants.CursorY_EQU = Constants.CursorY_EQU  - compHeight - Constants.ComponentSpacingY;
 
-            if (Constants.CursorX_EQU_Left > Constants.CursorX)
+            if (Constants.CursorX_EQU_Left >= Constants.CursorX) // = added on Jan 14
             {
                 Constants.CursorX = Constants.CursorX_EQU_Left + compWidth;
 
@@ -179,7 +179,9 @@ namespace PanelDrawing.CommonOperations
                 {
                     // Move to NEXT ROW
                     // Constants.CursorX = Constants.MarginX;
-                    Constants.CursorX = Constants.CursorX_EQU_DIS + 80;
+                   Constants.CursorX = Constants.CursorX_EQU_DIS + 80; // commented on Jan 14th
+
+                   // Constants.CursorX = Constants.CursorX_EQU_Left + 40;
 
                     Constants.CursorY += Constants.RowHeight + Constants.ComponentSpacingY;
 
@@ -207,7 +209,7 @@ namespace PanelDrawing.CommonOperations
             // X starts at left margin
             Constants.CursorX = Constants.MarginX;
 
-            Constants.CursorX_EQU_DIS = /*Constants.MarginX + */180;
+            Constants.CursorX_EQU_DIS = /*Constants.MarginX + */120;  //180 commented on Jan 14
 
             Constants.CursorX_EQU_Left = Constants.MarginXEQU;
 
@@ -361,7 +363,7 @@ namespace PanelDrawing.CommonOperations
                             //    continue;
                             //}
                             modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddCBSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, CBVoltage, "Nomegger", Constants.el_ExecFilePath, CompType);
+                            modOPCommand.AddCBSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, CBVoltage, Constants.el_ExecFilePath, CompType);
                         }
                         continue;
 
@@ -379,7 +381,7 @@ namespace PanelDrawing.CommonOperations
                             //    continue;
                             //}
                             modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddCBSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, CBVoltage, "Nomegger", Constants.el_ExecFilePath, CompType);
+                            modOPCommand.AddCBSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, CBVoltage, Constants.el_ExecFilePath, CompType);
                         }
                         continue;
 
