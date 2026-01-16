@@ -232,19 +232,22 @@ namespace PanelDrawing.Services.P1
                     // PART NUMBER
                     w.WriteLine($"ADD N52 '{partNumber}' {LL_x + 3 + 10},{LL_y} :F1.0;;NOP;");
 
+                    int dy = 0;
                     // ASSOCIATED PART NUMBERS
                     if (!string.IsNullOrWhiteSpace(associatedPNs))
-                    {
-                        int dy = 0;
+                    {                        
                         foreach (string pn in associatedPNs.Split(';'))
                         {
-                            dy += 4;
-                            w.WriteLine($"ADD N52 '{pn}' {LL_x + 5 + 10},{LL_y - dy} :F1.0;;NOP;");
+                            if (pn != partNumber)
+                            {
+                                dy += 4;
+                                w.WriteLine($"ADD N52 '{pn}' {LL_x + 5 + 10},{LL_y - dy} :F1.0;;NOP;");
+                            }
                         }
                     }
 
                     // N-MARKER
-                    w.WriteLine($"ADD N255 'N' {LL_x + 12 + 10},{LL_y - 2} :F1.0 :T4326 :D;;NOP;");
+                    w.WriteLine($"ADD N255 'N' {LL_x + 12 + 10},{LL_y - dy -4} :F1.0 :T4326 :D;;NOP;");
 
                     //  OPPOSITE CONNECTOR (LEFT SIDE)
 
@@ -304,6 +307,20 @@ namespace PanelDrawing.Services.P1
 
                     // PN
                     w.WriteLine($"ADD N52 '{partNumber}' {LL_x + 11 + 10},{LL_y} :F1.0;;NOP;");
+
+                    int dy = 0;
+                    // ASSOCIATED PART NUMBERS
+                    if (!string.IsNullOrWhiteSpace(associatedPNs))
+                    {
+                        foreach (string pn in associatedPNs.Split(';'))
+                        {
+                            if (pn != partNumber)
+                            {
+                                dy += 4;
+                                w.WriteLine($"ADD N52 '{pn}' {LL_x + 13 + 10},{LL_y - dy} :F1.0;;NOP;");
+                            }
+                        }
+                    }
 
                     // N-marker
                     w.WriteLine($"ADD N255 'N' {LL_x + 11 + 10},{LL_y - 3} :F1.0 :T4326 :D;;NOP;");

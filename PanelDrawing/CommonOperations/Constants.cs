@@ -368,8 +368,40 @@ namespace PanelDrawing.CommonOperations
             ["QX3"] = "sth_quadrax4",
             ["QX4"] = "sth_quadrax4",
 
-            // --- 5 to 12 cores---
-            //["T5"] = "sth_"
+            // --- 5 to 18 cores---
+
+            // Twisted core cables
+            ["T5"] = "sth_t54",
+            ["T6"] = "sth_t64",
+            ["T7"] = "sth_t74",
+            ["T8"] = "sth_t84",
+            ["T9"] = "sth_t94",
+            ["T10"] = "sth_t104",
+            ["T11"] = "sth_t114",
+            ["T12"] = "sth_t124",
+            ["T13"] = "sth_t134",
+            ["T14"] = "sth_t144",
+            ["T15"] = "sth_t154",
+            ["T16"] = "sth_t164",
+            ["T17"] = "sth_t174",
+            ["T18"] = "sth_t184",
+
+            // Sheilded Twisted core cables
+            ["ST5"] = "sth_st54",
+            ["ST6"] = "sth_st64",
+            ["ST7"] = "sth_st74",
+            ["ST8"] = "sth_st84",
+            ["ST9"] = "sth_st94",
+            ["ST10"] = "sth_st104",
+            ["ST11"] = "sth_st114",
+            ["ST12"] = "sth_st124",
+            ["ST13"] = "sth_st134",
+            ["ST14"] = "sth_st144",
+            ["ST15"] = "sth_st154",
+            ["ST16"] = "sth_st164",
+            ["ST17"] = "sth_st174",
+            ["ST18"] = "sth_st184",
+
         };
     }
 }
