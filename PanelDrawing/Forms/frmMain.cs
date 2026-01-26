@@ -194,22 +194,22 @@ namespace Panel_Drawing.Forms
             #endregion
 
             #region // Commented P1 & P2 EXE Validations for Production Release Purpose --- Button Validation
-            if (File.Exists(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails)))// && Environment.GetEnvironmentVariable("PD1_Flag", EnvironmentVariableTarget.Machine).Equals("PD1") && Environment.GetEnvironmentVariable("PD2_Flag", EnvironmentVariableTarget.Machine).Equals("PD2"))
-            {
-                Load Form for Create Wiring
-                lstSheetSizes.Enabled = false;
-                btnPanelComponents.Enabled = false;
-                string[] arrtemp = TextOperations.ConvertListInto1DArray(TextOperations.ConvertTextFileIntoList(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.ComponentsCreatedTextFileName)));
-                lstSheetSizes.SelectedItem = arrtemp[2];
-                txtSize.Text = arrtemp[3];
-                txtWidth.Text = arrtemp[4];
-                txtHeight.Text = arrtemp[5];
-            }
-            else if (!File.Exists(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails)))// && Environment.GetEnvironmentVariable("PD1_Flag", EnvironmentVariableTarget.Machine).Equals("PD") && Environment.GetEnvironmentVariable("PD2_Flag", EnvironmentVariableTarget.Machine).Equals("PD2"))
-            {
-                MessageBox.Show(Constants.msgComponentsWiring);
-                this.Close();
-            }
+            //if (File.Exists(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails)))// && Environment.GetEnvironmentVariable("PD1_Flag", EnvironmentVariableTarget.Machine).Equals("PD1") && Environment.GetEnvironmentVariable("PD2_Flag", EnvironmentVariableTarget.Machine).Equals("PD2"))
+            //{
+            //    Load Form for Create Wiring
+            //    lstSheetSizes.Enabled = false;
+            //    btnPanelComponents.Enabled = false;
+            //    string[] arrtemp = TextOperations.ConvertListInto1DArray(TextOperations.ConvertTextFileIntoList(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.ComponentsCreatedTextFileName)));
+            //    lstSheetSizes.SelectedItem = arrtemp[2];
+            //    txtSize.Text = arrtemp[3];
+            //    txtWidth.Text = arrtemp[4];
+            //    txtHeight.Text = arrtemp[5];
+            //}
+            //else if (!File.Exists(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails)))// && Environment.GetEnvironmentVariable("PD1_Flag", EnvironmentVariableTarget.Machine).Equals("PD") && Environment.GetEnvironmentVariable("PD2_Flag", EnvironmentVariableTarget.Machine).Equals("PD2"))
+            //{
+            //    MessageBox.Show(Constants.msgComponentsWiring);
+            //    this.Close();
+            //}
             #endregion
 
             //Read Data extraction File and populate Lists
