@@ -53,10 +53,11 @@ namespace PanelDrawing.CommonOperations
             //using (StreamWriter writer = File.AppendText(el_Execfilpath))
             using (var writer = File.AppendText(el_Execfilpath))
             {
-                writer.WriteLine($"ADD I0 ");
-                writer.WriteLine($"ADD I0 sth_splice ");
-                writer.WriteLine($"Add i0 sth_splice {X0},{Y0};");
+                //writer.WriteLine($"ADD I0 ");
+                //writer.WriteLine($"ADD I0 sth_splice ");
+                writer.WriteLine($"ADD I0 sth_splice {X0},{Y0};");
                 writer.WriteLine($"MOD N53 {X0},{Y0 + 4} 0,0 :E '{refName}';NOP;");
+                writer.WriteLine($"MOD N254 {X0 + 2.5},{Y0 - 5} 0,0 :E '{iPartNumber}';NOP;");
             }
         }
 
@@ -65,9 +66,9 @@ namespace PanelDrawing.CommonOperations
             //using (StreamWriter writer = File.AppendText(el_Execfilpath))
             using (var writer = File.AppendText(el_Execfilpath))
             {
-                writer.WriteLine($"ADD I0 ");
-                writer.WriteLine($"ADD I0 sth_ground_1 ");
-                writer.WriteLine($"Add i0 sth_ground_1 {X0},{Y0};");
+                //writer.WriteLine($"ADD I0 ");
+                //writer.WriteLine($"ADD I0 sth_ground_1 ");
+                writer.WriteLine($"ADD I0 sth_ground_1 {X0},{Y0};");
                 writer.WriteLine($"MOD N53 {X0},{Y0 + 4} 0,0 :E '{refName}';NOP;");
             }
         }
@@ -105,6 +106,7 @@ namespace PanelDrawing.CommonOperations
                 writer.WriteLine($":GRI");
                 writer.WriteLine($"ADD I0 info_sth_relay_base {X0 + 6},{tempY0 - 16};");
                 writer.WriteLine($"MOD N53 {X0 + 6},{tempY0 - 16} {X0 + 6},{tempY0 - 16} :E '{refName}' {X0 + 6},{tempY0 - 16} ;");
+                writer.WriteLine($"MOD N52 {X0 + 6.5},{tempY0 - 16} {X0 + 6.5},{tempY0 - 16} :E '{iPartNumber}' {X0 + 6.5},{tempY0 - 16} ;");
 
                 writer.WriteLine($"ADD I0 info_sth_relay {X0 - 10},{tempY0 - 16}; ");
                 writer.WriteLine($"MOD N53 {X0 - 10},{tempY0 - 16} {X0 - 10},{tempY0 - 16} STOR_MID :E 'RR' {X0 - 10},{tempY0 - 16} JU ;");

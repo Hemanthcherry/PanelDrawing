@@ -130,6 +130,18 @@ namespace PanelDrawing.CommonOperations
                 Constants.CursorX_EQU_DIS = Constants.CursorX_EQU_Left + 80;
             }
 
+            posX = Math.Round(posX);
+            if(posX % 2 == 0)
+            {
+                posX = posX + 1;
+            }
+
+            posY = Math.Round(posY);
+            if(posY % 2 == 0)
+            {
+                posY = posY + 1;
+            }
+
             return (posX, posY);
         }
 
@@ -199,6 +211,18 @@ namespace PanelDrawing.CommonOperations
                 // Update tallest component in this row
                 if (compHeight > Constants.RowHeight)
                     Constants.RowHeight = compHeight;
+
+                posX = Math.Round(posX);
+                if (posX % 2 == 0)
+                {
+                    posX = posX + 1;
+                }
+
+                posY = Math.Round(posY);
+                if (posY % 2 == 0)
+                {
+                    posY = posY + 1;
+                }
 
                 return (posX, posY);
             }            

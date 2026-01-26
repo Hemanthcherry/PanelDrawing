@@ -99,7 +99,7 @@ namespace Panel_Drawing.Forms
             bool IsComponentsWiringCreated = false;
             #region//Environment Variable Settings
             //Electre_Proj_Path
-            Constants.Env_Variable_Electre_Proj_Path = "C:\\ELECTRE\\electre_projects\\PANELDRAWING_JAN07\\";
+           // Constants.Env_Variable_Electre_Proj_Path = "C:\\ELECTRE\\electre_projects\\PANELDRAWING_JAN07\\";
             //Constants.Env_Variable_Electre_Proj_Path = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ELECTRE_PROJ", EnvironmentVariableTarget.Machine)) ? null : Environment.GetEnvironmentVariable("ELECTRE_PROJ", EnvironmentVariableTarget.Machine); //Environment.GetEnvironmentVariable("ELECTRE_PROJ", EnvironmentVariableTarget.Machine);//string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ELECTRE_PROJ")) ? null : Environment.GetEnvironmentVariable("ELECTRE_PROJ");
             if (string.IsNullOrEmpty(Constants.Env_Variable_Electre_Proj_Path))
             {
@@ -194,22 +194,22 @@ namespace Panel_Drawing.Forms
             #endregion
 
             #region // Commented P1 & P2 EXE Validations for Production Release Purpose --- Button Validation
-            //if (File.Exists(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails)))// && Environment.GetEnvironmentVariable("PD1_Flag", EnvironmentVariableTarget.Machine).Equals("PD1") && Environment.GetEnvironmentVariable("PD2_Flag", EnvironmentVariableTarget.Machine).Equals("PD2"))
-            //{
-            //    //Load Form for Create Wiring
-            //    lstSheetSizes.Enabled = false;
-            //    btnPanelComponents.Enabled = false;
-            //    string[] arrtemp = TextOperations.ConvertListInto1DArray(TextOperations.ConvertTextFileIntoList(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.ComponentsCreatedTextFileName)));
-            //    lstSheetSizes.SelectedItem = arrtemp[2];
-            //    txtSize.Text = arrtemp[3];
-            //    txtWidth.Text = arrtemp[4];
-            //    txtHeight.Text = arrtemp[5];
-            //}
-            //else if (!File.Exists(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails)))// && Environment.GetEnvironmentVariable("PD1_Flag", EnvironmentVariableTarget.Machine).Equals("PD") && Environment.GetEnvironmentVariable("PD2_Flag", EnvironmentVariableTarget.Machine).Equals("PD2"))
-            //{
-            //    MessageBox.Show(Constants.msgComponentsWiring);
-            //    this.Close();
-            //}
+            if (File.Exists(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails)))// && Environment.GetEnvironmentVariable("PD1_Flag", EnvironmentVariableTarget.Machine).Equals("PD1") && Environment.GetEnvironmentVariable("PD2_Flag", EnvironmentVariableTarget.Machine).Equals("PD2"))
+            {
+                Load Form for Create Wiring
+                lstSheetSizes.Enabled = false;
+                btnPanelComponents.Enabled = false;
+                string[] arrtemp = TextOperations.ConvertListInto1DArray(TextOperations.ConvertTextFileIntoList(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.ComponentsCreatedTextFileName)));
+                lstSheetSizes.SelectedItem = arrtemp[2];
+                txtSize.Text = arrtemp[3];
+                txtWidth.Text = arrtemp[4];
+                txtHeight.Text = arrtemp[5];
+            }
+            else if (!File.Exists(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails)))// && Environment.GetEnvironmentVariable("PD1_Flag", EnvironmentVariableTarget.Machine).Equals("PD") && Environment.GetEnvironmentVariable("PD2_Flag", EnvironmentVariableTarget.Machine).Equals("PD2"))
+            {
+                MessageBox.Show(Constants.msgComponentsWiring);
+                this.Close();
+            }
             #endregion
 
             //Read Data extraction File and populate Lists
@@ -426,7 +426,7 @@ namespace Panel_Drawing.Forms
             MyDataService.CoordinatesToPDPin();
             WireRouter.DrawWireLine();
             modMain.UpdatePanelDetailsTextFile(Constants.panelDetailsList); // Update PanelDetails file
-            modMain.ExitOutputFile(Constants.el_ExecFilePath);//Generate OutputFile and Exit
+            // modMain.ExitOutputFile(Constants.el_ExecFilePath);//Generate OutputFile and Exit
             CommonOperation.CreateTemp_El_Exec_File(Constants.El_Exec_Temp_P2);
             CommonOperation.CloseVbsFiles(Constants.Custom_Programs_File);
             //File.AppendText(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.ComponentsWiringCreatedTextFileName));

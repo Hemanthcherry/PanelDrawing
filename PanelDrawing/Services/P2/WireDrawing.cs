@@ -691,9 +691,9 @@ namespace PanelDrawing.Services.P2
                     Draw_Z_TypeWire(X1, Y1, X2, Y2, X3, Y3, X4, Y4, iWireCode, iWireGauge, wire_Type_Core_Number, wire_Length, writer, wire_symbol, wire_Type, groupId);
                 }
               
-                writer.WriteLine($":GRI");
-                writer.WriteLine($"pm_files_sav;;");
-                writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+                //writer.WriteLine($":GRI");
+                //writer.WriteLine($"pm_files_sav;;");
+                //writer.WriteLine($"GRI ELECTRE_GRID_STH;");
 
                 Constants.WiringOffset++;
 

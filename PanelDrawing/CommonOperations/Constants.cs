@@ -59,8 +59,8 @@ namespace PanelDrawing.CommonOperations
         // public static double SheetWidthTemp = 0;
         // public static double SheetHeightTemp = 0;
 
-        public static double MarginX = 40; // Horizontal margin
-        public static double MarginXEQU = 40;
+        public static double MarginX = 60; // Horizontal margin
+        public static double MarginXEQU = 60;
         public static double MarginYEQU = 40;
         public static double MarginY = 80; // Vertical margin
         public static double ComponentSpacingX = 30;  // Horizontal space between components
