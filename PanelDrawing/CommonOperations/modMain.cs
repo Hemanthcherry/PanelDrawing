@@ -35,42 +35,7 @@ namespace PanelDrawing.CommonOperations
         {
             Constants.libCatalogList = DataReader.LibraryCatalogReader(Constants.sComponent_Catalog_File);
             // Constants.arrTableOfLibCatalog = ExcelOperations.ConvertCSVDataInto2DArray(Constants.sComponent_Catalog_File,StringComparer.OrdinalIgnoreCase);//ReadLibCatalog
-        }
-
-        //public static (double X, double Y) GetNextComponentPosition(double compWidth, double compHeight)
-        //{
-        //    // Wrap to new row if needed
-        //    if (Constants.CursorX + compWidth > Constants.SheetWidthTemp - Constants.MarginX)
-        //    {
-        //        Constants.CursorX = Constants.MarginX;
-        //        Constants.CursorY += Constants.RowHeight + Constants.ComponentSpacingY;
-        //        Constants.RowHeight = 0;
-        //    }
-
-        //    double posX = Constants.CursorX;
-        //    double posY = Constants.CursorY;
-
-        //    // Move horizontal cursor
-        //    Constants.CursorX += compWidth + Constants.ComponentSpacingX;
-
-        //    // Track tallest in row
-        //    if (compHeight > Constants.RowHeight)
-        //        Constants.RowHeight = compHeight;
-
-        //    return (posX, posY);
-        //}
-
-
-        //public static void InitializeLayout()
-        //{
-        //    Constants.CursorX = Constants.MarginX;
-        //    Constants.CursorY = Constants.MarginY;
-
-        //    Constants.RowHeight = 0;
-
-        //    Constants.SheetWidthTemp = Constants.SheetWidth;
-        //    Constants.SheetHeightTemp = Constants.SheetHeight;
-        //}
+        }       
 
         public static (double X, double Y) GetNextEquPosition(string side, double compWidth, double compHeight)
         {
@@ -256,6 +221,7 @@ namespace PanelDrawing.CommonOperations
 
             Constants.ColumnWidth = 0;
         }
+
         public static (double Width, double Height) GetComponentDefaultSize(string compType)
         {
             return compType.ToUpper() switch
@@ -295,15 +261,6 @@ namespace PanelDrawing.CommonOperations
 
             Constants.processedItems = new List<string>();
             Constants.remainingItems = new List<string>();
-
-            //var components = Constants.panelComponentProperties.OrderBy(x => x.ComponentType);
-            //var components = Constants.panelComponentProperties
-            //                        .OrderBy(c =>
-            //                            c.ComponentType == "EQU" ? 0 :
-            //                            c.ComponentType == "DIS" ? 1 :
-            //                            2                                 // all others come after EQU & DIS
-            //                        )
-            //                        .ThenBy(c => c.ComponentType);         // sort the remaining normally
 
             string doubleSidePattern = @"(_J([1-9]|1[0-9]|2[0-4])|_[a-hj-np-z])$";
 
@@ -737,379 +694,7 @@ namespace PanelDrawing.CommonOperations
                         break;
                 }
             }
-        }
-
-        #region // Commented old InitiateStep1 code on 18 november, 2025
-        /*  public static void InitiateStep1()
-        {
-            int Q = 0;
-            int CompXdist = 50;
-            int CompYdist =50;//changed 50 to 100
-            int Xlimit;
-            int Ylimit;
-            int Xcol = 1;
-            int Xcounter = 1;
-            int Ycounter = 1;
-            int secXcol = 1;
-            int secXcounter = 0;
-            int secYcounter = 0;
-            int Noofpin = 1;int spacing =4;//(spacing may be 4 to 6)
-            Constants.processedItems = new List<string>();
-            Constants.remainingItems = new List<string>();
-            Xlimit = (Constants.SheetWidth - 10) / CompXdist; //' -10 to compensate on the title block
-            Ylimit = (Constants.SheetHeight - 10) / CompYdist;
-            for (int Q1 = 0; Q1 <= Constants.arrPanelComponentsProperties.GetLength(0) - 1; Q1++)
-            {
-                string CompDwgName = string.Empty;
-                string CompType = string.Empty;// As String
-                string CBType_Name = string.Empty;// As String
-                string CBType_Voltage = string.Empty;// As String
-                string MacroName = string.Empty;// As String
-                string CompPN = string.Empty;// As String
-                string CompAcc = string.Empty;// As String
-                string CompMaxPin = string.Empty;// As String
-                string SampleEquPinNumber = string.Empty;// As String
-                string GroupId = string.Empty;// As String
-                string Wire_Length = string.Empty;// As String
-                string Wire_Type = string.Empty;// As String
-                string Assosiate_PartNumbers = string.Empty;// As String
-                string Equipment_Box_Info = string.Empty;// As String
-                string Looms_Info = string.Empty;// As String
-                string TERTBK_Shunt_Info = string.Empty;// As String
-                CompXdist = 50;
-                CompYdist = 50;
-
-                CompDwgName = Constants.arrPanelComponentsProperties[Q1, 0];
-                CompType = Constants.arrPanelComponentsProperties[Q1, 1];
-                MacroName = Constants.arrPanelComponentsProperties[Q1, 2];
-                CompMaxPin = Constants.arrPanelComponentsProperties[Q1, 3];
-                CompPN = Constants.arrPanelComponentsProperties[Q1, 4];
-                CompAcc = Constants.arrPanelComponentsProperties[Q1, 5];
-                SampleEquPinNumber = Constants.arrPanelComponentsProperties[Q1, 6];
-                GroupId = Constants.arrPanelComponentsProperties[Q1, 7];
-                Wire_Length = Constants.arrPanelComponentsProperties[Q1, 8];
-                Wire_Type = Constants.arrPanelComponentsProperties[Q1, 9];
-                CBType_Name = Constants.arrPanelComponentsProperties[Q1, 10];
-                CBType_Voltage = Constants.arrPanelComponentsProperties[Q1, 11];
-                Assosiate_PartNumbers = Constants.arrPanelComponentsProperties[Q1, 12];
-                Equipment_Box_Info = Constants.arrPanelComponentsProperties[Q1, 13];
-                Looms_Info = Constants.arrPanelComponentsProperties[Q1, 14];
-                TERTBK_Shunt_Info = Constants.arrPanelComponentsProperties[Q1, 15];
-                //if (MacroName != "")
-                //{
-                if (CompType.ToUpper() == "SPL")
-                {
-                    if (secYcounter < Ylimit - 1)
-                    {
-                        secYcounter = secYcounter + 1;
-                    }
-                    else
-                    {
-                        secYcounter = 1;
-                        secXcol = secXcol + 1;
-                    }
-                    CompXdist = (Constants.SheetWidth / 8);
-                    CompYdist = (Constants.SheetHeight / 8);
-                    Constants.SPL_Cur_Height_Incre_Count = Constants.SPL_Cur_Height_Incre_Count + 10 - 1;
-                    CompYdist = CompYdist - Constants.SPL_Cur_Height_Incre_Count * 8;//264,230,202Constants.SheetHeight - (Constants.Cur_Height_Count * 50);
-                    Constants.SPL_Cur_Width_Incre_Count = Constants.SPL_Cur_Width_Incre_Count + 30;
-                    CompXdist = CompXdist + Constants.SPL_Cur_Width_Incre_Count;
-                    modOPCommand.AddSymbolSPL(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                }
-                else 
-                {
-                    Xcounter = Xcounter + 1;
-                    Ycounter = Ycounter + 1;
-                    frmPanelOri frmpanelori = new frmPanelOri();
-                    switch (CompType.ToUpper()) 
-                    {
-                        case "TCB" or "SCB" ://Circut Breakers
-                            
-                            #region//CB coordinate settings
-                            int T = 0;
-                            if (CompType.Equals("TCB")) { T = 3; }
-                            else if (CompType.Equals("SCB")) { T = 1; }
-                            CompXdist = (Constants.SheetWidth / 8);
-                            CompYdist = Constants.SheetHeight - Constants.CB_Cur_Height_Count - 40;
-                            Constants.CB_Cur_Height_Count = Constants.CB_Cur_Height_Count + (T * 4 + 4 * 6);
-                            #endregion
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            Constants.arrPinsOfEqu = modStandard.PinsOfConnectorToArray(CompDwgName, Constants.arrPanelDetails, 0, 1);
-                            //cbpinsCollection.Length * 4;
-                            
-                            string[] cbpinsTempCollection = new string[T];
-                            cbpinsTempCollection = (from i in Constants.arrPinsOfEqu
-                                                    where (!string.IsNullOrEmpty(i))
-                                                    select i).ToArray();
-                            var cbpinsCollection = cbpinsTempCollection.Distinct().ToArray();
-                            List<string> termsList = new List<string>();
-                            for (int runs = 0; runs <= cbpinsCollection.Length-1; runs++)
-                            {
-                                termsList.Add(cbpinsCollection[runs]);
-                            }
-                            if (termsList.Count < T)
-                            {
-                                for (int r = termsList.Count; r < T; r++)
-                                {
-                                    termsList.Add("*");
-                                }
-                            }
-                            // You can convert it back to an array if you would like to
-                            string[] stetemp = termsList.ToArray();
-                            //cbpinsTempCollection = Constants.arrPinsOfEqu;
-                            
-                            if (cbpinsCollection.Length == 0)
-                            {
-                                MessageBox.Show($"{CompDwgName} Pins Information Not Avaialble,Pls Check Once");
-                                continue;
-                            }
-                                                        
-                            //string[] stetemp = new string[T];
-                            //for (int N1 = 0; N1 <= cbpinsCollection.Length - 1; N1++)//Orig for loop
-                            //{
-                            //    stetemp[N1] = string.IsNullOrEmpty(cbpinsCollection[N1])?"*": cbpinsCollection[N1];
-                            //}
-                            int incre = 0;
-                            for (int N = 0; N <= stetemp.Length - 1; N++)//Orig for loop
-                            {
-                                //decre = decre - 2;
-                                //modOPCommand.CBSeg2(CompXdist - 2, CompYdist+ incre, stetemp[N], Constants.el_ExecFilePath, N);//orig
-                                //modOPCommand.CBSeg2(CompXdist - 2, CompYdist - incre, stetemp[N], Constants.el_ExecFilePath, N);
-                                incre = incre + 6;
-                            }
-                            incre = 0;
-                            for (int N = 0; N <= stetemp.Length - 1; N++)//Orig for loop
-                            {
-                                //decre = decre - 2;
-                                //modOPCommand.CBSeg2(CompXdist+10, CompYdist + incre, stetemp[N], Constants.el_ExecFilePath, N);//orig
-                                //modOPCommand.CBSeg2(CompXdist - 2, CompYdist - incre, stetemp[N], Constants.el_ExecFilePath, N);
-                                incre = incre + 6;
-                            }
-                            //MOD N51 115,255 0,0 :E '1111'; NOP;
-                            modOPCommand.AddCBSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, CBType_Voltage, "Nomegger", Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "TBK" or "TER" ://Terminal Blocks - TER,Junction Module - TBK
-                                                 
-                            Constants.arrPinsOfEqu = modStandard.PinsOfConnectorToArray(CompDwgName, Constants.arrPanelDetails, 0, 1);
-                            string[] tbkpinsCollectionter = new string[Constants.arrPinsOfEqu.Length];
-                            tbkpinsCollectionter = (from i in Constants.arrPinsOfEqu
-                                                    where (!string.IsNullOrEmpty(i))
-                                                    select i).Distinct().ToArray();
-                            
-                            if (tbkpinsCollectionter.Length == 0)
-                            {
-                                MessageBox.Show($"{CompDwgName} Pins Information Not Avaialble,Pls Check Once");
-                                continue;
-                            }
-                            
-                            #region // Coordinate settings
-                            CompXdist = (Constants.SheetWidth / 2);
-                            if (tbkpinsCollectionter.Length - 1 <= 2) Constants.TBK_Height_Temp_Decre_Count = tbkpinsCollectionter.Length * 4;
-                            CompYdist = Constants.SheetHeight - Constants.TBK_Cur_Height_Decre_Count - 24;
-                            Constants.TBK_Cur_Height_Decre_Count = Constants.TBK_Cur_Height_Decre_Count + (tbkpinsCollectionter.Length * 4 + 8 + 4 * 4) + Constants.TBK_Height_Temp_Decre_Count;//41
-                            #endregion
-                            
-                            modOPCommand.AddOOTB_TER_SymbolForTerminal(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, "0", tbkpinsCollectionter, TERTBK_Shunt_Info);
-                            break;
-                        case "SWT"://Switches
-
-                            #region//Coordinate settings
-                            CompXdist = (Constants.SheetWidth / 6) + Constants.SWT_Cur_Width_Incre_Count;
-                            Constants.SWT_Cur_Width_Incre_Count = Constants.SWT_Cur_Width_Incre_Count + 50;
-                            Constants.SWT_Cur_Height_Decre_Count = Constants.SWT_Cur_Height_Decre_Count + 10 - 1;
-                            CompYdist = Constants.SheetHeight - Constants.SWT_Cur_Height_Decre_Count * 8;
-                            #endregion
-
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, CompDwgName);
-                            break;
-                        case "EQU":
-                            string pattern = "[a-hj-np-zA-HJ-NP-Z]";
-                            Constants.arrPinsOfEqu = modStandard.PinsOfConnectorToArray(CompDwgName, Constants.arrPanelDetails, 0, 1);
-                            string[] dtcpinstempCollection = new string[Constants.arrPinsOfEqu.Length];
-                            dtcpinstempCollection = (from i in Constants.arrPinsOfEqu
-                                                    where (!string.IsNullOrEmpty(i))
-                                                    select i).ToArray();
-                            var dtcpinsCollection = dtcpinstempCollection.Distinct().ToArray();
-                            Noofpin = Constants.arrPinsOfEqu.Length;
-                            Ycounter = (Noofpin * spacing) + 2 * 4 + 4;
-                            Xcounter = 17;
-                            Constants.txtEquName = CompDwgName;
-                            frmpanelori.lblEquName.Text = CompDwgName;
-
-                            for (int PDRowUpdateEQU = 0; PDRowUpdateEQU <= Constants.arrPanelDetails.GetLength(0) - 1; PDRowUpdateEQU++)
-                            {
-                                if (Constants.arrPanelDetails[PDRowUpdateEQU, 0].Equals(CompDwgName))
-                                {
-                                    Constants.arrPanelDetails[PDRowUpdateEQU, Constants.colPD_Usage - 1] = SampleEquPinNumber;
-                                    Constants.arrPanelDetails[PDRowUpdateEQU, Constants.colPD_F_Type - 1] = CompType;
-                                    Constants.arrPanelDetails[PDRowUpdateEQU, Constants.colPD_F_GroupId] = GroupId;
-                                    Constants.arrPanelDetails[PDRowUpdateEQU, Constants.colPD_F_Wire_Length - 2] = Wire_Length;
-                                    Constants.arrPanelDetails[PDRowUpdateEQU, Constants.colPD_F_Wire_Type - 1] = Wire_Type;
-                                }
-                            }                            
-                            if (CompDwgName.Contains("_J") || Regex.IsMatch(CompDwgName.Substring(CompDwgName.Length-1), pattern))//Double type connectors
-                            {
-                                #region // Coordinate settings
-                                CompXdist = (Constants.SheetWidth /3);
-                                if (dtcpinsCollection.Length - 1 <= 2) Constants.DTC_Cur_Height_Decre_Count = dtcpinsCollection.Length * 4;
-                                CompYdist = (Constants.SheetHeight/2) - Constants.DTC_Cur_Height_Count;
-                                Constants.DTC_Cur_Height_Count = Constants.DTC_Cur_Height_Count + (dtcpinsCollection.Length * 4 + 8 + 4 * 4) + Constants.DTC_Cur_Height_Decre_Count+10;//41
-                                #endregion
-
-                                int startIndex = CompDwgName.IndexOf("_");
-                                string BC_Comp_Nmae_DTC = string.Empty;//Double Connector Component Name with out a(a to z with out i,o) or _J1(1 to 24)
-                                    
-                                if (Constants.remainingItems.Contains(BC_Comp_Nmae_DTC)) continue;
-                                BC_Comp_Nmae_DTC = CompDwgName.Substring(0, startIndex);
-                                modMain.GraLine_DTC(CompXdist, CompYdist, dtcpinsCollection.Length, CompDwgName, dtcpinsCollection, CompPN, Assosiate_PartNumbers, Equipment_Box_Info, BC_Comp_Nmae_DTC); //'CompMaxPin)
-                                if (!Constants.remainingItems.Contains(BC_Comp_Nmae_DTC)) Constants.remainingItems.Add(BC_Comp_Nmae_DTC);
-                            }
-                            else
-                            {
-                                frmpanelori.ShowDialog();
-                                modMain.DrawEquSymbolUsedPins(CompXdist, CompYdist, CompMaxPin, CompDwgName, SampleEquPinNumber, CompPN, frmpanelori, Assosiate_PartNumbers, Equipment_Box_Info, Looms_Info);
-                                frmpanelori.Close();
-                            }
-                            break;
-                        case "DIS"://Break Connectors
-                            Constants.arrPinsOfEqu = modStandard.PinsOfConnectorToArray(CompDwgName, Constants.arrPanelDetails, 0, 1);
-                            string[] dispinstempCollection = new string[Constants.arrPinsOfEqu.Length];
-                            dispinstempCollection = (from i in Constants.arrPinsOfEqu
-                                                    where (!string.IsNullOrEmpty(i))
-                                                    select i).ToArray();
-                            var dispinsCollection = dispinstempCollection.Distinct().ToArray();
-                            if (dispinsCollection.Length == 0)
-                            {
-                                MessageBox.Show($"{CompDwgName} Pins Information Not Avaialble,Pls Check Once");
-                                continue;
-                            }
-                            
-                            for (int PDRowUpdateDIS = 0; PDRowUpdateDIS <= Constants.arrPanelDetails.GetLength(0) - 1; PDRowUpdateDIS++)
-                            {
-                                if (Constants.arrPanelDetails[PDRowUpdateDIS, 0].Equals(CompDwgName))
-                                {
-                                    Constants.arrPanelDetails[PDRowUpdateDIS, Constants.colPD_Usage - 1] = SampleEquPinNumber;
-                                    Constants.arrPanelDetails[PDRowUpdateDIS, Constants.colPD_F_Type - 1] = CompType;
-                                }
-                            }
-                            
-                            #region // Coordinate settings
-                            CompXdist = (Constants.SheetWidth/3);
-                            if (dispinsCollection.Length - 1 <= 2) Constants.DIS_Cur_Height_Decre_Count = dispinsCollection.Length * 4;
-                            CompYdist = Constants.SheetHeight - Constants.DIS_Cur_Height_Count - 24;
-                            Constants.DIS_Cur_Height_Count = Constants.DIS_Cur_Height_Count + (dispinsCollection.Length * 4 + 8 + 4 * 4) + Constants.DIS_Cur_Height_Decre_Count;//41
-                            #endregion
-
-                            modMain.GraLine(CompXdist, CompYdist, dispinsCollection.Length, CompDwgName, dispinsCollection, CompPN, Assosiate_PartNumbers, Equipment_Box_Info); //'CompMaxPin)
-
-                            break;
-                        case "MSW" or "REL":
-                            #region//Coordinate settings
-                            CompXdist = (Constants.SheetWidth / 2) + Constants.RELMSW_Cur_Width_Incre_Count;
-                            Constants.RELMSW_Cur_Width_Incre_Count = Constants.RELMSW_Cur_Width_Incre_Count + 50;
-                            Constants.RELMSW_Cur_Height_Decre_Count = Constants.RELMSW_Cur_Height_Decre_Count + 10 - 1;
-                            CompYdist = (Constants.SheetHeight/2) - Constants.RELMSW_Cur_Height_Decre_Count * 8;
-                            #endregion
-
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            //modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            //modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "IND":
-                            CompXdist = (Constants.SheetWidth / 6) + Constants.IND_Cur_Width_Incre_Count;
-                            Constants.IND_Cur_Width_Incre_Count = Constants.IND_Cur_Width_Incre_Count + 70;
-                            Constants.IND_Cur_Height_Decre_Count = Constants.IND_Cur_Height_Decre_Count + 10 - 1;
-                            CompYdist = Constants.SheetHeight - Constants.SWT_Cur_Height_Decre_Count * 8 + 10;
-
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "BUS":
-                            CompXdist = (Constants.SheetWidth / 6) + Constants.BUS_Cur_Width_Incre_Count;
-                            Constants.BUS_Cur_Width_Incre_Count = Constants.BUS_Cur_Width_Incre_Count + 80;
-                            Constants.BUS_Cur_Height_Decre_Count = Constants.BUS_Cur_Height_Decre_Count + 10 - 1;
-                            CompYdist = Constants.SheetHeight - Constants.BUS_Cur_Height_Decre_Count * 8 + 30;
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "ANT":
-                            CompXdist = (Constants.SheetWidth / 6) + Constants.ANT_Cur_Width_Incre_Count;
-                            Constants.ANT_Cur_Width_Incre_Count = Constants.ANT_Cur_Width_Incre_Count + 140;
-                            Constants.ANT_Cur_Height_Decre_Count = Constants.ANT_Cur_Height_Decre_Count + 10 - 1;
-                            CompYdist = Constants.SheetHeight - Constants.ANT_Cur_Height_Decre_Count * 8 + 50;
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "DD":
-                            CompXdist = (Constants.SheetWidth / 6) + Constants.DD_Cur_Width_Incre_Count;
-                            Constants.DD_Cur_Width_Incre_Count = Constants.DD_Cur_Width_Incre_Count + 300;
-                            Constants.DD_Cur_Height_Decre_Count = Constants.DD_Cur_Height_Decre_Count + 10 - 1+50;
-                            CompYdist = Constants.SheetHeight - Constants.DD_Cur_Height_Decre_Count * 8;
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "FUS":
-                            CompXdist = (Constants.SheetWidth / 6) + Constants.FUS_Cur_Width_Incre_Count;
-                            Constants.FUS_Cur_Width_Incre_Count = Constants.FUS_Cur_Width_Incre_Count + 400;
-                            Constants.FUS_Cur_Height_Decre_Count = Constants.FUS_Cur_Height_Decre_Count + 10 - 1;
-                            CompYdist = Constants.SheetHeight - Constants.FUS_Cur_Height_Decre_Count * 8 + 100;
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "CNT":
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "SNR":
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "GROUND":
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "ML":
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "ERM" or "EM":
-                            CompXdist = (Constants.SheetWidth / 6) + Constants.ERM_Cur_Width_Incre_Count;
-                            Constants.ERM_Cur_Width_Incre_Count = Constants.ERM_Cur_Width_Incre_Count + 280;
-                            Constants.ERM_Cur_Height_Decre_Count = Constants.ERM_Cur_Height_Decre_Count + 10 - 1;
-                            CompYdist = Constants.SheetHeight - Constants.ERM_Cur_Height_Decre_Count * 8 + 150;
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "LMP":
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "M1" or "M2":
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "TRK":
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        case "NEW":
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            break;
-                        default :
-                            break;
-                }                    
-            }
-                
-                if (CompType.Equals("EQU"))
-                {
-                    CompXdist = CompXdist + Xcounter;
-                    CompYdist = CompYdist + Ycounter - 40;
-                }
-            }
-        }*/
-        #endregion
+        }        
 
         public static void UpdatePanelDetailsTextFile(List<PanelDetailsRow> panelDetailsList)
         {
@@ -1157,6 +742,140 @@ namespace PanelDrawing.CommonOperations
            // Constants.arrUpdatedPanelDetails = outputLines.ToArray();
         }
 
+        public static void ComponentsCreatedTextFileCreation()
+        {
+            //Constants.
+            //Constants.arrComponentsCreated[0] = string.Concat(Constants.textPanelPartNumber,Constants.textPanelPartName, lstSelectedItemTemplateName,);
+            File.WriteAllLines(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.ComponentsCreatedTextFileName), Constants.arrComponentsCreated);
+            File.WriteAllLines(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails), Constants.arrComponentsCreated);
+        }
+
+        public static void ExitOutputFile(string filepath)
+        {
+            using (var writer = File.AppendText(filepath))
+            {
+                writer.WriteLine("GRI ELECTRE_GRID_STH;");
+                writer.WriteLine("FOPEN (TYC+FEXEC+TYC);");
+                writer.WriteLine("FWRITE (TYC+';;'+TYC) ;");
+                writer.WriteLine("FCLOSE;");
+                writer.WriteLine("NOP;");
+                writer.WriteLine(";");
+                // writer.Close();
+            }
+        }
+
+        public static List<PanelComponentProperties> GatherPanelComponentProperties(string panelName)
+        {
+           // GatherPanelComponentProperties(panelName);
+            // Clear previous results
+            Constants.panelComponentProperties.Clear();
+
+            // STEP 1: Get all components belonging to panel & having part number
+            var panelComponents = Constants.dataExtractionList
+              //  Constants.dataExtractionListAbove
+                .Where(x => x.Panel == panelName &&
+                            Constants.listComponentsWithPartNumber.Contains(x.ConnectorName))
+                .Select(x => x.ConnectorName)
+                .Distinct()
+                .ToList();
+
+            var GNDcomponents = Constants.dataExtractionList.
+                Where(x =>  x.Panel == panelName && (x.ComponentType == "GND" || x.ComponentType == "GROUND")).Select(x => x.ConnectorName).Distinct().ToList();
+
+            panelComponents.AddRange(GNDcomponents);
+
+            panelComponents = panelComponents.Distinct().ToList();
+
+            foreach (var compName in panelComponents)
+            {
+                // STEP 2: Get all DEAbove rows for this component
+                //var compDEAbove = Constants.dataExtractionListAbove  // commented this line on Dec,1 2025
+                var compDEAbove = Constants.dataExtractionList
+                    .Where(x => x.ConnectorName == compName && x.Panel == panelName)
+                    .ToList();
+
+                // STEP 3: Get associated part numbers
+                var associatedPNs = compDEAbove
+                    .Select(x => x.CoreNumber)     // CoreNumber = PartNumber
+                    .Where(x => !string.IsNullOrEmpty(x)
+                            && (!int.TryParse(x, out int coreNum) || coreNum < 1 || coreNum > 18)) // added extra line on Dec,1 2025
+                    .Distinct()
+                    .ToList();
+
+                // STEP 4: Primary part number
+                string primaryPN = modOPCommand.GetPrimaryPartNumber(associatedPNs);
+
+                // STEP 5: Get extra properties DEBelow
+                var firstDEBelow = Constants.dataExtractionListBelow
+                    .FirstOrDefault(x => x.ConnectorName == compName &&
+                                         x.Panel == panelName);
+
+                string compType = firstDEBelow?.ComponentType ?? "";
+                string samplePin = firstDEBelow?.PinNumber ?? "";
+                string cbTypeName = firstDEBelow?.EquipmentName ?? "";
+                string cbVoltage = firstDEBelow?.Voltage ?? "";
+
+                // STEP 6: Shunts (for TBK/TER)
+                var shuntList = "";
+                if (compType == "TBK" || compType == "TER")
+                {
+                    shuntList = string.Join(";",
+                            Constants.dataExtractionListBelow
+                            .Where(x => x.ConnectorName == compName &&
+                                        !string.IsNullOrEmpty(x.Shunt))
+                            .Select(x => $"{x.ConnectorName},{x.PinNumber},{x.FunctionalDesignation},{x.ComponentType},{x.Shunt}"));
+                }             
+
+                // STEP 7: Get info from Library Catalog
+                var lib = Constants.libCatalogList
+                    .FirstOrDefault(x =>
+                        (x.RefInternal ?? "") == primaryPN ||
+                        (x.MandatoryAccessory1 ?? "") == primaryPN //||
+                       // (x.MandatoryAccessory2 ?? "") == primaryPN
+                    );
+
+                string macroName = lib?.Symbol2D ?? "";
+                string maxPins = lib?.MaxPins ?? "";
+                string accessory = lib?.MandatoryAccessory1 ?? "";
+
+                double CompWidth = lib?.CompWidth ?? 0.0;
+                double CompHeight = lib?.CompHeight ?? 0.0;
+                //string acc2 = lib?.MandatoryAccessory2 ?? "";
+
+                // STEP 8: Equipment Box & Looms
+                string equipInfo = compDEAbove.FirstOrDefault()?.EquipmentName ?? "";
+                string loomsInfo = compDEAbove.FirstOrDefault()?.BundleName ?? "";
+
+                // STEP 9: Construct modern object
+                var compProps = new PanelComponentProperties
+                {
+                    ComponentName = compName,
+                    ComponentType = compType,
+                    MacroName = macroName,
+                    MaxPin = maxPins,
+                    PartNumber = primaryPN,
+                    Accessory = $"{accessory}",
+                    SamplePin = samplePin,
+                    GroupId = firstDEBelow?.Group ?? "",
+                    WireLength = firstDEBelow?.Length ?? "",
+                    WireType = firstDEBelow?.CableType ?? "",
+                    CBTypeName = cbTypeName,
+                    CBVoltage = cbVoltage,
+                    AssociatedPartNumbers = string.Join(";", associatedPNs),
+                    EquipmentBox = equipInfo,
+                    Looms = loomsInfo,
+                    ShuntList = shuntList,
+                    CompWidth = CompWidth,
+                    CompHeight = CompHeight
+                };
+
+                Constants.panelComponentProperties.Add(compProps);
+            }        
+            
+            return Constants.panelComponentProperties;
+        }
+
+        #region // Commented on Jan 27, 2026    
         #region //Commented old UpdatePanelDetailsTextFile code on 18 november, 2025
         /* public static void UpdatePanelDetailsTextFile(string[,] arrPD)
          {            
@@ -1179,13 +898,559 @@ namespace PanelDrawing.CommonOperations
          }*/
         #endregion
 
-        public static void ComponentsCreatedTextFileCreation()
-        {
-            //Constants.
-            //Constants.arrComponentsCreated[0] = string.Concat(Constants.textPanelPartNumber,Constants.textPanelPartName, lstSelectedItemTemplateName,);
-            File.WriteAllLines(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.ComponentsCreatedTextFileName), Constants.arrComponentsCreated);
-            File.WriteAllLines(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails), Constants.arrComponentsCreated);
-        }
+        #region //GatherPanelComponentProperties_backup code
+        /* public static void GatherPanelComponentProperties_backup(string panelName)
+         {
+             #region//no of components from arrDEabove  
+             int NumberOfPanelComponents = 0;
+             string strComponentName = string.Empty;
+             int nocomps = (Constants.arrComponentsWithPartNumber).Count(x => !string.IsNullOrEmpty(x));//Remove null from array
+             for (int pancom = 0; pancom <= nocomps - 1; pancom++)
+             {
+                 strComponentName = Constants.arrComponentsWithPartNumber[pancom];
+                 for (int comDEabove = 0; comDEabove <= Constants.arrDEabove.GetLength(0) - 1; comDEabove++)
+                 {
+                     if (Constants.arrDEabove[comDEabove, Constants.colDE_Connector-1].Equals(strComponentName) && Constants.arrDEabove[comDEabove, Constants.colDE_Panels - 1].Equals(panelName))
+                         //if (Constants.arrDEabove[comDEabove, Constants.colDE_Connector - 1].Equals(strComponentName) && Constants.arrDEabove[comDEabove, Constants.colDE_Info - 1].Equals(Constants.info) && Constants.arrDEabove[comDEabove, Constants.colDE_Panels - 1].Equals(panellName))
+                     {
+                         NumberOfPanelComponents = NumberOfPanelComponents + 1;
+                         Debug.Print($" NumberOfPanelComponents {NumberOfPanelComponents.ToString()} - {strComponentName}");
+                         break;
+                     }
+                 }
+             }
+             #endregion
+
+             #region
+             int PanelComp = 0;
+             //Commented on Nov 13,2025 due to index outside bounds array getting in
+             //Constants.arrPanelComponentsProperties = new string[NumberOfPanelComponents, Constants.arrPanelComponentsPropertiesMaxCols];
+             Constants.arrPanelComponentsProperties = new string[nocomps, Constants.arrPanelComponentsPropertiesMaxCols];
+             bool IsInPanel = false;
+             string CompPN = string.Empty;
+             string CompType = string.Empty;
+             string CBType_Name = string.Empty;
+             string CBType_Voltage = string.Empty;
+             //colDE_CBType_Voltage
+             string SampleEquPinNumber= string.Empty;
+             string GroupId = string.Empty;
+             string Wire_Length = string.Empty;
+             string Wire_Type = string.Empty;
+             string Equipment_Box_Info = string.Empty;
+             string Looms_Info = string.Empty;
+             #endregion
+             //string TBKTER_Shunt_Value = string.Empty;
+             var finalPnlComps = Constants.arrComponentsWithPartNumber.Distinct().ToArray();
+             Constants.arrComponentsWithPartNumber = finalPnlComps.ToArray();
+             //Define Component Properties for each component which are inside panel
+             for (int rPanCOmpPros = 0; rPanCOmpPros <= nocomps - 1; rPanCOmpPros++)
+             {
+                 #region//Check for The particular component is inside/belongs to the panel or not 
+                 if(string.IsNullOrEmpty(Constants.arrComponentsWithPartNumber[rPanCOmpPros])) continue;
+                 strComponentName = Constants.arrComponentsWithPartNumber[rPanCOmpPros];
+                 for (int comDEabove = 0; comDEabove <= Constants.arrDEabove.GetLength(0) - 1; comDEabove++)
+                 {
+                     if (Constants.arrDEabove[comDEabove, Constants.colDE_Connector - 1].Equals(strComponentName) && Constants.arrDEabove[comDEabove, Constants.colDE_Panels - 1].Equals(panelName))
+                   //if (Constants.arrDEabove[comDEabove, Constants.colDE_Connector - 1].Equals(strComponentName) && Constants.arrDEabove[comDEabove, Constants.colDE_Info - 1].Equals(Constants.info) && Constants.arrDEabove[comDEabove, Constants.colDE_Panels - 1].Equals(panellName))
+                     {
+                         IsInPanel = true;
+                         //NumberOfPanelComponents = NumberOfPanelComponents + 1;
+                         //Debug.Print($" NumberOfPanelComponents {NumberOfPanelComponents.ToString()} - {strComponentName}");
+                         break;
+                     }
+                     *//*else
+                     {
+                         IsInPanel = false;
+                     }*//*
+                 }
+                 #endregion
+
+                 if (IsInPanel == false) continue;
+                 int rownum = Constants.temp_rownum;
+
+                 #region //Get Part Number from arrDEabove 2D array if the component is in same panel or exist based on IsInPanel is true or false
+                 for (int comDEabove = 0; comDEabove <= Constants.arrDEabove.GetLength(0) - 1; comDEabove++)
+                 {
+                     //Adding properties for Part Numbers
+                     if (Constants.arrDEabove[comDEabove, Constants.colDE_Connector - 1].Equals(strComponentName) && Constants.arrDEabove[comDEabove, Constants.colDE_PartNumber - 1] != "" && Constants.arrDEabove[comDEabove, Constants.colDE_Panels - 1].Equals(panelName))
+                     //if (Constants.arrDEabove[comDEabove, Constants.colDE_Connector - 1].Equals(strComponentName) && Constants.arrDEabove[comDEabove, Constants.colDE_Info - 1].Equals(Constants.info) && Constants.arrDEabove[comDEabove, Constants.colDE_PartNumber - 1] != "" && Constants.arrDEabove[comDEabove, Constants.colDE_Panels - 1].Equals(panellName))
+                     {
+                         #region //The below code search for whether Component Part Number is primary part number for relavent component or assosiate part number,
+                         string sd = modOPCommand.RowOfCountFoundStringInColOfMDarray(strComponentName, Constants.arrDEabove, Constants.colDE_Connector - 1, Constants.colDE_PartNumber - 1, Constants.colDE_Panels - 1);
+                         string[] arrPns = sd.Split(";");
+                         arrPns = arrPns.Distinct().ToArray();
+                         if (arrPns.Length > 1)
+                         {
+                             Constants.strDEPanelaboveAssosiatePNList = string.Empty;
+                             CompPN = modMain.FindPartNumberFromAssosiatedPartnumbersIfDefined(arrPns);
+                             var removePNfromAssoPNList = arrPns.ToList();
+                             removePNfromAssoPNList.Remove(CompPN);
+                             Constants.strDEPanelaboveAssosiatePNList = string.Join(";", removePNfromAssoPNList.ToArray());
+                             Equipment_Box_Info = Constants.arrDEabove[comDEabove, Constants.colDE_EquipmentBox - 1];
+                             Looms_Info = Constants.arrDEabove[comDEabove, Constants.colDE_Looms - 1];
+                         }
+                         else
+                         {
+                             CompPN = Constants.arrDEabove[comDEabove, Constants.colDE_PartNumber - 1];
+                             Equipment_Box_Info = Constants.arrDEabove[comDEabove, Constants.colDE_EquipmentBox - 1];
+                             Looms_Info = Constants.arrDEabove[comDEabove, Constants.colDE_Looms - 1];
+                         }
+                         #endregion
+                         break;
+                     }                    
+                 }
+                     #endregion
+
+                 #region// from arrDBBelow get  CompType,SampleEquPinNumber
+                 for (int comDEbelow = 0; comDEbelow <= Constants.arrDEbelow.GetLength(0) - 1; comDEbelow++)
+                 {
+                      if (Constants.arrDEbelow[comDEbelow, Constants.colDE_Connector - 1].Equals(strComponentName)  
+                        && (Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.cont) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.ind) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.ter) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.tbk) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.bus) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.cnt) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.ant)  || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.dd) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.snr) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.rel) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.spl) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.cb_s) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.cb_t)) 
+                         && Constants.arrDEbelow[comDEbelow, Constants.colDE_Panels - 1].Equals(panelName)) //&& Constants.arrDEbelow[comDEbelow, Constants.colDE_PartNumber - 1] != "")
+                      {
+                         CompType = Constants.arrDEbelow[comDEbelow, Constants.colDE_Type - 1];
+                         CBType_Name = Constants.arrDEbelow[comDEbelow, Constants.colDE_CBType_Name - 1];
+                         CBType_Voltage = Constants.arrDEbelow[comDEbelow, Constants.colDE_CBType_Voltage - 1];
+                         SampleEquPinNumber = Constants.arrDEbelow[comDEbelow, Constants.colDE_PinNumber - 1];
+
+                         #region//Adding shunt values for Terminal Block - TER,TBK COMPONENT TYPE
+                         if (CompType.Equals("TBK") || CompType.Equals("TER"))
+                         {                            
+                             for (int shuntDEbelow = 0; shuntDEbelow <= Constants.arrDEbelow.GetLength(0) - 1; shuntDEbelow++)
+                             {
+                                 if (Constants.arrDEbelow[comDEbelow, Constants.colDE_Connector - 1].Equals(strComponentName) && !string.IsNullOrEmpty(Constants.arrDEbelow[shuntDEbelow, Constants.colDE_TBKTER_Shunt_Value - 1]))
+                                 {
+                                     if (string.IsNullOrEmpty(Constants.strDEBelowTERTBK_Shunt_List))
+                                     {
+                                         Constants.strDEBelowTERTBK_Shunt_List = string.Concat(Constants.arrDEbelow[shuntDEbelow, Constants.colDE_Connector - 1], ",", Constants.arrDEbelow[shuntDEbelow, 7], ",", Constants.arrDEbelow[shuntDEbelow, 8], ",", Constants.arrDEbelow[shuntDEbelow, 11], ",", Constants.arrDEbelow[shuntDEbelow, Constants.colDE_TBKTER_Shunt_Value - 1]);
+                                     }
+                                     else
+                                     {
+                                         Constants.strDEBelowTERTBK_Shunt_List = string.Concat(Constants.strDEBelowTERTBK_Shunt_List, ";", string.Concat(Constants.arrDEbelow[shuntDEbelow, Constants.colDE_Connector - 1], ",", Constants.arrDEbelow[shuntDEbelow, 7], ",", Constants.arrDEbelow[shuntDEbelow, 8], ",", Constants.arrDEbelow[shuntDEbelow, 11], ",", Constants.arrDEbelow[shuntDEbelow, Constants.colDE_TBKTER_Shunt_Value - 1]));
+                                     } 
+                                 }
+                             }
+                             for (int shuntDEbelow = 0; shuntDEbelow <= Constants.arrDEabove.GetLength(0) - 1; shuntDEbelow++)
+                             {
+                                 if (Constants.arrDEabove[comDEbelow, Constants.colDE_Connector - 1].Equals(strComponentName) && !string.IsNullOrEmpty(Constants.arrDEabove[shuntDEbelow, Constants.colDE_TBKTER_Shunt_Value - 1]))
+                                 {
+                                     if (string.IsNullOrEmpty(Constants.strDEBelowTERTBK_Shunt_List))
+                                     {
+                                         Constants.strDEBelowTERTBK_Shunt_List = string.Concat(Constants.arrDEabove[shuntDEbelow, Constants.colDE_Connector - 1], ",", Constants.arrDEabove[shuntDEbelow, 7], ",", Constants.arrDEabove[shuntDEbelow, 8], ",", Constants.arrDEbelow[shuntDEbelow, 11], ",", Constants.arrDEabove[shuntDEbelow, Constants.colDE_TBKTER_Shunt_Value - 1]);
+                                     }
+                                     else
+                                     {
+                                         Constants.strDEBelowTERTBK_Shunt_List = string.Concat(Constants.strDEBelowTERTBK_Shunt_List, ";", string.Concat(Constants.arrDEabove[shuntDEbelow, Constants.colDE_Connector - 1], ",", Constants.arrDEabove[shuntDEbelow, 7], ",", Constants.arrDEabove[shuntDEbelow, 8], ",", Constants.arrDEabove[shuntDEbelow, 11], ",", Constants.arrDEabove[shuntDEbelow, Constants.colDE_TBKTER_Shunt_Value - 1]));
+                                     }
+                                 }
+                             }
+                         }
+                         #endregion
+                         break;
+                      }
+                 }
+                 #endregion
+
+                 string CompAcc = string.Empty;
+                 string MacroName = string.Empty;
+                 string CompMaxPin = string.Empty;
+                 string CompDwgName = string.Empty;
+                 CompDwgName = strComponentName;
+                 //To check in accessory column first
+                 rownum = modOPCommand.RowOfFoundStringInColOfMDarray(CompPN, Constants.arrTableOfLibCatalog, Constants.colLibCatalog_Accessory-1);
+                 //If its not there in accessory then in internal part number column
+                 if (rownum == 0) rownum = modOPCommand.RowOfFoundStringInColOfMDarray(CompPN, Constants.arrTableOfLibCatalog, Constants.colLibCatalog_InternalPartNumber-1);
+                 CompPN = Constants.arrTableOfLibCatalog[rownum, Constants.colLibCatalog_InternalPartNumber-1];
+                 CompAcc = Constants.arrTableOfLibCatalog[rownum, Constants.colLibCatalog_Accessory-1];
+                 MacroName = Constants.arrTableOfLibCatalog[rownum, Constants.colLibCatalog_Macro-1];
+                 CompMaxPin = Constants.arrTableOfLibCatalog[rownum, Constants.ColLibCatalog_MaxPin-1];
+
+                 Constants.arrPanelComponentsProperties[PanelComp, 0] = CompDwgName;
+                 Constants.arrPanelComponentsProperties[PanelComp, 1] = CompType;
+                 Constants.arrPanelComponentsProperties[PanelComp, 2] = MacroName;
+                 Constants.arrPanelComponentsProperties[PanelComp, 3] = CompMaxPin;
+                 Constants.arrPanelComponentsProperties[PanelComp, 4] = CompPN;
+                 Constants.arrPanelComponentsProperties[PanelComp, 5] = CompAcc;
+                 Constants.arrPanelComponentsProperties[PanelComp, 6] = SampleEquPinNumber;
+                 Constants.arrPanelComponentsProperties[PanelComp, 7] = GroupId;
+                 Constants.arrPanelComponentsProperties[PanelComp, 8] = Wire_Length;
+                 Constants.arrPanelComponentsProperties[PanelComp, 9] = Wire_Type;
+                 Constants.arrPanelComponentsProperties[PanelComp, 10] = CBType_Name;
+                 Constants.arrPanelComponentsProperties[PanelComp, 11] = CBType_Voltage;
+                 Constants.arrPanelComponentsProperties[PanelComp, 12] = Constants.strDEPanelaboveAssosiatePNList;
+                 Constants.arrPanelComponentsProperties[PanelComp, 13] = Equipment_Box_Info;
+                 Constants.arrPanelComponentsProperties[PanelComp, 14] = Looms_Info;
+                 Constants.arrPanelComponentsProperties[PanelComp, 15] = Constants.strDEBelowTERTBK_Shunt_List;
+
+                 PanelComp = PanelComp + 1;
+                 Constants.strDEPanelaboveAssosiatePNList = string.Empty;
+                 Constants.strDEBelowTERTBK_Shunt_List = string.Empty;
+             }
+         }*/
+        #endregion
+
+        #region //Commented old ReadMyData code on 19 november, 2025
+        //public static void ReadMyData(string sMyData_File)
+        //{
+        //    try
+        //    {
+        //        Constants.arr_My_Data = ExcelOperations.ConvertCSVDataInto2DArray(sMyData_File, StringComparer.OrdinalIgnoreCase); //Parsing of My_Data file
+        //        modMain.ReadPanelDetails(); // Parsing of Panel Details file
+        //        AssignOrientation();//Assign AssignOrientation from My_Data file to PD array
+        //        CoordinatesToPDPin();//Assign CoordinatesToPDPin from My_Data file to PD array
+        //        //AssignOrientation();//Assign AssignOrientation from My_Data file to PD array
+        //        DrawWireLine();//Generate Output Command file that is "el_exec" file
+        //        //Parsing of My_Data file & PD file,Assign CoordinatesToPDPin from My_Data file to PD array,Assign AssignOrientation from My_Data file to PD array,DrawWireLine
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Optional: Log or display error
+        //        MessageBox.Show(ex.Message);
+        //        return;
+        //        //Console.WriteLine("Error: " + ex.Message);
+        //    }
+        //}
+        #endregion
+
+        #region //Commented old CoordinatesToPDPin code on 19 november, 2025
+        //public static void CoordinatesToPDPin()
+        //{
+        //    for (int k = 0; k <= Constants.arrPanelDetails.GetLength(0)-1; k++)
+        //    {
+        //        //if (!Constants.arrPanelDetails[k, Constants.colPD_Usage-1].Equals("1"))
+        //       //if (!Constants.arrPanelDetails[k, Constants.colPD_Usage - 1].Equals("1") && Constants.arrPanelDetails[k, Constants.colPD_F_Ori - 1].Equals("L"))
+        //           // {
+        //            bool Tdetails = false;
+        //            bool Fdetails = false;
+
+        //            for (int n = 0; n <= Constants.arr_My_Data.GetLength(0)-1; n++)
+        //            {
+        //                if (!Tdetails &&
+        //                    Constants.arr_My_Data[n, Constants.colMD_Connector - 1] == Constants.arrPanelDetails[k, Constants.colPD_T_Connector - 1] &&
+        //                    Constants.arr_My_Data[n, Constants.colMD_PinNumber - 1] == Constants.arrPanelDetails[k, Constants.colPD_T_Pin - 1] &&
+        //                    //string.Equals(Constants.arr_My_Data[n, Constants.colMD_SheetName - 1], "Panel_Drawing", StringComparison.OrdinalIgnoreCase))
+        //                    string.Equals(Constants.arr_My_Data[n, Constants.colMD_SheetName - 1], Constants.textPanelPartNumber, StringComparison.OrdinalIgnoreCase))
+        //                {
+        //                    Constants.arrPanelDetails[k, Constants.colPD_T_PinX-1] = Constants.arr_My_Data[n, Constants.colMD_PinX-1];
+        //                    Constants.arrPanelDetails[k, Constants.colPD_T_PinY-1] = Constants.arr_My_Data[n, Constants.colMD_PinY-1];
+        //                    Constants.arrPanelDetails[k, Constants.colPD_T_Type-1] = Constants.arr_My_Data[n, Constants.colMD_Type-1];
+
+        //                    int rownumTo = modOPCommand.RowOfFoundStringInColOfMDarray(Constants.arr_My_Data[n, Constants.colMD_PinNumber - 1], Constants.arrPanelDetails, Constants.colPD_F_Pin - 1);
+        //                    Constants.arrPanelDetails[rownumTo, Constants.colPD_Usage - 1] = Constants.arr_My_Data[n, 14];
+        //                    Constants.arrPanelDetails[k, Constants.colPD_Usage - 1] = Constants.arr_My_Data[n, 14];
+
+        //                    Tdetails = true;
+        //                }
+
+        //                if (!Fdetails &&
+        //                    Constants.arr_My_Data[n, Constants.colMD_Connector-1] == Constants.arrPanelDetails[k, Constants.colPD_F_Connector - 1] &&
+        //                    Constants.arr_My_Data[n, Constants.colMD_PinNumber - 1] == Constants.arrPanelDetails[k, Constants.colPD_F_Pin - 1] &&
+        //                    //string.Equals(Constants.arr_My_Data[n, Constants.colMD_SheetName - 1], "Panel_Drawing", StringComparison.OrdinalIgnoreCase))
+        //                    string.Equals(Constants.arr_My_Data[n, Constants.colMD_SheetName - 1], Constants.textPanelPartNumber, StringComparison.OrdinalIgnoreCase))
+        //                    //Panel_Drawing
+        //                {
+        //                    Constants.arrPanelDetails[k, Constants.colPD_F_PinX-1] = Constants.arr_My_Data[n, Constants.colMD_PinX-1];
+        //                    Constants.arrPanelDetails[k, Constants.colPD_F_PinY-1] = Constants.arr_My_Data[n, Constants.colMD_PinY-1];
+        //                    Constants.arrPanelDetails[k, Constants.colPD_F_Type-1] = Constants.arr_My_Data[n, Constants.colMD_Type-1];
+
+        //                    int rownumFrom = modOPCommand.RowOfFoundStringInColOfMDarray(Constants.arr_My_Data[n, Constants.colMD_PinNumber - 1], Constants.arrPanelDetails, Constants.colPD_T_Pin - 1);
+        //                    Constants.arrPanelDetails[rownumFrom, Constants.colPD_Usage - 1] = Constants.arr_My_Data[n, 14];
+        //                    Constants.arrPanelDetails[k, Constants.colPD_Usage - 1] = Constants.arr_My_Data[n,14];
+
+        //                    Fdetails = true;
+        //                }
+
+        //                if (Tdetails && Fdetails)
+        //                {
+        //                    break;
+        //                }
+        //            }
+
+        //            if (Tdetails && Fdetails)
+        //            {
+        //                Constants.arr_My_Data[k, Constants.colPD_Usage - 1] = "1";
+
+        //                //Call function with reversed F and T arguments
+        //                DeactivateRepetitiveConnections(
+        //                    Constants.arr_My_Data[k, Constants.colPD_T_Connector - 1],
+        //                    Constants.arr_My_Data[k, Constants.colPD_T_Pin - 1],
+        //                    Constants.arr_My_Data[k, Constants.colPD_F_Connector - 1],
+        //                    Constants.arr_My_Data[k, Constants.colPD_F_Pin - 1]
+        //                );
+        //            }
+        //        //}
+
+        //        #region//Update PD with GroupId,Wire Length,Wire Type
+        //        int PDrownum = modOPCommand.RowOfFoundStringsInColOfMDarray(Constants.arrPanelDetails[k, Constants.colPD_F_Connector - 1], Constants.arrPanelDetails[k, Constants.colPD_F_Pin - 1], Constants.arrPanelDetails[k, Constants.colPD_WireCode - 1] , Constants.arrDEbelow, Constants.colDE_Connector - 1, Constants.colDE_PinNumber - 1, Constants.colDE_WireCode-1);
+        //        if (PDrownum > -1)
+        //        {
+        //            Constants.arrPanelDetails[k, Constants.colPD_F_GroupId - 1] = Constants.arrDEbelow[PDrownum, Constants.colDE_GroupId - 1];
+        //            Constants.arrPanelDetails[k, Constants.colPD_F_Wire_Length - 1] = Constants.arrDEbelow[PDrownum, Constants.colDE_Wire_Length - 1];
+        //            Constants.arrPanelDetails[k, Constants.colPD_F_Wire_Type - 1] = Constants.arrDEbelow[PDrownum, Constants.colDE_Wire_Type - 1];
+        //            Constants.arrPanelDetails[k, Constants.colPD_F_Wire_Type_Number - 1] = Constants.arrDEbelow[PDrownum, Constants.colDE_PartNumber - 1];
+        //        }
+        //        #endregion
+        //    }
+        //}
+        #endregion
+
+        #region //Commented old DeactivateRepetitiveConnections code on 19 november, 2025
+        //public static void DeactivateRepetitiveConnections(string FC, string FP, string TC, string TP)
+        //{
+        //    for (int k = 0; k <= Constants.arrPanelDetails.GetLength(0)-1; k++)
+        //    {
+        //        if (Constants.arr_My_Data[k, Constants.colPD_F_Connector-1] == FC &&
+        //            Constants.arr_My_Data[k, Constants.colPD_F_Pin-1] == FP &&
+        //            Constants.arr_My_Data[k, Constants.colPD_T_Connector - 1] == TC &&
+        //            Constants.arr_My_Data[k, Constants.colPD_T_Pin-1] == TP)
+        //        {
+        //            Constants.arr_My_Data[k, Constants.colPD_Usage - 1] = "2";
+        //            break;
+        //        }
+        //    }
+        //}
+        #endregion
+
+        #region //Commented old AssignOrientation code on 19 november, 2025
+        //public static void AssignOrientation()
+        //{
+        //    List<string> OriAssignedEQU = new List<string>();
+
+        //    for (int k = 0; k <= Constants.arrPanelDetails.GetLength(0)-1; k++)
+        //    {
+        //        //if (Constants.arrPanelDetails[k, Constants.colPD_Usage-1] == "1")
+        //        //{
+        //            string c1 = Constants.arrPanelDetails[k, Constants.colPD_F_Connector - 1];
+        //            string c2 = Constants.arrPanelDetails[k, Constants.colPD_T_Connector-1];
+        //            string F_Type = Constants.arrPanelDetails[k, Constants.colPD_F_Type - 1];
+        //            string T_Type = Constants.arrPanelDetails[k, Constants.colPD_T_Type-1];
+
+        //        if (F_Type == "EQU")
+        //        {
+        //            Constants.txtEquName = c1;
+        //        }
+
+        //        if (modStandard.SearchAndAppend(Constants.txtEquName, OriAssignedEQU))
+        //        {
+        //            Constants.sPanelEQUori_File = string.Concat(Constants.Electre_Temp_Folder_Path, Constants.textPanelPartNumber, " " + "- " + Constants.txtEquName, " - PanelEquOri.txt");//
+        //            if (!modStandard.ValidateFileSelection(Constants.sPanelEQUori_File))
+        //                {
+        //                    Console.WriteLine($"{Constants.sPanelEQUori_File} - PanelOri file is missing");
+        //                    // Optionally continue or break here
+        //                    continue;
+        //                }
+        //                else
+        //                {
+        //                    try
+        //                    {
+        //                        foreach (string line in File.ReadLines(Constants.sPanelEQUori_File))
+        //                        {
+        //                            string[] arrtemp1 = line.Split(';');
+        //                            if (arrtemp1.Length < 3) continue;
+
+        //                            string pinNumber = arrtemp1[1];
+        //                            string orientation = arrtemp1[2];
+
+        //                            // Assign to F_Ori
+        //                            for (int s = 0; s <= Constants.arrPanelDetails.GetLength(0)-1; s++)
+        //                            {
+        //                            //if (Constants.arrPanelDetails[s, Constants.colPD_F_Connector-1] == Constants.txtEquName &&
+        //                            //    Constants.arrPanelDetails[s, Constants.colPD_F_Pin-1] == pinNumber)
+        //                            if (Constants.arrPanelDetails[s, Constants.colPD_F_Connector - 1].Equals(Constants.txtEquName) && //== Constants.txtEquName &&
+        //                                Constants.arrPanelDetails[s, Constants.colPD_F_Pin - 1].Equals(pinNumber))
+        //                            {
+        //                                Constants.arrPanelDetails[s, Constants.colPD_F_Ori - 1] = orientation;
+        //                                    break;
+        //                                }
+        //                            }
+
+        //                            // Assign to T_Ori
+        //                            for (int t = 0; t <= Constants.arrPanelDetails.GetLength(0)-1; t++)
+        //                            {
+        //                                if (Constants.arrPanelDetails[t, Constants.colPD_T_Connector-1] == Constants.txtEquName &&
+        //                                    Constants.arrPanelDetails[t, Constants.colPD_T_Pin-1] == pinNumber)
+        //                                {
+        //                                Constants.arrPanelDetails[t, Constants.colPD_T_Ori - 1] = orientation;
+        //                                    break;
+        //                                }
+        //                            }
+        //                        }
+        //                    }
+        //                    catch (Exception ex)
+        //                    {
+        //                        Console.WriteLine($"Error reading file: {ex.Message}");
+        //                    }
+        //                }
+        //            }
+        //        //}
+        //    }
+        //}
+        #endregion
+
+        #region //Commented old DrawWireLine code on 19 november, 2025
+        //public static void DrawWireLine()
+        //{
+        //    double X1=0, Y1=0, X2=0, Y2=0;
+        //    string c1 = string.Empty, c2 = string.Empty;
+        //    string F_Type = string.Empty, T_Type = string.Empty;
+        //    string F_Ori = string.Empty, T_Ori = string.Empty;
+        //    string WireCode = string.Empty,GroupId = string.Empty,Wire_Length = string.Empty, Wire_Type = string.Empty, Wire_Type_Number = string.Empty, strPin = string.Empty;
+        //    Constants.lst_WireCodes_Info_Processed = new List<string>();
+        //    // Write to file or console as in VB6: Print #1, "GRID 1,1 ;"
+        //    // Assuming output is redirected to a file or console here:
+        //    //Console.WriteLine("GRID 2.0,2 ;");
+        //    using (writer = File.AppendText(Constants.el_ExecFilePath))
+        //    {
+        //        //writer.WriteLine("GRID 2.0,2 ;");//, Constants.arrPanelDetails.GetLength(0)));
+        //    }
+
+        //    //int totalcount = Constants.arrPanelDetails.GetLength(0);
+        //    //int totalcount = Constants.arrPanelDetails.GetLength(0) / 2;
+        //    //var f = Constants.arrPanelDetails.
+        //    //for (int k = 0; k <= 1; k++)
+        //    for (int k = 0; k <= Constants.arrPanelDetails.GetLength(0) - 1; k++)
+        //    {
+        //        //if (!Constants.arrPanelDetails[k, Constants.colPD_Usage-1].Equals(strPin))
+        //        //{
+        //            if (string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_F_PinX - 1])) continue;
+        //            if (string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_F_PinY - 1])) continue;
+        //            if (string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_T_PinX - 1])) continue;
+        //            if (string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_T_PinY - 1])) continue;
+        //        X1 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_F_PinX - 1]);
+        //        //Convert.ToDouble(string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_F_PinX-1])?0:Constants.arrPanelDetails[k, Constants.colPD_F_PinX - 1]);
+        //        Y1 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_F_PinY - 1]); 
+        //        //Convert.ToDouble(string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_F_PinY-1])?0:Constants.arrPanelDetails[k, Constants.colPD_F_PinY - 1]);
+        //            X2 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_T_PinX - 1]);
+        //        //Convert.ToDouble(string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_T_PinX-1])?0:Constants.arrPanelDetails[k, Constants.colPD_T_PinX - 1]);
+        //        Y2 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_T_PinY - 1]);
+        //        //Convert.ToDouble(string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_T_PinY-1])?0:Constants.arrPanelDetails[k, Constants.colPD_T_PinY - 1]);
+        //                                                                                        //Y1 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_F_PinY-1]);
+        //                                                                                        //X2 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_T_PinX - 1]);
+        //                                                                                        //Y2 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_T_PinY-1]);
+        //            c1 = Constants.arrPanelDetails[k, Constants.colPD_F_Connector-1];
+        //            c2 = Constants.arrPanelDetails[k, Constants.colPD_T_Connector - 1];
+        //            F_Type = Constants.arrPanelDetails[k, Constants.colPD_F_Type-1];
+        //            T_Type = Constants.arrPanelDetails[k, Constants.colPD_T_Type - 1];
+        //            WireCode = Constants.arrPanelDetails[k, Constants.colPD_WireCode-1];
+        //            F_Ori = Constants.arrPanelDetails[k, Constants.colPD_F_Ori - 1];
+        //            T_Ori = Constants.arrPanelDetails[k, Constants.colPD_T_Ori-1];
+        //            strPin = Constants.arrPanelDetails[k, Constants.colPD_Usage - 1];
+        //            GroupId = Constants.arrPanelDetails[k, Constants.colPD_F_GroupId-1];
+        //            Wire_Length = Constants.arrPanelDetails[k, Constants.colPD_F_Wire_Length - 1];
+        //            Wire_Type = Constants.arrPanelDetails[k, Constants.colPD_F_Wire_Type - 1];
+        //            Wire_Type_Number = Constants.arrPanelDetails[k, Constants.colPD_F_Wire_Type_Number - 1];
+
+        //            if (k == 33)
+        //            {
+        //                Console.WriteLine("J1 check");
+        //            }
+        //        if (X1 < X2)
+        //        {
+        //            ConnectionRequired(X1, Y1, X2, Y2, c1, c2, WireCode, F_Type, T_Type, F_Ori, T_Ori, GroupId, Wire_Length, Wire_Type, Wire_Type_Number);
+        //        }
+        //    }
+        //    //}
+        //}
+        #endregion
+
+        #region //Commented old ConnectionRequired code on 19 november, 2025
+        //private static void ConnectionRequired(double p1x, double p1y, double p2x, double p2y,string c1, string c2, string wCode, string iF_Type, string iT_Type,string iF_Ori, string iT_Ori,string groupId,string wire_Length,string wire_Type, string wire_Type_Core_Number)
+        //{
+        //    string gauge = string.Empty;
+        //    string wire_code = string.Empty;
+        //    string wire_code_with_gauge = string.Empty;
+
+        //    // Split WCode into code and gauge
+        //    var arrTemp = wCode.Split('/');
+        //    wire_code = arrTemp[0];
+        //    gauge = arrTemp.Length > 1 ? arrTemp[1] : "";
+        //    wire_code_with_gauge = string.Concat(wire_code, "/", gauge);
+        //    //wire_code_with_gauge = string.Concat(arrTemp[0], "/", arrTemp[1]);
+        //    //Constants.lst_WireCodes_Info.Add();
+        //    //if (!Constants.lst_WireCodes_Info_Processed.Contains(wire_code))
+        //    //    Constants.lst_WireCodes_Info_Processed.Add(wire_code);
+        //    //else { //return;
+        //    //       }
+        //    // Check if it's a straight line
+        //    if (p1y == p2y)
+        //        //if (p1x == p2x || p1y == p2y)
+        //    {
+        //        if (c1 == c2 && p1x == p2x)
+        //        {
+        //            // Do nothing - overlapping wire scenario
+        //        }
+        //        else
+        //        {
+        //            //if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00") || wire_code.StartsWith("SS"))
+        //            if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00") || wire_code.StartsWith("SS") || wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))//coax,sth_coax,triax,sth_triax
+        //                modOPCommand.Simple2PointConnection_Mono_StraightLine(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId,wire_Length, wire_Type, wire_Type_Core_Number);
+        //            else if (wire_Type.Equals("TP") || wire_Type.Equals("QUADRAX"))//Quadrax,sth_quadrax4
+        //                modOPCommand.Simple2PointConnection_TP_StraightLine(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
+        //            else if (wire_Type.Equals("STP"))
+        //                modOPCommand.Simple2PointConnection_STP_StraightLine(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
+        //            else { }
+
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if ((iF_Ori == "T" || iF_Ori == "B") || (iT_Ori == "T" || iT_Ori == "B"))
+        //        {
+        //            //modOPCommand.Simple3PointConnection(p1x + 4, p1y, p2x + 4, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, iF_Ori, iT_Ori);
+        //        }
+        //        else//Z LINE
+        //        {
+        //            modOPCommand.Simple4PointConnection_ZLine_Optimized(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
+        //            #region//B4 Code Optimized
+        //            ////if (wire_code.StartsWith("S") || wire_code.StartsWith("SS"))
+        //            //if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00") || wire_code.StartsWith("SS") || wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))//coax,sth_coax,triax,sth_triax
+        //            //    modOPCommand.Simple4PointConnection_Mono_ZLine(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
+        //            //else if (wire_Type.Equals("TP") || wire_Type.Equals("QUADRAX"))//Quadrax,sth_quadrax4
+        //            //    modOPCommand.Simple4PointConnection_TP_ZLine(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
+        //            //else if (wire_Type.Equals("STP"))
+        //            //    modOPCommand.Simple4PointConnection_STP_ZLine(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
+        //            //else { }
+        //            #endregion
+        //        }
+        //    }
+        //}
+        #endregion
+
+        //public static (double X, double Y) GetNextComponentPosition(double compWidth, double compHeight)
+        //{
+        //    // Wrap to new row if needed
+        //    if (Constants.CursorX + compWidth > Constants.SheetWidthTemp - Constants.MarginX)
+        //    {
+        //        Constants.CursorX = Constants.MarginX;
+        //        Constants.CursorY += Constants.RowHeight + Constants.ComponentSpacingY;
+        //        Constants.RowHeight = 0;
+        //    }
+
+        //    double posX = Constants.CursorX;
+        //    double posY = Constants.CursorY;
+
+        //    // Move horizontal cursor
+        //    Constants.CursorX += compWidth + Constants.ComponentSpacingX;
+
+        //    // Track tallest in row
+        //    if (compHeight > Constants.RowHeight)
+        //        Constants.RowHeight = compHeight;
+
+        //    return (posX, posY);
+        //}
+
+
+        //public static void InitializeLayout()
+        //{
+        //    Constants.CursorX = Constants.MarginX;
+        //    Constants.CursorY = Constants.MarginY;
+
+        //    Constants.RowHeight = 0;
+
+        //    Constants.SheetWidthTemp = Constants.SheetWidth;
+        //    Constants.SheetHeightTemp = Constants.SheetHeight;
+        //}
+
 
         //**********************************************************
         #region//OLD GraLine - BackUp
@@ -1720,23 +1985,23 @@ namespace PanelDrawing.CommonOperations
         //    Constants.panelDetailsList = TextOperations.SortPanelDetails(Constants.panelDetailsList);
         //}
 
-        public static string FindPartNumberFromAssosiatedPartnumbersIfDefined(string[] arrCompPN)
-        {
-            int colCFound, colDFound, colAssoFound, colBYFound;
-            string strPN = string.Empty;
-            for (int pn = 0; pn <= arrCompPN.Length - 1; pn++)
-            {
-                colCFound = modOPCommand.RowOfFoundStringInColOfMDarray(arrCompPN[pn], Constants.arrTableOfLibCatalog, Constants.colLibCatalog_InternalPartNumber - 1);
-                colDFound = modOPCommand.RowOfFoundStringInColOfMDarray(arrCompPN[pn], Constants.arrTableOfLibCatalog, Constants.colLibCatalog_InternalPartNumber - 1);
-                colAssoFound = modOPCommand.RowOfFoundStringInColOfMDarray(arrCompPN[pn], Constants.arrTableOfLibCatalog, Constants.colLibCatalog_Accessory - 1);
-                if (colCFound > 0 && colDFound > 0 && colAssoFound.Equals(0))
-                {
-                    strPN = arrCompPN[pn];
-                    break;
-                }
-            }
-            return strPN;
-        }
+        //public static string FindPartNumberFromAssosiatedPartnumbersIfDefined(string[] arrCompPN)
+        //{
+        //    int colCFound, colDFound, colAssoFound, colBYFound;
+        //    string strPN = string.Empty;
+        //    for (int pn = 0; pn <= arrCompPN.Length - 1; pn++)
+        //    {
+        //        colCFound = modOPCommand.RowOfFoundStringInColOfMDarray(arrCompPN[pn], Constants.arrTableOfLibCatalog, Constants.colLibCatalog_InternalPartNumber - 1);
+        //        colDFound = modOPCommand.RowOfFoundStringInColOfMDarray(arrCompPN[pn], Constants.arrTableOfLibCatalog, Constants.colLibCatalog_InternalPartNumber - 1);
+        //        colAssoFound = modOPCommand.RowOfFoundStringInColOfMDarray(arrCompPN[pn], Constants.arrTableOfLibCatalog, Constants.colLibCatalog_Accessory - 1);
+        //        if (colCFound > 0 && colDFound > 0 && colAssoFound.Equals(0))
+        //        {
+        //            strPN = arrCompPN[pn];
+        //            break;
+        //        }
+        //    }
+        //    return strPN;
+        //}
 
         #region // GatherPanelComponentProperties old code backup - Nov 17,2025
         /* public static void GatherPanelComponentProperties(string panelName)
@@ -1928,648 +2193,379 @@ namespace PanelDrawing.CommonOperations
          }*/
         #endregion
 
-        public static List<PanelComponentProperties> GatherPanelComponentProperties(string panelName)
+        #region // Commented old InitiateStep1 code on 18 november, 2025
+        /*  public static void InitiateStep1()
         {
-           // GatherPanelComponentProperties(panelName);
-            // Clear previous results
-            Constants.panelComponentProperties.Clear();
-
-            // STEP 1: Get all components belonging to panel & having part number
-            var panelComponents = Constants.dataExtractionList
-              //  Constants.dataExtractionListAbove
-                .Where(x => x.Panel == panelName &&
-                            Constants.listComponentsWithPartNumber.Contains(x.ConnectorName))
-                .Select(x => x.ConnectorName)
-                .Distinct()
-                .ToList();
-
-            var GNDcomponents = Constants.dataExtractionList.
-                Where(x =>  x.Panel == panelName && (x.ComponentType == "GND" || x.ComponentType == "GROUND")).Select(x => x.ConnectorName).Distinct().ToList();
-
-            panelComponents.AddRange(GNDcomponents);
-
-            panelComponents = panelComponents.Distinct().ToList();
-
-            foreach (var compName in panelComponents)
+            int Q = 0;
+            int CompXdist = 50;
+            int CompYdist =50;//changed 50 to 100
+            int Xlimit;
+            int Ylimit;
+            int Xcol = 1;
+            int Xcounter = 1;
+            int Ycounter = 1;
+            int secXcol = 1;
+            int secXcounter = 0;
+            int secYcounter = 0;
+            int Noofpin = 1;int spacing =4;//(spacing may be 4 to 6)
+            Constants.processedItems = new List<string>();
+            Constants.remainingItems = new List<string>();
+            Xlimit = (Constants.SheetWidth - 10) / CompXdist; //' -10 to compensate on the title block
+            Ylimit = (Constants.SheetHeight - 10) / CompYdist;
+            for (int Q1 = 0; Q1 <= Constants.arrPanelComponentsProperties.GetLength(0) - 1; Q1++)
             {
-                // STEP 2: Get all DEAbove rows for this component
-                //var compDEAbove = Constants.dataExtractionListAbove  // commented this line on Dec,1 2025
-                var compDEAbove = Constants.dataExtractionList
-                    .Where(x => x.ConnectorName == compName && x.Panel == panelName)
-                    .ToList();
+                string CompDwgName = string.Empty;
+                string CompType = string.Empty;// As String
+                string CBType_Name = string.Empty;// As String
+                string CBType_Voltage = string.Empty;// As String
+                string MacroName = string.Empty;// As String
+                string CompPN = string.Empty;// As String
+                string CompAcc = string.Empty;// As String
+                string CompMaxPin = string.Empty;// As String
+                string SampleEquPinNumber = string.Empty;// As String
+                string GroupId = string.Empty;// As String
+                string Wire_Length = string.Empty;// As String
+                string Wire_Type = string.Empty;// As String
+                string Assosiate_PartNumbers = string.Empty;// As String
+                string Equipment_Box_Info = string.Empty;// As String
+                string Looms_Info = string.Empty;// As String
+                string TERTBK_Shunt_Info = string.Empty;// As String
+                CompXdist = 50;
+                CompYdist = 50;
 
-                // STEP 3: Get associated part numbers
-                var associatedPNs = compDEAbove
-                    .Select(x => x.CoreNumber)     // CoreNumber = PartNumber
-                    .Where(x => !string.IsNullOrEmpty(x)
-                            && (!int.TryParse(x, out int coreNum) || coreNum < 1 || coreNum > 18)) // added extra line on Dec,1 2025
-                    .Distinct()
-                    .ToList();
-
-                // STEP 4: Primary part number
-                string primaryPN = modOPCommand.GetPrimaryPartNumber(associatedPNs);
-
-                // STEP 5: Get extra properties DEBelow
-                var firstDEBelow = Constants.dataExtractionListBelow
-                    .FirstOrDefault(x => x.ConnectorName == compName &&
-                                         x.Panel == panelName);
-
-                string compType = firstDEBelow?.ComponentType ?? "";
-                string samplePin = firstDEBelow?.PinNumber ?? "";
-                string cbTypeName = firstDEBelow?.EquipmentName ?? "";
-                string cbVoltage = firstDEBelow?.Voltage ?? "";
-
-                // STEP 6: Shunts (for TBK/TER)
-                var shuntList = "";
-                if (compType == "TBK" || compType == "TER")
+                CompDwgName = Constants.arrPanelComponentsProperties[Q1, 0];
+                CompType = Constants.arrPanelComponentsProperties[Q1, 1];
+                MacroName = Constants.arrPanelComponentsProperties[Q1, 2];
+                CompMaxPin = Constants.arrPanelComponentsProperties[Q1, 3];
+                CompPN = Constants.arrPanelComponentsProperties[Q1, 4];
+                CompAcc = Constants.arrPanelComponentsProperties[Q1, 5];
+                SampleEquPinNumber = Constants.arrPanelComponentsProperties[Q1, 6];
+                GroupId = Constants.arrPanelComponentsProperties[Q1, 7];
+                Wire_Length = Constants.arrPanelComponentsProperties[Q1, 8];
+                Wire_Type = Constants.arrPanelComponentsProperties[Q1, 9];
+                CBType_Name = Constants.arrPanelComponentsProperties[Q1, 10];
+                CBType_Voltage = Constants.arrPanelComponentsProperties[Q1, 11];
+                Assosiate_PartNumbers = Constants.arrPanelComponentsProperties[Q1, 12];
+                Equipment_Box_Info = Constants.arrPanelComponentsProperties[Q1, 13];
+                Looms_Info = Constants.arrPanelComponentsProperties[Q1, 14];
+                TERTBK_Shunt_Info = Constants.arrPanelComponentsProperties[Q1, 15];
+                //if (MacroName != "")
+                //{
+                if (CompType.ToUpper() == "SPL")
                 {
-                    shuntList = string.Join(";",
-                            Constants.dataExtractionListBelow
-                            .Where(x => x.ConnectorName == compName &&
-                                        !string.IsNullOrEmpty(x.Shunt))
-                            .Select(x => $"{x.ConnectorName},{x.PinNumber},{x.FunctionalDesignation},{x.ComponentType},{x.Shunt}"));
-                }             
-
-                // STEP 7: Get info from Library Catalog
-                var lib = Constants.libCatalogList
-                    .FirstOrDefault(x =>
-                        (x.RefInternal ?? "") == primaryPN ||
-                        (x.MandatoryAccessory1 ?? "") == primaryPN //||
-                       // (x.MandatoryAccessory2 ?? "") == primaryPN
-                    );
-
-                string macroName = lib?.Symbol2D ?? "";
-                string maxPins = lib?.MaxPins ?? "";
-                string accessory = lib?.MandatoryAccessory1 ?? "";
-
-                double CompWidth = lib?.CompWidth ?? 0.0;
-                double CompHeight = lib?.CompHeight ?? 0.0;
-                //string acc2 = lib?.MandatoryAccessory2 ?? "";
-
-                // STEP 8: Equipment Box & Looms
-                string equipInfo = compDEAbove.FirstOrDefault()?.EquipmentName ?? "";
-                string loomsInfo = compDEAbove.FirstOrDefault()?.BundleName ?? "";
-
-                // STEP 9: Construct modern object
-                var compProps = new PanelComponentProperties
+                    if (secYcounter < Ylimit - 1)
+                    {
+                        secYcounter = secYcounter + 1;
+                    }
+                    else
+                    {
+                        secYcounter = 1;
+                        secXcol = secXcol + 1;
+                    }
+                    CompXdist = (Constants.SheetWidth / 8);
+                    CompYdist = (Constants.SheetHeight / 8);
+                    Constants.SPL_Cur_Height_Incre_Count = Constants.SPL_Cur_Height_Incre_Count + 10 - 1;
+                    CompYdist = CompYdist - Constants.SPL_Cur_Height_Incre_Count * 8;//264,230,202Constants.SheetHeight - (Constants.Cur_Height_Count * 50);
+                    Constants.SPL_Cur_Width_Incre_Count = Constants.SPL_Cur_Width_Incre_Count + 30;
+                    CompXdist = CompXdist + Constants.SPL_Cur_Width_Incre_Count;
+                    modOPCommand.AddSymbolSPL(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                }
+                else 
                 {
-                    ComponentName = compName,
-                    ComponentType = compType,
-                    MacroName = macroName,
-                    MaxPin = maxPins,
-                    PartNumber = primaryPN,
-                    Accessory = $"{accessory}",
-                    SamplePin = samplePin,
-                    GroupId = firstDEBelow?.Group ?? "",
-                    WireLength = firstDEBelow?.Length ?? "",
-                    WireType = firstDEBelow?.CableType ?? "",
-                    CBTypeName = cbTypeName,
-                    CBVoltage = cbVoltage,
-                    AssociatedPartNumbers = string.Join(";", associatedPNs),
-                    EquipmentBox = equipInfo,
-                    Looms = loomsInfo,
-                    ShuntList = shuntList,
-                    CompWidth = CompWidth,
-                    CompHeight = CompHeight
-                };
+                    Xcounter = Xcounter + 1;
+                    Ycounter = Ycounter + 1;
+                    frmPanelOri frmpanelori = new frmPanelOri();
+                    switch (CompType.ToUpper()) 
+                    {
+                        case "TCB" or "SCB" ://Circut Breakers
+                            
+                            #region//CB coordinate settings
+                            int T = 0;
+                            if (CompType.Equals("TCB")) { T = 3; }
+                            else if (CompType.Equals("SCB")) { T = 1; }
+                            CompXdist = (Constants.SheetWidth / 8);
+                            CompYdist = Constants.SheetHeight - Constants.CB_Cur_Height_Count - 40;
+                            Constants.CB_Cur_Height_Count = Constants.CB_Cur_Height_Count + (T * 4 + 4 * 6);
+                            #endregion
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            Constants.arrPinsOfEqu = modStandard.PinsOfConnectorToArray(CompDwgName, Constants.arrPanelDetails, 0, 1);
+                            //cbpinsCollection.Length * 4;
+                            
+                            string[] cbpinsTempCollection = new string[T];
+                            cbpinsTempCollection = (from i in Constants.arrPinsOfEqu
+                                                    where (!string.IsNullOrEmpty(i))
+                                                    select i).ToArray();
+                            var cbpinsCollection = cbpinsTempCollection.Distinct().ToArray();
+                            List<string> termsList = new List<string>();
+                            for (int runs = 0; runs <= cbpinsCollection.Length-1; runs++)
+                            {
+                                termsList.Add(cbpinsCollection[runs]);
+                            }
+                            if (termsList.Count < T)
+                            {
+                                for (int r = termsList.Count; r < T; r++)
+                                {
+                                    termsList.Add("*");
+                                }
+                            }
+                            // You can convert it back to an array if you would like to
+                            string[] stetemp = termsList.ToArray();
+                            //cbpinsTempCollection = Constants.arrPinsOfEqu;
+                            
+                            if (cbpinsCollection.Length == 0)
+                            {
+                                MessageBox.Show($"{CompDwgName} Pins Information Not Avaialble,Pls Check Once");
+                                continue;
+                            }
+                                                        
+                            //string[] stetemp = new string[T];
+                            //for (int N1 = 0; N1 <= cbpinsCollection.Length - 1; N1++)//Orig for loop
+                            //{
+                            //    stetemp[N1] = string.IsNullOrEmpty(cbpinsCollection[N1])?"*": cbpinsCollection[N1];
+                            //}
+                            int incre = 0;
+                            for (int N = 0; N <= stetemp.Length - 1; N++)//Orig for loop
+                            {
+                                //decre = decre - 2;
+                                //modOPCommand.CBSeg2(CompXdist - 2, CompYdist+ incre, stetemp[N], Constants.el_ExecFilePath, N);//orig
+                                //modOPCommand.CBSeg2(CompXdist - 2, CompYdist - incre, stetemp[N], Constants.el_ExecFilePath, N);
+                                incre = incre + 6;
+                            }
+                            incre = 0;
+                            for (int N = 0; N <= stetemp.Length - 1; N++)//Orig for loop
+                            {
+                                //decre = decre - 2;
+                                //modOPCommand.CBSeg2(CompXdist+10, CompYdist + incre, stetemp[N], Constants.el_ExecFilePath, N);//orig
+                                //modOPCommand.CBSeg2(CompXdist - 2, CompYdist - incre, stetemp[N], Constants.el_ExecFilePath, N);
+                                incre = incre + 6;
+                            }
+                            //MOD N51 115,255 0,0 :E '1111'; NOP;
+                            modOPCommand.AddCBSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, CBType_Voltage, "Nomegger", Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "TBK" or "TER" ://Terminal Blocks - TER,Junction Module - TBK
+                                                 
+                            Constants.arrPinsOfEqu = modStandard.PinsOfConnectorToArray(CompDwgName, Constants.arrPanelDetails, 0, 1);
+                            string[] tbkpinsCollectionter = new string[Constants.arrPinsOfEqu.Length];
+                            tbkpinsCollectionter = (from i in Constants.arrPinsOfEqu
+                                                    where (!string.IsNullOrEmpty(i))
+                                                    select i).Distinct().ToArray();
+                            
+                            if (tbkpinsCollectionter.Length == 0)
+                            {
+                                MessageBox.Show($"{CompDwgName} Pins Information Not Avaialble,Pls Check Once");
+                                continue;
+                            }
+                            
+                            #region // Coordinate settings
+                            CompXdist = (Constants.SheetWidth / 2);
+                            if (tbkpinsCollectionter.Length - 1 <= 2) Constants.TBK_Height_Temp_Decre_Count = tbkpinsCollectionter.Length * 4;
+                            CompYdist = Constants.SheetHeight - Constants.TBK_Cur_Height_Decre_Count - 24;
+                            Constants.TBK_Cur_Height_Decre_Count = Constants.TBK_Cur_Height_Decre_Count + (tbkpinsCollectionter.Length * 4 + 8 + 4 * 4) + Constants.TBK_Height_Temp_Decre_Count;//41
+                            #endregion
+                            
+                            modOPCommand.AddOOTB_TER_SymbolForTerminal(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, "0", tbkpinsCollectionter, TERTBK_Shunt_Info);
+                            break;
+                        case "SWT"://Switches
 
-                Constants.panelComponentProperties.Add(compProps);
-            }        
-            
-            return Constants.panelComponentProperties;
-        }
+                            #region//Coordinate settings
+                            CompXdist = (Constants.SheetWidth / 6) + Constants.SWT_Cur_Width_Incre_Count;
+                            Constants.SWT_Cur_Width_Incre_Count = Constants.SWT_Cur_Width_Incre_Count + 50;
+                            Constants.SWT_Cur_Height_Decre_Count = Constants.SWT_Cur_Height_Decre_Count + 10 - 1;
+                            CompYdist = Constants.SheetHeight - Constants.SWT_Cur_Height_Decre_Count * 8;
+                            #endregion
 
-        #region //GatherPanelComponentProperties_backup code
-        /* public static void GatherPanelComponentProperties_backup(string panelName)
-         {
-             #region//no of components from arrDEabove  
-             int NumberOfPanelComponents = 0;
-             string strComponentName = string.Empty;
-             int nocomps = (Constants.arrComponentsWithPartNumber).Count(x => !string.IsNullOrEmpty(x));//Remove null from array
-             for (int pancom = 0; pancom <= nocomps - 1; pancom++)
-             {
-                 strComponentName = Constants.arrComponentsWithPartNumber[pancom];
-                 for (int comDEabove = 0; comDEabove <= Constants.arrDEabove.GetLength(0) - 1; comDEabove++)
-                 {
-                     if (Constants.arrDEabove[comDEabove, Constants.colDE_Connector-1].Equals(strComponentName) && Constants.arrDEabove[comDEabove, Constants.colDE_Panels - 1].Equals(panelName))
-                         //if (Constants.arrDEabove[comDEabove, Constants.colDE_Connector - 1].Equals(strComponentName) && Constants.arrDEabove[comDEabove, Constants.colDE_Info - 1].Equals(Constants.info) && Constants.arrDEabove[comDEabove, Constants.colDE_Panels - 1].Equals(panellName))
-                     {
-                         NumberOfPanelComponents = NumberOfPanelComponents + 1;
-                         Debug.Print($" NumberOfPanelComponents {NumberOfPanelComponents.ToString()} - {strComponentName}");
-                         break;
-                     }
-                 }
-             }
-             #endregion
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, CompDwgName);
+                            break;
+                        case "EQU":
+                            string pattern = "[a-hj-np-zA-HJ-NP-Z]";
+                            Constants.arrPinsOfEqu = modStandard.PinsOfConnectorToArray(CompDwgName, Constants.arrPanelDetails, 0, 1);
+                            string[] dtcpinstempCollection = new string[Constants.arrPinsOfEqu.Length];
+                            dtcpinstempCollection = (from i in Constants.arrPinsOfEqu
+                                                    where (!string.IsNullOrEmpty(i))
+                                                    select i).ToArray();
+                            var dtcpinsCollection = dtcpinstempCollection.Distinct().ToArray();
+                            Noofpin = Constants.arrPinsOfEqu.Length;
+                            Ycounter = (Noofpin * spacing) + 2 * 4 + 4;
+                            Xcounter = 17;
+                            Constants.txtEquName = CompDwgName;
+                            frmpanelori.lblEquName.Text = CompDwgName;
 
-             #region
-             int PanelComp = 0;
-             //Commented on Nov 13,2025 due to index outside bounds array getting in
-             //Constants.arrPanelComponentsProperties = new string[NumberOfPanelComponents, Constants.arrPanelComponentsPropertiesMaxCols];
-             Constants.arrPanelComponentsProperties = new string[nocomps, Constants.arrPanelComponentsPropertiesMaxCols];
-             bool IsInPanel = false;
-             string CompPN = string.Empty;
-             string CompType = string.Empty;
-             string CBType_Name = string.Empty;
-             string CBType_Voltage = string.Empty;
-             //colDE_CBType_Voltage
-             string SampleEquPinNumber= string.Empty;
-             string GroupId = string.Empty;
-             string Wire_Length = string.Empty;
-             string Wire_Type = string.Empty;
-             string Equipment_Box_Info = string.Empty;
-             string Looms_Info = string.Empty;
-             #endregion
-             //string TBKTER_Shunt_Value = string.Empty;
-             var finalPnlComps = Constants.arrComponentsWithPartNumber.Distinct().ToArray();
-             Constants.arrComponentsWithPartNumber = finalPnlComps.ToArray();
-             //Define Component Properties for each component which are inside panel
-             for (int rPanCOmpPros = 0; rPanCOmpPros <= nocomps - 1; rPanCOmpPros++)
-             {
-                 #region//Check for The particular component is inside/belongs to the panel or not 
-                 if(string.IsNullOrEmpty(Constants.arrComponentsWithPartNumber[rPanCOmpPros])) continue;
-                 strComponentName = Constants.arrComponentsWithPartNumber[rPanCOmpPros];
-                 for (int comDEabove = 0; comDEabove <= Constants.arrDEabove.GetLength(0) - 1; comDEabove++)
-                 {
-                     if (Constants.arrDEabove[comDEabove, Constants.colDE_Connector - 1].Equals(strComponentName) && Constants.arrDEabove[comDEabove, Constants.colDE_Panels - 1].Equals(panelName))
-                   //if (Constants.arrDEabove[comDEabove, Constants.colDE_Connector - 1].Equals(strComponentName) && Constants.arrDEabove[comDEabove, Constants.colDE_Info - 1].Equals(Constants.info) && Constants.arrDEabove[comDEabove, Constants.colDE_Panels - 1].Equals(panellName))
-                     {
-                         IsInPanel = true;
-                         //NumberOfPanelComponents = NumberOfPanelComponents + 1;
-                         //Debug.Print($" NumberOfPanelComponents {NumberOfPanelComponents.ToString()} - {strComponentName}");
-                         break;
-                     }
-                     *//*else
-                     {
-                         IsInPanel = false;
-                     }*//*
-                 }
-                 #endregion
+                            for (int PDRowUpdateEQU = 0; PDRowUpdateEQU <= Constants.arrPanelDetails.GetLength(0) - 1; PDRowUpdateEQU++)
+                            {
+                                if (Constants.arrPanelDetails[PDRowUpdateEQU, 0].Equals(CompDwgName))
+                                {
+                                    Constants.arrPanelDetails[PDRowUpdateEQU, Constants.colPD_Usage - 1] = SampleEquPinNumber;
+                                    Constants.arrPanelDetails[PDRowUpdateEQU, Constants.colPD_F_Type - 1] = CompType;
+                                    Constants.arrPanelDetails[PDRowUpdateEQU, Constants.colPD_F_GroupId] = GroupId;
+                                    Constants.arrPanelDetails[PDRowUpdateEQU, Constants.colPD_F_Wire_Length - 2] = Wire_Length;
+                                    Constants.arrPanelDetails[PDRowUpdateEQU, Constants.colPD_F_Wire_Type - 1] = Wire_Type;
+                                }
+                            }                            
+                            if (CompDwgName.Contains("_J") || Regex.IsMatch(CompDwgName.Substring(CompDwgName.Length-1), pattern))//Double type connectors
+                            {
+                                #region // Coordinate settings
+                                CompXdist = (Constants.SheetWidth /3);
+                                if (dtcpinsCollection.Length - 1 <= 2) Constants.DTC_Cur_Height_Decre_Count = dtcpinsCollection.Length * 4;
+                                CompYdist = (Constants.SheetHeight/2) - Constants.DTC_Cur_Height_Count;
+                                Constants.DTC_Cur_Height_Count = Constants.DTC_Cur_Height_Count + (dtcpinsCollection.Length * 4 + 8 + 4 * 4) + Constants.DTC_Cur_Height_Decre_Count+10;//41
+                                #endregion
 
-                 if (IsInPanel == false) continue;
-                 int rownum = Constants.temp_rownum;
+                                int startIndex = CompDwgName.IndexOf("_");
+                                string BC_Comp_Nmae_DTC = string.Empty;//Double Connector Component Name with out a(a to z with out i,o) or _J1(1 to 24)
+                                    
+                                if (Constants.remainingItems.Contains(BC_Comp_Nmae_DTC)) continue;
+                                BC_Comp_Nmae_DTC = CompDwgName.Substring(0, startIndex);
+                                modMain.GraLine_DTC(CompXdist, CompYdist, dtcpinsCollection.Length, CompDwgName, dtcpinsCollection, CompPN, Assosiate_PartNumbers, Equipment_Box_Info, BC_Comp_Nmae_DTC); //'CompMaxPin)
+                                if (!Constants.remainingItems.Contains(BC_Comp_Nmae_DTC)) Constants.remainingItems.Add(BC_Comp_Nmae_DTC);
+                            }
+                            else
+                            {
+                                frmpanelori.ShowDialog();
+                                modMain.DrawEquSymbolUsedPins(CompXdist, CompYdist, CompMaxPin, CompDwgName, SampleEquPinNumber, CompPN, frmpanelori, Assosiate_PartNumbers, Equipment_Box_Info, Looms_Info);
+                                frmpanelori.Close();
+                            }
+                            break;
+                        case "DIS"://Break Connectors
+                            Constants.arrPinsOfEqu = modStandard.PinsOfConnectorToArray(CompDwgName, Constants.arrPanelDetails, 0, 1);
+                            string[] dispinstempCollection = new string[Constants.arrPinsOfEqu.Length];
+                            dispinstempCollection = (from i in Constants.arrPinsOfEqu
+                                                    where (!string.IsNullOrEmpty(i))
+                                                    select i).ToArray();
+                            var dispinsCollection = dispinstempCollection.Distinct().ToArray();
+                            if (dispinsCollection.Length == 0)
+                            {
+                                MessageBox.Show($"{CompDwgName} Pins Information Not Avaialble,Pls Check Once");
+                                continue;
+                            }
+                            
+                            for (int PDRowUpdateDIS = 0; PDRowUpdateDIS <= Constants.arrPanelDetails.GetLength(0) - 1; PDRowUpdateDIS++)
+                            {
+                                if (Constants.arrPanelDetails[PDRowUpdateDIS, 0].Equals(CompDwgName))
+                                {
+                                    Constants.arrPanelDetails[PDRowUpdateDIS, Constants.colPD_Usage - 1] = SampleEquPinNumber;
+                                    Constants.arrPanelDetails[PDRowUpdateDIS, Constants.colPD_F_Type - 1] = CompType;
+                                }
+                            }
+                            
+                            #region // Coordinate settings
+                            CompXdist = (Constants.SheetWidth/3);
+                            if (dispinsCollection.Length - 1 <= 2) Constants.DIS_Cur_Height_Decre_Count = dispinsCollection.Length * 4;
+                            CompYdist = Constants.SheetHeight - Constants.DIS_Cur_Height_Count - 24;
+                            Constants.DIS_Cur_Height_Count = Constants.DIS_Cur_Height_Count + (dispinsCollection.Length * 4 + 8 + 4 * 4) + Constants.DIS_Cur_Height_Decre_Count;//41
+                            #endregion
 
-                 #region //Get Part Number from arrDEabove 2D array if the component is in same panel or exist based on IsInPanel is true or false
-                 for (int comDEabove = 0; comDEabove <= Constants.arrDEabove.GetLength(0) - 1; comDEabove++)
-                 {
-                     //Adding properties for Part Numbers
-                     if (Constants.arrDEabove[comDEabove, Constants.colDE_Connector - 1].Equals(strComponentName) && Constants.arrDEabove[comDEabove, Constants.colDE_PartNumber - 1] != "" && Constants.arrDEabove[comDEabove, Constants.colDE_Panels - 1].Equals(panelName))
-                     //if (Constants.arrDEabove[comDEabove, Constants.colDE_Connector - 1].Equals(strComponentName) && Constants.arrDEabove[comDEabove, Constants.colDE_Info - 1].Equals(Constants.info) && Constants.arrDEabove[comDEabove, Constants.colDE_PartNumber - 1] != "" && Constants.arrDEabove[comDEabove, Constants.colDE_Panels - 1].Equals(panellName))
-                     {
-                         #region //The below code search for whether Component Part Number is primary part number for relavent component or assosiate part number,
-                         string sd = modOPCommand.RowOfCountFoundStringInColOfMDarray(strComponentName, Constants.arrDEabove, Constants.colDE_Connector - 1, Constants.colDE_PartNumber - 1, Constants.colDE_Panels - 1);
-                         string[] arrPns = sd.Split(";");
-                         arrPns = arrPns.Distinct().ToArray();
-                         if (arrPns.Length > 1)
-                         {
-                             Constants.strDEPanelaboveAssosiatePNList = string.Empty;
-                             CompPN = modMain.FindPartNumberFromAssosiatedPartnumbersIfDefined(arrPns);
-                             var removePNfromAssoPNList = arrPns.ToList();
-                             removePNfromAssoPNList.Remove(CompPN);
-                             Constants.strDEPanelaboveAssosiatePNList = string.Join(";", removePNfromAssoPNList.ToArray());
-                             Equipment_Box_Info = Constants.arrDEabove[comDEabove, Constants.colDE_EquipmentBox - 1];
-                             Looms_Info = Constants.arrDEabove[comDEabove, Constants.colDE_Looms - 1];
-                         }
-                         else
-                         {
-                             CompPN = Constants.arrDEabove[comDEabove, Constants.colDE_PartNumber - 1];
-                             Equipment_Box_Info = Constants.arrDEabove[comDEabove, Constants.colDE_EquipmentBox - 1];
-                             Looms_Info = Constants.arrDEabove[comDEabove, Constants.colDE_Looms - 1];
-                         }
-                         #endregion
-                         break;
-                     }                    
-                 }
-                     #endregion
+                            modMain.GraLine(CompXdist, CompYdist, dispinsCollection.Length, CompDwgName, dispinsCollection, CompPN, Assosiate_PartNumbers, Equipment_Box_Info); //'CompMaxPin)
 
-                 #region// from arrDBBelow get  CompType,SampleEquPinNumber
-                 for (int comDEbelow = 0; comDEbelow <= Constants.arrDEbelow.GetLength(0) - 1; comDEbelow++)
-                 {
-                      if (Constants.arrDEbelow[comDEbelow, Constants.colDE_Connector - 1].Equals(strComponentName)  
-                        && (Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.cont) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.ind) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.ter) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.tbk) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.bus) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.cnt) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.ant)  || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.dd) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.snr) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.rel) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.spl) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.cb_s) || Constants.arrDEbelow[comDEbelow, Constants.colDE_Info - 1].Substring(0, 4).Equals(Constants.cb_t)) 
-                         && Constants.arrDEbelow[comDEbelow, Constants.colDE_Panels - 1].Equals(panelName)) //&& Constants.arrDEbelow[comDEbelow, Constants.colDE_PartNumber - 1] != "")
-                      {
-                         CompType = Constants.arrDEbelow[comDEbelow, Constants.colDE_Type - 1];
-                         CBType_Name = Constants.arrDEbelow[comDEbelow, Constants.colDE_CBType_Name - 1];
-                         CBType_Voltage = Constants.arrDEbelow[comDEbelow, Constants.colDE_CBType_Voltage - 1];
-                         SampleEquPinNumber = Constants.arrDEbelow[comDEbelow, Constants.colDE_PinNumber - 1];
+                            break;
+                        case "MSW" or "REL":
+                            #region//Coordinate settings
+                            CompXdist = (Constants.SheetWidth / 2) + Constants.RELMSW_Cur_Width_Incre_Count;
+                            Constants.RELMSW_Cur_Width_Incre_Count = Constants.RELMSW_Cur_Width_Incre_Count + 50;
+                            Constants.RELMSW_Cur_Height_Decre_Count = Constants.RELMSW_Cur_Height_Decre_Count + 10 - 1;
+                            CompYdist = (Constants.SheetHeight/2) - Constants.RELMSW_Cur_Height_Decre_Count * 8;
+                            #endregion
 
-                         #region//Adding shunt values for Terminal Block - TER,TBK COMPONENT TYPE
-                         if (CompType.Equals("TBK") || CompType.Equals("TER"))
-                         {                            
-                             for (int shuntDEbelow = 0; shuntDEbelow <= Constants.arrDEbelow.GetLength(0) - 1; shuntDEbelow++)
-                             {
-                                 if (Constants.arrDEbelow[comDEbelow, Constants.colDE_Connector - 1].Equals(strComponentName) && !string.IsNullOrEmpty(Constants.arrDEbelow[shuntDEbelow, Constants.colDE_TBKTER_Shunt_Value - 1]))
-                                 {
-                                     if (string.IsNullOrEmpty(Constants.strDEBelowTERTBK_Shunt_List))
-                                     {
-                                         Constants.strDEBelowTERTBK_Shunt_List = string.Concat(Constants.arrDEbelow[shuntDEbelow, Constants.colDE_Connector - 1], ",", Constants.arrDEbelow[shuntDEbelow, 7], ",", Constants.arrDEbelow[shuntDEbelow, 8], ",", Constants.arrDEbelow[shuntDEbelow, 11], ",", Constants.arrDEbelow[shuntDEbelow, Constants.colDE_TBKTER_Shunt_Value - 1]);
-                                     }
-                                     else
-                                     {
-                                         Constants.strDEBelowTERTBK_Shunt_List = string.Concat(Constants.strDEBelowTERTBK_Shunt_List, ";", string.Concat(Constants.arrDEbelow[shuntDEbelow, Constants.colDE_Connector - 1], ",", Constants.arrDEbelow[shuntDEbelow, 7], ",", Constants.arrDEbelow[shuntDEbelow, 8], ",", Constants.arrDEbelow[shuntDEbelow, 11], ",", Constants.arrDEbelow[shuntDEbelow, Constants.colDE_TBKTER_Shunt_Value - 1]));
-                                     } 
-                                 }
-                             }
-                             for (int shuntDEbelow = 0; shuntDEbelow <= Constants.arrDEabove.GetLength(0) - 1; shuntDEbelow++)
-                             {
-                                 if (Constants.arrDEabove[comDEbelow, Constants.colDE_Connector - 1].Equals(strComponentName) && !string.IsNullOrEmpty(Constants.arrDEabove[shuntDEbelow, Constants.colDE_TBKTER_Shunt_Value - 1]))
-                                 {
-                                     if (string.IsNullOrEmpty(Constants.strDEBelowTERTBK_Shunt_List))
-                                     {
-                                         Constants.strDEBelowTERTBK_Shunt_List = string.Concat(Constants.arrDEabove[shuntDEbelow, Constants.colDE_Connector - 1], ",", Constants.arrDEabove[shuntDEbelow, 7], ",", Constants.arrDEabove[shuntDEbelow, 8], ",", Constants.arrDEbelow[shuntDEbelow, 11], ",", Constants.arrDEabove[shuntDEbelow, Constants.colDE_TBKTER_Shunt_Value - 1]);
-                                     }
-                                     else
-                                     {
-                                         Constants.strDEBelowTERTBK_Shunt_List = string.Concat(Constants.strDEBelowTERTBK_Shunt_List, ";", string.Concat(Constants.arrDEabove[shuntDEbelow, Constants.colDE_Connector - 1], ",", Constants.arrDEabove[shuntDEbelow, 7], ",", Constants.arrDEabove[shuntDEbelow, 8], ",", Constants.arrDEabove[shuntDEbelow, 11], ",", Constants.arrDEabove[shuntDEbelow, Constants.colDE_TBKTER_Shunt_Value - 1]));
-                                     }
-                                 }
-                             }
-                         }
-                         #endregion
-                         break;
-                      }
-                 }
-                 #endregion
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            //modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            //modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "IND":
+                            CompXdist = (Constants.SheetWidth / 6) + Constants.IND_Cur_Width_Incre_Count;
+                            Constants.IND_Cur_Width_Incre_Count = Constants.IND_Cur_Width_Incre_Count + 70;
+                            Constants.IND_Cur_Height_Decre_Count = Constants.IND_Cur_Height_Decre_Count + 10 - 1;
+                            CompYdist = Constants.SheetHeight - Constants.SWT_Cur_Height_Decre_Count * 8 + 10;
 
-                 string CompAcc = string.Empty;
-                 string MacroName = string.Empty;
-                 string CompMaxPin = string.Empty;
-                 string CompDwgName = string.Empty;
-                 CompDwgName = strComponentName;
-                 //To check in accessory column first
-                 rownum = modOPCommand.RowOfFoundStringInColOfMDarray(CompPN, Constants.arrTableOfLibCatalog, Constants.colLibCatalog_Accessory-1);
-                 //If its not there in accessory then in internal part number column
-                 if (rownum == 0) rownum = modOPCommand.RowOfFoundStringInColOfMDarray(CompPN, Constants.arrTableOfLibCatalog, Constants.colLibCatalog_InternalPartNumber-1);
-                 CompPN = Constants.arrTableOfLibCatalog[rownum, Constants.colLibCatalog_InternalPartNumber-1];
-                 CompAcc = Constants.arrTableOfLibCatalog[rownum, Constants.colLibCatalog_Accessory-1];
-                 MacroName = Constants.arrTableOfLibCatalog[rownum, Constants.colLibCatalog_Macro-1];
-                 CompMaxPin = Constants.arrTableOfLibCatalog[rownum, Constants.ColLibCatalog_MaxPin-1];
-
-                 Constants.arrPanelComponentsProperties[PanelComp, 0] = CompDwgName;
-                 Constants.arrPanelComponentsProperties[PanelComp, 1] = CompType;
-                 Constants.arrPanelComponentsProperties[PanelComp, 2] = MacroName;
-                 Constants.arrPanelComponentsProperties[PanelComp, 3] = CompMaxPin;
-                 Constants.arrPanelComponentsProperties[PanelComp, 4] = CompPN;
-                 Constants.arrPanelComponentsProperties[PanelComp, 5] = CompAcc;
-                 Constants.arrPanelComponentsProperties[PanelComp, 6] = SampleEquPinNumber;
-                 Constants.arrPanelComponentsProperties[PanelComp, 7] = GroupId;
-                 Constants.arrPanelComponentsProperties[PanelComp, 8] = Wire_Length;
-                 Constants.arrPanelComponentsProperties[PanelComp, 9] = Wire_Type;
-                 Constants.arrPanelComponentsProperties[PanelComp, 10] = CBType_Name;
-                 Constants.arrPanelComponentsProperties[PanelComp, 11] = CBType_Voltage;
-                 Constants.arrPanelComponentsProperties[PanelComp, 12] = Constants.strDEPanelaboveAssosiatePNList;
-                 Constants.arrPanelComponentsProperties[PanelComp, 13] = Equipment_Box_Info;
-                 Constants.arrPanelComponentsProperties[PanelComp, 14] = Looms_Info;
-                 Constants.arrPanelComponentsProperties[PanelComp, 15] = Constants.strDEBelowTERTBK_Shunt_List;
-
-                 PanelComp = PanelComp + 1;
-                 Constants.strDEPanelaboveAssosiatePNList = string.Empty;
-                 Constants.strDEBelowTERTBK_Shunt_List = string.Empty;
-             }
-         }*/
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "BUS":
+                            CompXdist = (Constants.SheetWidth / 6) + Constants.BUS_Cur_Width_Incre_Count;
+                            Constants.BUS_Cur_Width_Incre_Count = Constants.BUS_Cur_Width_Incre_Count + 80;
+                            Constants.BUS_Cur_Height_Decre_Count = Constants.BUS_Cur_Height_Decre_Count + 10 - 1;
+                            CompYdist = Constants.SheetHeight - Constants.BUS_Cur_Height_Decre_Count * 8 + 30;
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "ANT":
+                            CompXdist = (Constants.SheetWidth / 6) + Constants.ANT_Cur_Width_Incre_Count;
+                            Constants.ANT_Cur_Width_Incre_Count = Constants.ANT_Cur_Width_Incre_Count + 140;
+                            Constants.ANT_Cur_Height_Decre_Count = Constants.ANT_Cur_Height_Decre_Count + 10 - 1;
+                            CompYdist = Constants.SheetHeight - Constants.ANT_Cur_Height_Decre_Count * 8 + 50;
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "DD":
+                            CompXdist = (Constants.SheetWidth / 6) + Constants.DD_Cur_Width_Incre_Count;
+                            Constants.DD_Cur_Width_Incre_Count = Constants.DD_Cur_Width_Incre_Count + 300;
+                            Constants.DD_Cur_Height_Decre_Count = Constants.DD_Cur_Height_Decre_Count + 10 - 1+50;
+                            CompYdist = Constants.SheetHeight - Constants.DD_Cur_Height_Decre_Count * 8;
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "FUS":
+                            CompXdist = (Constants.SheetWidth / 6) + Constants.FUS_Cur_Width_Incre_Count;
+                            Constants.FUS_Cur_Width_Incre_Count = Constants.FUS_Cur_Width_Incre_Count + 400;
+                            Constants.FUS_Cur_Height_Decre_Count = Constants.FUS_Cur_Height_Decre_Count + 10 - 1;
+                            CompYdist = Constants.SheetHeight - Constants.FUS_Cur_Height_Decre_Count * 8 + 100;
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "CNT":
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "SNR":
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "GROUND":
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "ML":
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "ERM" or "EM":
+                            CompXdist = (Constants.SheetWidth / 6) + Constants.ERM_Cur_Width_Incre_Count;
+                            Constants.ERM_Cur_Width_Incre_Count = Constants.ERM_Cur_Width_Incre_Count + 280;
+                            Constants.ERM_Cur_Height_Decre_Count = Constants.ERM_Cur_Height_Decre_Count + 10 - 1;
+                            CompYdist = Constants.SheetHeight - Constants.ERM_Cur_Height_Decre_Count * 8 + 150;
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "LMP":
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "M1" or "M2":
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "TRK":
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        case "NEW":
+                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                            break;
+                        default :
+                            break;
+                }                    
+            }
+                
+                if (CompType.Equals("EQU"))
+                {
+                    CompXdist = CompXdist + Xcounter;
+                    CompYdist = CompYdist + Ycounter - 40;
+                }
+            }
+        }*/
+        #endregion
         #endregion
 
-        #region //Commented old ReadMyData code on 19 november, 2025
-        //public static void ReadMyData(string sMyData_File)
-        //{
-        //    try
-        //    {
-        //        Constants.arr_My_Data = ExcelOperations.ConvertCSVDataInto2DArray(sMyData_File, StringComparer.OrdinalIgnoreCase); //Parsing of My_Data file
-        //        modMain.ReadPanelDetails(); // Parsing of Panel Details file
-        //        AssignOrientation();//Assign AssignOrientation from My_Data file to PD array
-        //        CoordinatesToPDPin();//Assign CoordinatesToPDPin from My_Data file to PD array
-        //        //AssignOrientation();//Assign AssignOrientation from My_Data file to PD array
-        //        DrawWireLine();//Generate Output Command file that is "el_exec" file
-        //        //Parsing of My_Data file & PD file,Assign CoordinatesToPDPin from My_Data file to PD array,Assign AssignOrientation from My_Data file to PD array,DrawWireLine
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Optional: Log or display error
-        //        MessageBox.Show(ex.Message);
-        //        return;
-        //        //Console.WriteLine("Error: " + ex.Message);
-        //    }
-        //}
-        #endregion
-
-        #region //Commented old CoordinatesToPDPin code on 19 november, 2025
-        //public static void CoordinatesToPDPin()
-        //{
-        //    for (int k = 0; k <= Constants.arrPanelDetails.GetLength(0)-1; k++)
-        //    {
-        //        //if (!Constants.arrPanelDetails[k, Constants.colPD_Usage-1].Equals("1"))
-        //       //if (!Constants.arrPanelDetails[k, Constants.colPD_Usage - 1].Equals("1") && Constants.arrPanelDetails[k, Constants.colPD_F_Ori - 1].Equals("L"))
-        //           // {
-        //            bool Tdetails = false;
-        //            bool Fdetails = false;
-
-        //            for (int n = 0; n <= Constants.arr_My_Data.GetLength(0)-1; n++)
-        //            {
-        //                if (!Tdetails &&
-        //                    Constants.arr_My_Data[n, Constants.colMD_Connector - 1] == Constants.arrPanelDetails[k, Constants.colPD_T_Connector - 1] &&
-        //                    Constants.arr_My_Data[n, Constants.colMD_PinNumber - 1] == Constants.arrPanelDetails[k, Constants.colPD_T_Pin - 1] &&
-        //                    //string.Equals(Constants.arr_My_Data[n, Constants.colMD_SheetName - 1], "Panel_Drawing", StringComparison.OrdinalIgnoreCase))
-        //                    string.Equals(Constants.arr_My_Data[n, Constants.colMD_SheetName - 1], Constants.textPanelPartNumber, StringComparison.OrdinalIgnoreCase))
-        //                {
-        //                    Constants.arrPanelDetails[k, Constants.colPD_T_PinX-1] = Constants.arr_My_Data[n, Constants.colMD_PinX-1];
-        //                    Constants.arrPanelDetails[k, Constants.colPD_T_PinY-1] = Constants.arr_My_Data[n, Constants.colMD_PinY-1];
-        //                    Constants.arrPanelDetails[k, Constants.colPD_T_Type-1] = Constants.arr_My_Data[n, Constants.colMD_Type-1];
-
-        //                    int rownumTo = modOPCommand.RowOfFoundStringInColOfMDarray(Constants.arr_My_Data[n, Constants.colMD_PinNumber - 1], Constants.arrPanelDetails, Constants.colPD_F_Pin - 1);
-        //                    Constants.arrPanelDetails[rownumTo, Constants.colPD_Usage - 1] = Constants.arr_My_Data[n, 14];
-        //                    Constants.arrPanelDetails[k, Constants.colPD_Usage - 1] = Constants.arr_My_Data[n, 14];
-
-        //                    Tdetails = true;
-        //                }
-
-        //                if (!Fdetails &&
-        //                    Constants.arr_My_Data[n, Constants.colMD_Connector-1] == Constants.arrPanelDetails[k, Constants.colPD_F_Connector - 1] &&
-        //                    Constants.arr_My_Data[n, Constants.colMD_PinNumber - 1] == Constants.arrPanelDetails[k, Constants.colPD_F_Pin - 1] &&
-        //                    //string.Equals(Constants.arr_My_Data[n, Constants.colMD_SheetName - 1], "Panel_Drawing", StringComparison.OrdinalIgnoreCase))
-        //                    string.Equals(Constants.arr_My_Data[n, Constants.colMD_SheetName - 1], Constants.textPanelPartNumber, StringComparison.OrdinalIgnoreCase))
-        //                    //Panel_Drawing
-        //                {
-        //                    Constants.arrPanelDetails[k, Constants.colPD_F_PinX-1] = Constants.arr_My_Data[n, Constants.colMD_PinX-1];
-        //                    Constants.arrPanelDetails[k, Constants.colPD_F_PinY-1] = Constants.arr_My_Data[n, Constants.colMD_PinY-1];
-        //                    Constants.arrPanelDetails[k, Constants.colPD_F_Type-1] = Constants.arr_My_Data[n, Constants.colMD_Type-1];
-
-        //                    int rownumFrom = modOPCommand.RowOfFoundStringInColOfMDarray(Constants.arr_My_Data[n, Constants.colMD_PinNumber - 1], Constants.arrPanelDetails, Constants.colPD_T_Pin - 1);
-        //                    Constants.arrPanelDetails[rownumFrom, Constants.colPD_Usage - 1] = Constants.arr_My_Data[n, 14];
-        //                    Constants.arrPanelDetails[k, Constants.colPD_Usage - 1] = Constants.arr_My_Data[n,14];
-
-        //                    Fdetails = true;
-        //                }
-
-        //                if (Tdetails && Fdetails)
-        //                {
-        //                    break;
-        //                }
-        //            }
-
-        //            if (Tdetails && Fdetails)
-        //            {
-        //                Constants.arr_My_Data[k, Constants.colPD_Usage - 1] = "1";
-
-        //                //Call function with reversed F and T arguments
-        //                DeactivateRepetitiveConnections(
-        //                    Constants.arr_My_Data[k, Constants.colPD_T_Connector - 1],
-        //                    Constants.arr_My_Data[k, Constants.colPD_T_Pin - 1],
-        //                    Constants.arr_My_Data[k, Constants.colPD_F_Connector - 1],
-        //                    Constants.arr_My_Data[k, Constants.colPD_F_Pin - 1]
-        //                );
-        //            }
-        //        //}
-
-        //        #region//Update PD with GroupId,Wire Length,Wire Type
-        //        int PDrownum = modOPCommand.RowOfFoundStringsInColOfMDarray(Constants.arrPanelDetails[k, Constants.colPD_F_Connector - 1], Constants.arrPanelDetails[k, Constants.colPD_F_Pin - 1], Constants.arrPanelDetails[k, Constants.colPD_WireCode - 1] , Constants.arrDEbelow, Constants.colDE_Connector - 1, Constants.colDE_PinNumber - 1, Constants.colDE_WireCode-1);
-        //        if (PDrownum > -1)
-        //        {
-        //            Constants.arrPanelDetails[k, Constants.colPD_F_GroupId - 1] = Constants.arrDEbelow[PDrownum, Constants.colDE_GroupId - 1];
-        //            Constants.arrPanelDetails[k, Constants.colPD_F_Wire_Length - 1] = Constants.arrDEbelow[PDrownum, Constants.colDE_Wire_Length - 1];
-        //            Constants.arrPanelDetails[k, Constants.colPD_F_Wire_Type - 1] = Constants.arrDEbelow[PDrownum, Constants.colDE_Wire_Type - 1];
-        //            Constants.arrPanelDetails[k, Constants.colPD_F_Wire_Type_Number - 1] = Constants.arrDEbelow[PDrownum, Constants.colDE_PartNumber - 1];
-        //        }
-        //        #endregion
-        //    }
-        //}
-        #endregion
-
-        #region //Commented old DeactivateRepetitiveConnections code on 19 november, 2025
-        //public static void DeactivateRepetitiveConnections(string FC, string FP, string TC, string TP)
-        //{
-        //    for (int k = 0; k <= Constants.arrPanelDetails.GetLength(0)-1; k++)
-        //    {
-        //        if (Constants.arr_My_Data[k, Constants.colPD_F_Connector-1] == FC &&
-        //            Constants.arr_My_Data[k, Constants.colPD_F_Pin-1] == FP &&
-        //            Constants.arr_My_Data[k, Constants.colPD_T_Connector - 1] == TC &&
-        //            Constants.arr_My_Data[k, Constants.colPD_T_Pin-1] == TP)
-        //        {
-        //            Constants.arr_My_Data[k, Constants.colPD_Usage - 1] = "2";
-        //            break;
-        //        }
-        //    }
-        //}
-        #endregion
-
-        #region //Commented old AssignOrientation code on 19 november, 2025
-        //public static void AssignOrientation()
-        //{
-        //    List<string> OriAssignedEQU = new List<string>();
-
-        //    for (int k = 0; k <= Constants.arrPanelDetails.GetLength(0)-1; k++)
-        //    {
-        //        //if (Constants.arrPanelDetails[k, Constants.colPD_Usage-1] == "1")
-        //        //{
-        //            string c1 = Constants.arrPanelDetails[k, Constants.colPD_F_Connector - 1];
-        //            string c2 = Constants.arrPanelDetails[k, Constants.colPD_T_Connector-1];
-        //            string F_Type = Constants.arrPanelDetails[k, Constants.colPD_F_Type - 1];
-        //            string T_Type = Constants.arrPanelDetails[k, Constants.colPD_T_Type-1];
-
-        //        if (F_Type == "EQU")
-        //        {
-        //            Constants.txtEquName = c1;
-        //        }
-
-        //        if (modStandard.SearchAndAppend(Constants.txtEquName, OriAssignedEQU))
-        //        {
-        //            Constants.sPanelEQUori_File = string.Concat(Constants.Electre_Temp_Folder_Path, Constants.textPanelPartNumber, " " + "- " + Constants.txtEquName, " - PanelEquOri.txt");//
-        //            if (!modStandard.ValidateFileSelection(Constants.sPanelEQUori_File))
-        //                {
-        //                    Console.WriteLine($"{Constants.sPanelEQUori_File} - PanelOri file is missing");
-        //                    // Optionally continue or break here
-        //                    continue;
-        //                }
-        //                else
-        //                {
-        //                    try
-        //                    {
-        //                        foreach (string line in File.ReadLines(Constants.sPanelEQUori_File))
-        //                        {
-        //                            string[] arrtemp1 = line.Split(';');
-        //                            if (arrtemp1.Length < 3) continue;
-
-        //                            string pinNumber = arrtemp1[1];
-        //                            string orientation = arrtemp1[2];
-
-        //                            // Assign to F_Ori
-        //                            for (int s = 0; s <= Constants.arrPanelDetails.GetLength(0)-1; s++)
-        //                            {
-        //                            //if (Constants.arrPanelDetails[s, Constants.colPD_F_Connector-1] == Constants.txtEquName &&
-        //                            //    Constants.arrPanelDetails[s, Constants.colPD_F_Pin-1] == pinNumber)
-        //                            if (Constants.arrPanelDetails[s, Constants.colPD_F_Connector - 1].Equals(Constants.txtEquName) && //== Constants.txtEquName &&
-        //                                Constants.arrPanelDetails[s, Constants.colPD_F_Pin - 1].Equals(pinNumber))
-        //                            {
-        //                                Constants.arrPanelDetails[s, Constants.colPD_F_Ori - 1] = orientation;
-        //                                    break;
-        //                                }
-        //                            }
-
-        //                            // Assign to T_Ori
-        //                            for (int t = 0; t <= Constants.arrPanelDetails.GetLength(0)-1; t++)
-        //                            {
-        //                                if (Constants.arrPanelDetails[t, Constants.colPD_T_Connector-1] == Constants.txtEquName &&
-        //                                    Constants.arrPanelDetails[t, Constants.colPD_T_Pin-1] == pinNumber)
-        //                                {
-        //                                Constants.arrPanelDetails[t, Constants.colPD_T_Ori - 1] = orientation;
-        //                                    break;
-        //                                }
-        //                            }
-        //                        }
-        //                    }
-        //                    catch (Exception ex)
-        //                    {
-        //                        Console.WriteLine($"Error reading file: {ex.Message}");
-        //                    }
-        //                }
-        //            }
-        //        //}
-        //    }
-        //}
-        #endregion
-
-        #region //Commented old DrawWireLine code on 19 november, 2025
-        //public static void DrawWireLine()
-        //{
-        //    double X1=0, Y1=0, X2=0, Y2=0;
-        //    string c1 = string.Empty, c2 = string.Empty;
-        //    string F_Type = string.Empty, T_Type = string.Empty;
-        //    string F_Ori = string.Empty, T_Ori = string.Empty;
-        //    string WireCode = string.Empty,GroupId = string.Empty,Wire_Length = string.Empty, Wire_Type = string.Empty, Wire_Type_Number = string.Empty, strPin = string.Empty;
-        //    Constants.lst_WireCodes_Info_Processed = new List<string>();
-        //    // Write to file or console as in VB6: Print #1, "GRID 1,1 ;"
-        //    // Assuming output is redirected to a file or console here:
-        //    //Console.WriteLine("GRID 2.0,2 ;");
-        //    using (writer = File.AppendText(Constants.el_ExecFilePath))
-        //    {
-        //        //writer.WriteLine("GRID 2.0,2 ;");//, Constants.arrPanelDetails.GetLength(0)));
-        //    }
-
-        //    //int totalcount = Constants.arrPanelDetails.GetLength(0);
-        //    //int totalcount = Constants.arrPanelDetails.GetLength(0) / 2;
-        //    //var f = Constants.arrPanelDetails.
-        //    //for (int k = 0; k <= 1; k++)
-        //    for (int k = 0; k <= Constants.arrPanelDetails.GetLength(0) - 1; k++)
-        //    {
-        //        //if (!Constants.arrPanelDetails[k, Constants.colPD_Usage-1].Equals(strPin))
-        //        //{
-        //            if (string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_F_PinX - 1])) continue;
-        //            if (string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_F_PinY - 1])) continue;
-        //            if (string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_T_PinX - 1])) continue;
-        //            if (string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_T_PinY - 1])) continue;
-        //        X1 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_F_PinX - 1]);
-        //        //Convert.ToDouble(string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_F_PinX-1])?0:Constants.arrPanelDetails[k, Constants.colPD_F_PinX - 1]);
-        //        Y1 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_F_PinY - 1]); 
-        //        //Convert.ToDouble(string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_F_PinY-1])?0:Constants.arrPanelDetails[k, Constants.colPD_F_PinY - 1]);
-        //            X2 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_T_PinX - 1]);
-        //        //Convert.ToDouble(string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_T_PinX-1])?0:Constants.arrPanelDetails[k, Constants.colPD_T_PinX - 1]);
-        //        Y2 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_T_PinY - 1]);
-        //        //Convert.ToDouble(string.IsNullOrEmpty(Constants.arrPanelDetails[k, Constants.colPD_T_PinY-1])?0:Constants.arrPanelDetails[k, Constants.colPD_T_PinY - 1]);
-        //                                                                                        //Y1 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_F_PinY-1]);
-        //                                                                                        //X2 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_T_PinX - 1]);
-        //                                                                                        //Y2 = Convert.ToDouble(Constants.arrPanelDetails[k, Constants.colPD_T_PinY-1]);
-        //            c1 = Constants.arrPanelDetails[k, Constants.colPD_F_Connector-1];
-        //            c2 = Constants.arrPanelDetails[k, Constants.colPD_T_Connector - 1];
-        //            F_Type = Constants.arrPanelDetails[k, Constants.colPD_F_Type-1];
-        //            T_Type = Constants.arrPanelDetails[k, Constants.colPD_T_Type - 1];
-        //            WireCode = Constants.arrPanelDetails[k, Constants.colPD_WireCode-1];
-        //            F_Ori = Constants.arrPanelDetails[k, Constants.colPD_F_Ori - 1];
-        //            T_Ori = Constants.arrPanelDetails[k, Constants.colPD_T_Ori-1];
-        //            strPin = Constants.arrPanelDetails[k, Constants.colPD_Usage - 1];
-        //            GroupId = Constants.arrPanelDetails[k, Constants.colPD_F_GroupId-1];
-        //            Wire_Length = Constants.arrPanelDetails[k, Constants.colPD_F_Wire_Length - 1];
-        //            Wire_Type = Constants.arrPanelDetails[k, Constants.colPD_F_Wire_Type - 1];
-        //            Wire_Type_Number = Constants.arrPanelDetails[k, Constants.colPD_F_Wire_Type_Number - 1];
-
-        //            if (k == 33)
-        //            {
-        //                Console.WriteLine("J1 check");
-        //            }
-        //        if (X1 < X2)
-        //        {
-        //            ConnectionRequired(X1, Y1, X2, Y2, c1, c2, WireCode, F_Type, T_Type, F_Ori, T_Ori, GroupId, Wire_Length, Wire_Type, Wire_Type_Number);
-        //        }
-        //    }
-        //    //}
-        //}
-        #endregion
-
-        #region //Commented old ConnectionRequired code on 19 november, 2025
-        //private static void ConnectionRequired(double p1x, double p1y, double p2x, double p2y,string c1, string c2, string wCode, string iF_Type, string iT_Type,string iF_Ori, string iT_Ori,string groupId,string wire_Length,string wire_Type, string wire_Type_Core_Number)
-        //{
-        //    string gauge = string.Empty;
-        //    string wire_code = string.Empty;
-        //    string wire_code_with_gauge = string.Empty;
-
-        //    // Split WCode into code and gauge
-        //    var arrTemp = wCode.Split('/');
-        //    wire_code = arrTemp[0];
-        //    gauge = arrTemp.Length > 1 ? arrTemp[1] : "";
-        //    wire_code_with_gauge = string.Concat(wire_code, "/", gauge);
-        //    //wire_code_with_gauge = string.Concat(arrTemp[0], "/", arrTemp[1]);
-        //    //Constants.lst_WireCodes_Info.Add();
-        //    //if (!Constants.lst_WireCodes_Info_Processed.Contains(wire_code))
-        //    //    Constants.lst_WireCodes_Info_Processed.Add(wire_code);
-        //    //else { //return;
-        //    //       }
-        //    // Check if it's a straight line
-        //    if (p1y == p2y)
-        //        //if (p1x == p2x || p1y == p2y)
-        //    {
-        //        if (c1 == c2 && p1x == p2x)
-        //        {
-        //            // Do nothing - overlapping wire scenario
-        //        }
-        //        else
-        //        {
-        //            //if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00") || wire_code.StartsWith("SS"))
-        //            if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00") || wire_code.StartsWith("SS") || wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))//coax,sth_coax,triax,sth_triax
-        //                modOPCommand.Simple2PointConnection_Mono_StraightLine(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId,wire_Length, wire_Type, wire_Type_Core_Number);
-        //            else if (wire_Type.Equals("TP") || wire_Type.Equals("QUADRAX"))//Quadrax,sth_quadrax4
-        //                modOPCommand.Simple2PointConnection_TP_StraightLine(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
-        //            else if (wire_Type.Equals("STP"))
-        //                modOPCommand.Simple2PointConnection_STP_StraightLine(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
-        //            else { }
-
-        //        }
-        //    }
-        //    else
-        //    {
-        //        if ((iF_Ori == "T" || iF_Ori == "B") || (iT_Ori == "T" || iT_Ori == "B"))
-        //        {
-        //            //modOPCommand.Simple3PointConnection(p1x + 4, p1y, p2x + 4, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, iF_Ori, iT_Ori);
-        //        }
-        //        else//Z LINE
-        //        {
-        //            modOPCommand.Simple4PointConnection_ZLine_Optimized(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
-        //            #region//B4 Code Optimized
-        //            ////if (wire_code.StartsWith("S") || wire_code.StartsWith("SS"))
-        //            //if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00") || wire_code.StartsWith("SS") || wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))//coax,sth_coax,triax,sth_triax
-        //            //    modOPCommand.Simple4PointConnection_Mono_ZLine(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
-        //            //else if (wire_Type.Equals("TP") || wire_Type.Equals("QUADRAX"))//Quadrax,sth_quadrax4
-        //            //    modOPCommand.Simple4PointConnection_TP_ZLine(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
-        //            //else if (wire_Type.Equals("STP"))
-        //            //    modOPCommand.Simple4PointConnection_STP_ZLine(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
-        //            //else { }
-        //            #endregion
-        //        }
-        //    }
-        //}
-        #endregion
-
-        public static void ExitOutputFile(string filepath)
-        {
-            using (var writer  = File.AppendText(filepath))
-            {
-                writer.WriteLine("GRI ELECTRE_GRID_STH;");
-                writer.WriteLine("FOPEN (TYC+FEXEC+TYC);");
-                writer.WriteLine("FWRITE (TYC+';;'+TYC) ;");
-                writer.WriteLine("FCLOSE;");
-                writer.WriteLine("NOP;");
-                writer.WriteLine(";");
-               // writer.Close();
-            }        
-        }
     }
 }
 

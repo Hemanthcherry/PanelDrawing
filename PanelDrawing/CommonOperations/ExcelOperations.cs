@@ -22,12 +22,12 @@ namespace PanelDrawing.CommonOperations
         }
 
         //Excel CSV file data convert into 2D Array structure
-        public static string[,] ConvertCSVDataInto2DArray(string csvFilePath, StringComparer ordinalIgnoreCase)
-        {
-            string[] strArrayCSV = ReadExcelFile(csvFilePath).ToArray();
-            string [,] data = CommonOperation.Conver1DArrayto2DArray(strArrayCSV,Path.GetFileName(csvFilePath));
-            return data;
-        }        
+        //public static string[,] ConvertCSVDataInto2DArray(string csvFilePath, StringComparer ordinalIgnoreCase)
+        //{
+        //    string[] strArrayCSV = ReadExcelFile(csvFilePath).ToArray();
+        //    string [,] data = CommonOperation.Conver1DArrayto2DArray(strArrayCSV,Path.GetFileName(csvFilePath));
+        //    return data;
+        //}        
 
     }
 }

@@ -25,49 +25,7 @@ namespace PanelDrawing.CommonOperations
             list.Add(istrName);
             return true;
         }
-
-        // Code Added by Anil
-        /* public static string[] PinsOfConnectorToArray(string istr, string[,] iSearcharr, int iSearchCol, int iOPCol)
-        {
-            int T;
-            int X;
-            X = 0;
-            string[] temp = new string[iSearcharr.GetLength(0)];
-            for (T = 0; T <= iSearcharr.GetLength(0) - 1; T++)
-            {
-                if (iSearcharr[T, iSearchCol].Trim() == istr.Trim())
-                {
-                    temp[X] = iSearcharr[T, iOPCol];
-                    X = X + 1;
-                }
-            }
-            return temp;
-        }*/
-
-        // Code Added by Hemanth on 24-09-2025
-        /* public static string[] PinsOfConnectorToArray(string istr, string[,] iSearcharr, int iSearchCol, int iOPCol)
-        {
-            int T;
-            int X;
-            X = 0;
-            string[] temp = new string[iSearcharr.GetLength(0)];
-
-            for (T = 0; T <= iSearcharr.GetLength(0) - 1; T++)
-            {
-                if (iSearcharr[T, iSearchCol].Trim() == istr.Trim())
-                {
-                    temp[X] = iSearcharr[T, iOPCol];
-                    X = X + 1;
-                }
-                else if (iSearcharr[T, 2].Trim() == istr.Trim())
-                {
-                    temp[X] = iSearcharr[T, 3];
-                    X = X + 1;
-                }
-            }
-            return temp;
-        }*/
-
+      
         public static string[] PinsOfConnector(string connector)
         {
             if (string.IsNullOrWhiteSpace(connector))
@@ -106,6 +64,8 @@ namespace PanelDrawing.CommonOperations
 
             return list;
         }
+
+        #region // Commented old code on Jan 27, 2026
 
         #region //Commented old PinsOfConnectorToArray code on 18 november, 2025
         //public static string[] PinsOfConnectorToArray(string istr, string[,] iSearcharr, int iSearchCol, int iOPCol)
@@ -156,17 +116,59 @@ namespace PanelDrawing.CommonOperations
         //}
         #endregion
 
-        public static int RowOfFoundStringIn1Darray(string searchStr, string[] array)
+        //public static int RowOfFoundStringIn1Darray(string searchStr, string[] array)
+        //{
+        //    for (int i = 0; i < array.Length; i++)
+        //    {
+        //        if (array[i] == searchStr)
+        //        {
+        //            return i; // Use i + 1 if you want to keep VB6's 1-based index behavior
+        //        }
+        //    }
+        //    return 0;
+        //}
+
+        // Code Added by Anil
+        /* public static string[] PinsOfConnectorToArray(string istr, string[,] iSearcharr, int iSearchCol, int iOPCol)
         {
-            for (int i = 0; i < array.Length; i++)
+            int T;
+            int X;
+            X = 0;
+            string[] temp = new string[iSearcharr.GetLength(0)];
+            for (T = 0; T <= iSearcharr.GetLength(0) - 1; T++)
             {
-                if (array[i] == searchStr)
+                if (iSearcharr[T, iSearchCol].Trim() == istr.Trim())
                 {
-                    return i; // Use i + 1 if you want to keep VB6's 1-based index behavior
+                    temp[X] = iSearcharr[T, iOPCol];
+                    X = X + 1;
                 }
             }
-            return 0;
-        }
+            return temp;
+        }*/
 
+        // Code Added by Hemanth on 24-09-2025
+        /* public static string[] PinsOfConnectorToArray(string istr, string[,] iSearcharr, int iSearchCol, int iOPCol)
+        {
+            int T;
+            int X;
+            X = 0;
+            string[] temp = new string[iSearcharr.GetLength(0)];
+
+            for (T = 0; T <= iSearcharr.GetLength(0) - 1; T++)
+            {
+                if (iSearcharr[T, iSearchCol].Trim() == istr.Trim())
+                {
+                    temp[X] = iSearcharr[T, iOPCol];
+                    X = X + 1;
+                }
+                else if (iSearcharr[T, 2].Trim() == istr.Trim())
+                {
+                    temp[X] = iSearcharr[T, 3];
+                    X = X + 1;
+                }
+            }
+            return temp;
+        }*/
+        #endregion
     }
 }

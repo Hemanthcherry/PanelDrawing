@@ -83,7 +83,6 @@ namespace PanelDrawing.Services.P1
             Constants.processedItems.Add(baseConnectorName);
         }
 
-
         public static void EquSeg1(double X0, double Y0, string filePath, string strDISOrientation)
         {
             using (var writer = File.AppendText(filePath))

@@ -156,28 +156,7 @@ namespace PanelDrawing.Services.P1
                     }
                 }               
             }
-        }
-
-        #region //Commented DisSeg2 on Dec 8, 2025
-        //public static void DisSeg2_OLD(double X0, double Y0, string N, string filePath, string Ori)
-        //{
-        //    using (var writer = File.AppendText(filePath))
-        //    {
-        //        if (Ori.Equals("L"))
-        //        {
-        //            writer.WriteLine($"ADD Cont_sth_mg_hal {X0},{Y0};");//oRIG
-        //            writer.WriteLine($"MOD N51 {X0 + 0.8},{Y0} 0,0 :E '{N}'; NOP;");
-        //            writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0},{Y0} :T4320 {X0},{Y0 - 2};NOP;");
-        //        }
-        //        if (Ori.Equals("R"))//Right Side Pins
-        //        {
-        //            writer.WriteLine($"ADD contact_sth_receptacle {X0 + 10},{Y0};");
-        //            writer.WriteLine($"MOD N254 {X0 + 11 - 2.5},{Y0} 0,0 :E '{N}'; NOP;");
-        //            writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0 + 10},{Y0 - 2} :T4320 {X0 + 10},{Y0 - 2};NOP;");
-        //        }
-        //    }
-        //}
-        #endregion
+        }   
 
         public static void DisSeg3(double X0, double Y0, double L, string filePath, string strOri)
         {
@@ -198,51 +177,7 @@ namespace PanelDrawing.Services.P1
                     writer.WriteLine($"ADD L214 {X0 + 10 + 10},{Y0} {X0 + 10 + 10},{Y0 + L}; ; ; ; NOP;");
                 }
             }
-        }
-
-        #region //Commented DisSeg4 on Dec 8, 2025
-        //public static void DisSeg4_OLD(double LL_x, double LL_y, double UR_x, double UR_y, string CompNmae, string filePath, string Ori, string partnumber, string assoPNs)
-        //{
-        //    //double w = 6;   // Width
-        //    // double O = 4;   // Offset
-        //    using (var writer = File.AppendText(filePath))
-        //    {
-        //        if (Ori.Equals("L"))
-        //        {
-        //            writer.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 4},{UR_y + 4 + 4} ;");
-        //            writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3},{LL_y - 30 - 48 + 8 + 8 + 2} '{CompNmae}' {UR_x + 4 - 8},{UR_y + 4 - 6 - 12 + 8 + 8 + 2};");
-        //            writer.WriteLine($"ADD N253 '{CompNmae}' {LL_x + 2},{LL_y + 3} :F1.0 :T1001 :D;;NOP;");
-        //            writer.WriteLine($"ADD N52 '{partnumber}' {LL_x + 2},{LL_y} :F1.0;;NOP;");
-        //            writer.WriteLine($"MOD N52 {LL_x + 2},{LL_y} 0,0 :E '{partnumber}';NOP;");
-        //            //Included Assosiate PartNumbers for Break Connectors Family
-        //            if (!string.IsNullOrEmpty(assoPNs))
-        //            {
-        //                int decre = 0;
-        //                string[] arrassopns = assoPNs.Split(";");
-        //                for (int assopns = 0; assopns <= arrassopns.Length - 1; assopns++)
-        //                {
-        //                    string associatePartNumber = arrassopns[assopns];
-        //                    if (partnumber != associatePartNumber)
-        //                    {
-        //                        decre = decre + 4;
-        //                        writer.WriteLine($"ADD N52 '{arrassopns[assopns]}' {LL_x + 2 + 3},{LL_y - decre} :F1.0;;NOP;");
-        //                    }
-        //                }
-        //            }
-        //            writer.WriteLine($"ADD N255 'N' {LL_x + 2},{LL_y - 3} :F1.0 :T4326 :D;;NOP;");
-        //        }
-        //        if (Ori.Equals("R"))
-        //        {
-        //            writer.WriteLine($"ADD R254  {LL_x - 4 + 10},{LL_y} {UR_x + 4 + 10},{UR_y + 4 + 4} ;");
-        //            writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3},{LL_y - 30 - 48 + 8 + 8 + 2} '{CompNmae}' {UR_x + 4 + 8 - 4 - 2},{UR_y + 4 - 6 - 12 + 8 + 8 + 2};");
-        //            writer.WriteLine($"ADD N253 '{CompNmae}' {LL_x + 2 + 9},{LL_y + 3} :F1.0 :T1001 :D;;NOP;");
-        //            writer.WriteLine($"ADD N52 '{partnumber}' {LL_x + 2 + 9},{LL_y} :F1.0;;NOP;");
-        //            writer.WriteLine($"MOD N52 {LL_x + 2 + 9},{LL_y} 0,0 :E '{partnumber}';NOP;");
-        //            writer.WriteLine($"ADD N255 'N' {LL_x + 2 + 9},{LL_y - 3} :F1.0 :T4326 :D;;NOP;");
-        //        }
-        //    }
-        //}
-        #endregion
+        }    
 
         public static void DisSeg4(double LL_x, double LL_y, double UR_x, double UR_y, string CompName, string filePath, string Ori, string partnumber, string assoPNs,string BaseName)
         {
@@ -371,6 +306,7 @@ namespace PanelDrawing.Services.P1
                 }
             }
         }
+
         public static void DisSeg5(double X0, double Y0, string filePath, string strOri)
         {
             using (var writer = File.AppendText(filePath))
@@ -387,6 +323,7 @@ namespace PanelDrawing.Services.P1
                 }
             }
         }
+
         public static void DISSegEquipmentBox(double LL_x, double LL_y, double UR_x, double UR_y, string iEquName, string Ori, string filePath)
         {
            // double w = 6;   // Width
@@ -407,5 +344,71 @@ namespace PanelDrawing.Services.P1
 
             }
         }
+
+
+        #region //Commented DisSeg2 on Dec 8, 2025
+        //public static void DisSeg2_OLD(double X0, double Y0, string N, string filePath, string Ori)
+        //{
+        //    using (var writer = File.AppendText(filePath))
+        //    {
+        //        if (Ori.Equals("L"))
+        //        {
+        //            writer.WriteLine($"ADD Cont_sth_mg_hal {X0},{Y0};");//oRIG
+        //            writer.WriteLine($"MOD N51 {X0 + 0.8},{Y0} 0,0 :E '{N}'; NOP;");
+        //            writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0},{Y0} :T4320 {X0},{Y0 - 2};NOP;");
+        //        }
+        //        if (Ori.Equals("R"))//Right Side Pins
+        //        {
+        //            writer.WriteLine($"ADD contact_sth_receptacle {X0 + 10},{Y0};");
+        //            writer.WriteLine($"MOD N254 {X0 + 11 - 2.5},{Y0} 0,0 :E '{N}'; NOP;");
+        //            writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0 + 10},{Y0 - 2} :T4320 {X0 + 10},{Y0 - 2};NOP;");
+        //        }
+        //    }
+        //}
+        #endregion
+
+        #region //Commented DisSeg4 on Dec 8, 2025
+        //public static void DisSeg4_OLD(double LL_x, double LL_y, double UR_x, double UR_y, string CompNmae, string filePath, string Ori, string partnumber, string assoPNs)
+        //{
+        //    //double w = 6;   // Width
+        //    // double O = 4;   // Offset
+        //    using (var writer = File.AppendText(filePath))
+        //    {
+        //        if (Ori.Equals("L"))
+        //        {
+        //            writer.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 4},{UR_y + 4 + 4} ;");
+        //            writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3},{LL_y - 30 - 48 + 8 + 8 + 2} '{CompNmae}' {UR_x + 4 - 8},{UR_y + 4 - 6 - 12 + 8 + 8 + 2};");
+        //            writer.WriteLine($"ADD N253 '{CompNmae}' {LL_x + 2},{LL_y + 3} :F1.0 :T1001 :D;;NOP;");
+        //            writer.WriteLine($"ADD N52 '{partnumber}' {LL_x + 2},{LL_y} :F1.0;;NOP;");
+        //            writer.WriteLine($"MOD N52 {LL_x + 2},{LL_y} 0,0 :E '{partnumber}';NOP;");
+        //            //Included Assosiate PartNumbers for Break Connectors Family
+        //            if (!string.IsNullOrEmpty(assoPNs))
+        //            {
+        //                int decre = 0;
+        //                string[] arrassopns = assoPNs.Split(";");
+        //                for (int assopns = 0; assopns <= arrassopns.Length - 1; assopns++)
+        //                {
+        //                    string associatePartNumber = arrassopns[assopns];
+        //                    if (partnumber != associatePartNumber)
+        //                    {
+        //                        decre = decre + 4;
+        //                        writer.WriteLine($"ADD N52 '{arrassopns[assopns]}' {LL_x + 2 + 3},{LL_y - decre} :F1.0;;NOP;");
+        //                    }
+        //                }
+        //            }
+        //            writer.WriteLine($"ADD N255 'N' {LL_x + 2},{LL_y - 3} :F1.0 :T4326 :D;;NOP;");
+        //        }
+        //        if (Ori.Equals("R"))
+        //        {
+        //            writer.WriteLine($"ADD R254  {LL_x - 4 + 10},{LL_y} {UR_x + 4 + 10},{UR_y + 4 + 4} ;");
+        //            writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3},{LL_y - 30 - 48 + 8 + 8 + 2} '{CompNmae}' {UR_x + 4 + 8 - 4 - 2},{UR_y + 4 - 6 - 12 + 8 + 8 + 2};");
+        //            writer.WriteLine($"ADD N253 '{CompNmae}' {LL_x + 2 + 9},{LL_y + 3} :F1.0 :T1001 :D;;NOP;");
+        //            writer.WriteLine($"ADD N52 '{partnumber}' {LL_x + 2 + 9},{LL_y} :F1.0;;NOP;");
+        //            writer.WriteLine($"MOD N52 {LL_x + 2 + 9},{LL_y} 0,0 :E '{partnumber}';NOP;");
+        //            writer.WriteLine($"ADD N255 'N' {LL_x + 2 + 9},{LL_y - 3} :F1.0 :T4326 :D;;NOP;");
+        //        }
+        //    }
+        //}
+        #endregion
     }
 }

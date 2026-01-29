@@ -82,10 +82,10 @@ namespace Panel_Drawing.Forms
             }
         }
 
-        private DataGridView GetGrdOriInfo()
-        {
-            return grdOriInfo;
-        }
+        //private DataGridView GetGrdOriInfo()
+        //{
+        //    return grdOriInfo;
+        //}
 
         private void cmdOK_Click(object sender, EventArgs e)
         {

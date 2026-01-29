@@ -13,7 +13,6 @@ namespace PanelDrawing.CommonOperations
 {
     public class modOPCommand
     {
-        //'Puting into seperate Panel Project
         public static void NewSheetWithTB(string el_Execfilpath, string pnlnum, string strnum, string SheetTemplateName)
         {
             //FileStream fileStream = new FileStream(el_ExecfilePath, FileMode.OpenOrCreate, FileAccess.Write);
@@ -112,100 +111,7 @@ namespace PanelDrawing.CommonOperations
                 writer.WriteLine($"MOD N53 {X0 - 10},{tempY0 - 16} {X0 - 10},{tempY0 - 16} STOR_MID :E 'RR' {X0 - 10},{tempY0 - 16} JU ;");
                 writer.WriteLine($"MOD N10 {X0 - 10},{tempY0 - 16} {X0 - 10},{tempY0 - 16} STOR_MID :E 'D' {X0 - 10},{tempY0 - 16} JU");
             }
-        }
-
-        public static List<PanelComponentProperties> GatherPanelComponentProperties1(string panelName)
-        {
-            // Clear previous results
-            Constants.panelComponentProperties.Clear();
-
-            // STEP 1: Get all components belonging to panel & having part number
-            var panelComponents =
-                Constants.dataExtractionListAbove
-                .Where(x => x.Panel == panelName &&
-                            Constants.listComponentsWithPartNumber.Contains(x.ConnectorName))
-                .Select(x => x.ConnectorName)
-                .Distinct()
-                .ToList();
-
-            foreach (var compName in panelComponents)
-            {
-                // STEP 2: Get all DEAbove rows for this component
-                var compDEAbove = Constants.dataExtractionListAbove
-                    .Where(x => x.ConnectorName == compName && x.Panel == panelName)
-                    .ToList();
-
-                // STEP 3: Get associated part numbers
-                var associatedPNs = compDEAbove
-                    .Select(x => x.CoreNumber)     // CoreNumber = PartNumber
-                    .Where(x => !string.IsNullOrEmpty(x))
-                    .Distinct()
-                    .ToList();
-
-                // STEP 4: Primary part number
-                string primaryPN = modOPCommand.GetPrimaryPartNumber(associatedPNs);
-
-                // STEP 5: Get extra properties DEBelow
-                var firstDEBelow = Constants.dataExtractionListBelow
-                    .FirstOrDefault(x => x.ConnectorName == compName &&
-                                         x.Panel == panelName);
-
-                string compType = firstDEBelow?.ComponentType ?? "";
-                string samplePin = firstDEBelow?.PinNumber ?? "";
-                string cbTypeName = firstDEBelow?.Tag4 ?? "";
-                string cbVoltage = firstDEBelow?.Tag5 ?? "";
-
-                // STEP 6: Shunts (for TBK/TER)
-                string shuntList = string.Join(";",
-                    Constants.dataExtractionListBelow
-                    .Where(x => x.ConnectorName == compName &&
-                                !string.IsNullOrEmpty(x.Shunt))
-                    .Select(x => $"{x.ConnectorName},{x.PinNumber},{x.FunctionalDesignation},{x.ComponentType},{x.Shunt}")
-                );
-
-                // STEP 7: Get info from Library Catalog
-                var lib = Constants.libCatalogList
-                    .FirstOrDefault(x =>
-                        (x.RefInternal ?? "") == primaryPN ||
-                        (x.MandatoryAccessory1 ?? "") == primaryPN ||
-                        (x.MandatoryAccessory2 ?? "") == primaryPN
-                    );
-
-                string macroName = lib?.Symbol2D ?? "";
-                string maxPins = lib?.MaxPins ?? "";
-                string accessory = lib?.MandatoryAccessory1 ?? "";
-                string acc2 = lib?.MandatoryAccessory2 ?? "";
-
-                // STEP 8: Equipment Box & Looms
-                string equipInfo = compDEAbove.FirstOrDefault()?.EquipmentName ?? "";
-                string loomsInfo = compDEAbove.FirstOrDefault()?.BundleName ?? "";
-
-                // STEP 9: Construct modern object
-                var compProps = new PanelComponentProperties
-                {
-                    ComponentName = compName,
-                    ComponentType = compType,
-                    MacroName = macroName,
-                    MaxPin = maxPins,
-                    PartNumber = primaryPN,
-                    Accessory = $"{accessory};{acc2}",
-                    SamplePin = samplePin,
-                    GroupId = firstDEBelow?.Group ?? "",
-                    WireLength = firstDEBelow?.Length ?? "",
-                    WireType = firstDEBelow?.CableType ?? "",
-                    CBTypeName = cbTypeName,
-                    CBVoltage = cbVoltage,
-                    AssociatedPartNumbers = string.Join(";", associatedPNs),
-                    EquipmentBox = equipInfo,
-                    Looms = loomsInfo,
-                    ShuntList = shuntList
-                };
-
-                Constants.panelComponentProperties.Add(compProps);
-            }
-
-            return Constants.panelComponentProperties;
-        }
+        } 
 
         public static void AddOOTB_TER_SymbolForTerminal(string iConnectorNameForComment, double X0, double Y0, string iPartNumber, string el_Execfilpath,string IROT, string[] arrPin,string temp_TERTBK_Shunt_info)  //'Symbolname is Macroname
         {
@@ -254,26 +160,6 @@ namespace PanelDrawing.CommonOperations
             }
         }
 
-        public static int RowOfFoundStringInColOfMDarray(string CompPN, string[,] Temp_arrTableOfLibCatalog, int colnum)
-        {
-            int rownumFound = 0;
-            for (int rownum = 0; rownum <= Temp_arrTableOfLibCatalog.GetLength(0) - 1; rownum++)
-            {
-                //string strsub = CompPN.Substring(0).Trim();
-                if (Temp_arrTableOfLibCatalog[rownum, colnum].Trim().Contains(CompPN.Trim()))
-                {
-                    rownumFound = rownum;
-                    break;
-                }
-               /* else
-                {
-                    rownumFound = 0;
-                }*/
-            }
-            return rownumFound;
-        }
-
-        //RowOfFoundStringInColOfMDarray
         public static LibraryCatalog FindCatalogByPart(string partNumber)
         {
             var res = Constants.libCatalogList
@@ -285,39 +171,6 @@ namespace PanelDrawing.CommonOperations
             return res;
         }
 
-
-        #region //Commented old RowOfCountFoundStringInColOfMDarray code on 18 november, 2025 and written GetAssociatedPartNumbers
-        //public static string RowOfCountFoundStringInColOfMDarray(string strSerch, string[,] Temp_arr, int colnum1, int colnum2,int colnum3)
-        //{
-        //    Constants.strAssosiatePNinfo = string.Empty; 
-        //    string strPNs=string.Empty;
-        //    //var gh = Temp_arr[1]
-        //    for (int rownum = 0; rownum <= Temp_arr.GetLength(0) - 1; rownum++)
-        //    {
-        //        if (Temp_arr[rownum, colnum1].Trim().Equals(strSerch.Trim()) && !string.IsNullOrEmpty(Temp_arr[rownum, colnum2]) && Temp_arr[rownum, colnum3].Trim().Equals(Constants.textPanelPartName.Trim()))
-        //        {
-        //            strPNs = Temp_arr[rownum, colnum2].Trim();
-        //            Constants.strAssosiatePNinfo = string.Concat(Constants.strAssosiatePNinfo,";", strPNs);
-        //        }
-        //    }
-        //    return Constants.strAssosiatePNinfo.Substring(1, Constants.strAssosiatePNinfo.Length-1);
-        //}
-        #endregion
-
-        public static List<string> GetAssociatedPartNumbers(string connector, string panel)
-        {
-            var res = Constants.dataExtractionListAbove
-                .Where(x => x.ConnectorName == connector &&
-                            x.Panel == panel &&
-                            !string.IsNullOrEmpty(x.CoreNumber))  // CoreNumber = PartNumber
-                .Select(x => x.CoreNumber)
-                .Distinct()
-                .ToList();
-
-            return res;
-        }
-
-        //FindPartNumberFromAssosiatedPartnumbersIfDefined
         public static string GetPrimaryPartNumber(List<string> assocParts)
         {
             foreach (var pn in assocParts)
@@ -329,37 +182,7 @@ namespace PanelDrawing.CommonOperations
             }
 
             return assocParts.FirstOrDefault() ?? "";
-        }
-
-        public static int RowOfFoundStringsInColOfMDarray(string str1,string str2,string str3, string[,] Temp_arr, int colnum1, int colnum2,int colnum3)
-        {
-            int rownumFound = 0;
-            string[] arrtempWireCode = str3.Split('/');
-            for (int rownum = 0; rownum <= Temp_arr.GetLength(0) - 1; rownum++)
-            {
-                //string strsub = CompPN.Substring(0).Trim();
-                if (Temp_arr[rownum, colnum1].Trim().Equals(str1.Trim()) && Temp_arr[rownum, colnum3].Trim().Equals(arrtempWireCode[0].Trim()) && Temp_arr[rownum, colnum2].Trim().Equals(str2.Trim()))
-                {
-                    rownumFound = rownum;
-                    break;
-                }
-               /* else
-                {
-                    rownumFound = 0;
-                }*/
-            }
-            return rownumFound;
-        }      
-
-        public static void AddSWTSymbolAttributes(double iX0, double iY0,string PartNumber, string filePath,string refname)
-        {
-            using (var writer = File.AppendText(filePath))
-            {
-                writer.WriteLine($"MOD N53 {iX0 + 4},{iY0} 0,0 :E '{refname}';NOP;");
-                writer.WriteLine($"MOD N2 {iX0 + 4},{iY0} 0,0 :E '{refname}';NOP;");
-                writer.WriteLine($"MOD N52 {iX0+4},{iY0 - 1} 0,0 :E '{PartNumber}';NOP;");
-            }
-        }
+        }    
 
         public static void AddSymbolAttributes(double iX0, double iY0, string refname, string loc, string PartNumber, string filePath, string comptype)
         {
@@ -409,43 +232,221 @@ namespace PanelDrawing.CommonOperations
             }
         }
 
-        public static void AddDISSymbolAttributes(double iX0, double iY0, string refname, string loc, string PartNumber, string filePath)
-        {
-            using (var writer = File.AppendText(filePath))
-            {
-                //writer.WriteLine($"MOD N53 {iX0},{iY0 + 2} 0,0 :E '{refname}';NOP;");
-                //writer.WriteLine($"MOD N202 {iX0},{iY0 - 4} 0,0 :E '{loc}';NOP;");
-                writer.WriteLine($"MOD N52 {iX0},{iY0 - 4 - 4} 0,0 :E '{PartNumber}';NOP;");
-                writer.WriteLine($"SHOW #E;");
-            }
-        }
+        #region // Commented old Codes on 27 Jan, 2026
 
-        public static void SegLooms(double iX0, double iY0, string iCompName, string iPartNumber, string filePath, string LoomRefName)
-        {
-            using (var writer = File.AppendText(filePath))
-            {
-                //writer.WriteLine($"ADD R203  76.5,206.5 92,229.5 ;");
-            }
-        }
-        public static void CBSeg2(double X0, double Y0, string N, string filePath, int decreRight)
-        {
-            using (var writer = File.AppendText(filePath))
-            {
-                //MOD N51 115,255 0,0 :E '1111'; NOP;
-                writer.WriteLine($"MOD N51 {X0},{Y0} 0,0 :E '{N}'; NOP;");
-                #region
-                //writer.WriteLine($"MOD N51 {X0 + 12},{Y0} 0,0 :E '{N}'; NOP;");
+        //public static int RowOfFoundStringInColOfMDarray(string CompPN, string[,] Temp_arrTableOfLibCatalog, int colnum)
+        //{
+        //    int rownumFound = 0;
+        //    for (int rownum = 0; rownum <= Temp_arrTableOfLibCatalog.GetLength(0) - 1; rownum++)
+        //    {
+        //        //string strsub = CompPN.Substring(0).Trim();
+        //        if (Temp_arrTableOfLibCatalog[rownum, colnum].Trim().Contains(CompPN.Trim()))
+        //        {
+        //            rownumFound = rownum;
+        //            break;
+        //        }
+        //       /* else
+        //        {
+        //            rownumFound = 0;
+        //        }*/
+        //    }
+        //    return rownumFound;
+        //}
+        // Commented on Jan 27, 2026
+        //public static List<PanelComponentProperties> GatherPanelComponentProperties1(string panelName)
+        //{
+        //    // Clear previous results
+        //    Constants.panelComponentProperties.Clear();
 
-                //writer.WriteLine($"Add N51 'TCB' :F1.0 :R0 :AC I0 {X0}, {Y0} :T1003 {X0 - 2}, {Y0+4};NOP;");
-                //writer.WriteLine($"Add N51 '{N}' :F1.0 :R0 :AC I0 {X0},{Y0} :T1003 {X0-2},{Y0+4};NOP;");//ORIG
-                //writer.WriteLine($"MOD N51 {X0},{Y0} 0,0 :E '{N}'; NOP;");
-                //writer.WriteLine($"ADD N51 '{N}' {X0},{Y0} :F1.0 :T4326 :D;;NOP;");
-                //writer.WriteLine($"ADD N51 '{N}' {X0 + 12},{Y0} :F1.0 :T4326 :D;;NOP;");
-                //writer.WriteLine($"MOD N51 '{N}' {X0},{Y0} :F1.0 :T4326 :D;;NOP;");
-                //writer.WriteLine($"MOD N51 '{N}' {X0 + 12},{Y0} :F1.0 :T4326 :D;;NOP;");
-                #endregion
-            }
-        }
+        //    // STEP 1: Get all components belonging to panel & having part number
+        //    var panelComponents =
+        //        Constants.dataExtractionListAbove
+        //        .Where(x => x.Panel == panelName &&
+        //                    Constants.listComponentsWithPartNumber.Contains(x.ConnectorName))
+        //        .Select(x => x.ConnectorName)
+        //        .Distinct()
+        //        .ToList();
+
+        //    foreach (var compName in panelComponents)
+        //    {
+        //        // STEP 2: Get all DEAbove rows for this component
+        //        var compDEAbove = Constants.dataExtractionListAbove
+        //            .Where(x => x.ConnectorName == compName && x.Panel == panelName)
+        //            .ToList();
+
+        //        // STEP 3: Get associated part numbers
+        //        var associatedPNs = compDEAbove
+        //            .Select(x => x.CoreNumber)     // CoreNumber = PartNumber
+        //            .Where(x => !string.IsNullOrEmpty(x))
+        //            .Distinct()
+        //            .ToList();
+
+        //        // STEP 4: Primary part number
+        //        string primaryPN = modOPCommand.GetPrimaryPartNumber(associatedPNs);
+
+        //        // STEP 5: Get extra properties DEBelow
+        //        var firstDEBelow = Constants.dataExtractionListBelow
+        //            .FirstOrDefault(x => x.ConnectorName == compName &&
+        //                                 x.Panel == panelName);
+
+        //        string compType = firstDEBelow?.ComponentType ?? "";
+        //        string samplePin = firstDEBelow?.PinNumber ?? "";
+        //        string cbTypeName = firstDEBelow?.Tag4 ?? "";
+        //        string cbVoltage = firstDEBelow?.Tag5 ?? "";
+
+        //        // STEP 6: Shunts (for TBK/TER)
+        //        string shuntList = string.Join(";",
+        //            Constants.dataExtractionListBelow
+        //            .Where(x => x.ConnectorName == compName &&
+        //                        !string.IsNullOrEmpty(x.Shunt))
+        //            .Select(x => $"{x.ConnectorName},{x.PinNumber},{x.FunctionalDesignation},{x.ComponentType},{x.Shunt}")
+        //        );
+
+        //        // STEP 7: Get info from Library Catalog
+        //        var lib = Constants.libCatalogList
+        //            .FirstOrDefault(x =>
+        //                (x.RefInternal ?? "") == primaryPN ||
+        //                (x.MandatoryAccessory1 ?? "") == primaryPN ||
+        //                (x.MandatoryAccessory2 ?? "") == primaryPN
+        //            );
+
+        //        string macroName = lib?.Symbol2D ?? "";
+        //        string maxPins = lib?.MaxPins ?? "";
+        //        string accessory = lib?.MandatoryAccessory1 ?? "";
+        //        string acc2 = lib?.MandatoryAccessory2 ?? "";
+
+        //        // STEP 8: Equipment Box & Looms
+        //        string equipInfo = compDEAbove.FirstOrDefault()?.EquipmentName ?? "";
+        //        string loomsInfo = compDEAbove.FirstOrDefault()?.BundleName ?? "";
+
+        //        // STEP 9: Construct modern object
+        //        var compProps = new PanelComponentProperties
+        //        {
+        //            ComponentName = compName,
+        //            ComponentType = compType,
+        //            MacroName = macroName,
+        //            MaxPin = maxPins,
+        //            PartNumber = primaryPN,
+        //            Accessory = $"{accessory};{acc2}",
+        //            SamplePin = samplePin,
+        //            GroupId = firstDEBelow?.Group ?? "",
+        //            WireLength = firstDEBelow?.Length ?? "",
+        //            WireType = firstDEBelow?.CableType ?? "",
+        //            CBTypeName = cbTypeName,
+        //            CBVoltage = cbVoltage,
+        //            AssociatedPartNumbers = string.Join(";", associatedPNs),
+        //            EquipmentBox = equipInfo,
+        //            Looms = loomsInfo,
+        //            ShuntList = shuntList
+        //        };
+
+        //        Constants.panelComponentProperties.Add(compProps);
+        //    }
+
+        //    return Constants.panelComponentProperties;
+        //}
+
+        #region //Commented old RowOfCountFoundStringInColOfMDarray code on 18 november, 2025 and written GetAssociatedPartNumbers
+        //public static string RowOfCountFoundStringInColOfMDarray(string strSerch, string[,] Temp_arr, int colnum1, int colnum2,int colnum3)
+        //{
+        //    Constants.strAssosiatePNinfo = string.Empty; 
+        //    string strPNs=string.Empty;
+        //    //var gh = Temp_arr[1]
+        //    for (int rownum = 0; rownum <= Temp_arr.GetLength(0) - 1; rownum++)
+        //    {
+        //        if (Temp_arr[rownum, colnum1].Trim().Equals(strSerch.Trim()) && !string.IsNullOrEmpty(Temp_arr[rownum, colnum2]) && Temp_arr[rownum, colnum3].Trim().Equals(Constants.textPanelPartName.Trim()))
+        //        {
+        //            strPNs = Temp_arr[rownum, colnum2].Trim();
+        //            Constants.strAssosiatePNinfo = string.Concat(Constants.strAssosiatePNinfo,";", strPNs);
+        //        }
+        //    }
+        //    return Constants.strAssosiatePNinfo.Substring(1, Constants.strAssosiatePNinfo.Length-1);
+        //}
+        #endregion
+
+        //public static List<string> GetAssociatedPartNumbers(string connector, string panel)
+        //{
+        //    var res = Constants.dataExtractionListAbove
+        //        .Where(x => x.ConnectorName == connector &&
+        //                    x.Panel == panel &&
+        //                    !string.IsNullOrEmpty(x.CoreNumber))  // CoreNumber = PartNumber
+        //        .Select(x => x.CoreNumber)
+        //        .Distinct()
+        //        .ToList();
+
+        //    return res;
+        //}
+
+        //FindPartNumberFromAssosiatedPartnumbersIfDefined
+
+        // Commented on Jan 27, 2026
+        //public static int RowOfFoundStringsInColOfMDarray(string str1,string str2,string str3, string[,] Temp_arr, int colnum1, int colnum2,int colnum3)
+        //{
+        //    int rownumFound = 0;
+        //    string[] arrtempWireCode = str3.Split('/');
+        //    for (int rownum = 0; rownum <= Temp_arr.GetLength(0) - 1; rownum++)
+        //    {
+        //        //string strsub = CompPN.Substring(0).Trim();
+        //        if (Temp_arr[rownum, colnum1].Trim().Equals(str1.Trim()) && Temp_arr[rownum, colnum3].Trim().Equals(arrtempWireCode[0].Trim()) && Temp_arr[rownum, colnum2].Trim().Equals(str2.Trim()))
+        //        {
+        //            rownumFound = rownum;
+        //            break;
+        //        }
+        //       /* else
+        //        {
+        //            rownumFound = 0;
+        //        }*/
+        //    }
+        //    return rownumFound;
+        //}      
+
+        //public static void AddSWTSymbolAttributes(double iX0, double iY0,string PartNumber, string filePath,string refname)
+        //{
+        //    using (var writer = File.AppendText(filePath))
+        //    {
+        //        writer.WriteLine($"MOD N53 {iX0 + 4},{iY0} 0,0 :E '{refname}';NOP;");
+        //        writer.WriteLine($"MOD N2 {iX0 + 4},{iY0} 0,0 :E '{refname}';NOP;");
+        //        writer.WriteLine($"MOD N52 {iX0+4},{iY0 - 1} 0,0 :E '{PartNumber}';NOP;");
+        //    }
+        //}
+
+        //public static void AddDISSymbolAttributes(double iX0, double iY0, string refname, string loc, string PartNumber, string filePath)
+        //{
+        //    using (var writer = File.AppendText(filePath))
+        //    {
+        //        //writer.WriteLine($"MOD N53 {iX0},{iY0 + 2} 0,0 :E '{refname}';NOP;");
+        //        //writer.WriteLine($"MOD N202 {iX0},{iY0 - 4} 0,0 :E '{loc}';NOP;");
+        //        writer.WriteLine($"MOD N52 {iX0},{iY0 - 4 - 4} 0,0 :E '{PartNumber}';NOP;");
+        //        writer.WriteLine($"SHOW #E;");
+        //    }
+        //}
+
+        //public static void SegLooms(double iX0, double iY0, string iCompName, string iPartNumber, string filePath, string LoomRefName)
+        //{
+        //    using (var writer = File.AppendText(filePath))
+        //    {
+        //        //writer.WriteLine($"ADD R203  76.5,206.5 92,229.5 ;");
+        //    }
+        //}
+        //public static void CBSeg2(double X0, double Y0, string N, string filePath, int decreRight)
+        //{
+        //    using (var writer = File.AppendText(filePath))
+        //    {
+        //        //MOD N51 115,255 0,0 :E '1111'; NOP;
+        //        writer.WriteLine($"MOD N51 {X0},{Y0} 0,0 :E '{N}'; NOP;");
+        //        #region
+        //        //writer.WriteLine($"MOD N51 {X0 + 12},{Y0} 0,0 :E '{N}'; NOP;");
+
+        //        //writer.WriteLine($"Add N51 'TCB' :F1.0 :R0 :AC I0 {X0}, {Y0} :T1003 {X0 - 2}, {Y0+4};NOP;");
+        //        //writer.WriteLine($"Add N51 '{N}' :F1.0 :R0 :AC I0 {X0},{Y0} :T1003 {X0-2},{Y0+4};NOP;");//ORIG
+        //        //writer.WriteLine($"MOD N51 {X0},{Y0} 0,0 :E '{N}'; NOP;");
+        //        //writer.WriteLine($"ADD N51 '{N}' {X0},{Y0} :F1.0 :T4326 :D;;NOP;");
+        //        //writer.WriteLine($"ADD N51 '{N}' {X0 + 12},{Y0} :F1.0 :T4326 :D;;NOP;");
+        //        //writer.WriteLine($"MOD N51 '{N}' {X0},{Y0} :F1.0 :T4326 :D;;NOP;");
+        //        //writer.WriteLine($"MOD N51 '{N}' {X0 + 12},{Y0} :F1.0 :T4326 :D;;NOP;");
+        //        #endregion
+        //    }
+        //}
 
         #region//DIS Connector************************
 
@@ -1302,373 +1303,373 @@ namespace PanelDrawing.CommonOperations
         //}
         #endregion
 
-        public static void DrawNewHpLine_Length(double iStartX, double iStartY, double iLength, int iWireCode, int iWireGauge, int iWireLength,string filepath)
-        {
-            // Draw Horizontal Positive line
-            string sMidCoord = $"{iStartX + iLength / 2},{iStartY}";
+        //public static void DrawNewHpLine_Length(double iStartX, double iStartY, double iLength, int iWireCode, int iWireGauge, int iWireLength,string filepath)
+        //{
+        //    // Draw Horizontal Positive line
+        //    string sMidCoord = $"{iStartX + iLength / 2},{iStartY}";
 
-            // Write output to file
-            using (var writer = File.AppendText(filepath))
-            {
-                writer.WriteLine($"ADD I2 sth_cable_id_t {sMidCoord};NOP;");
-                writer.WriteLine($"MOD N154 {sMidCoord} {sMidCoord} :L54 STOR_MID :E'{iWireCode}' JU ;NOP;");
-                writer.WriteLine($"MOD N55 {sMidCoord} {sMidCoord} :E'#{iWireGauge}';NOP;");
-            }
-        }
-        
-        public static void Simple2PointConnection(double p1x, double p1y, double p2x, double p2y, string wireCode, string wireGauge)
-        {
-            double X1 = p1x, Y1 = p1y;
-            double X2 = p2x, Y2 = p2y;
+        //    // Write output to file
+        //    using (var writer = File.AppendText(filepath))
+        //    {
+        //        writer.WriteLine($"ADD I2 sth_cable_id_t {sMidCoord};NOP;");
+        //        writer.WriteLine($"MOD N154 {sMidCoord} {sMidCoord} :L54 STOR_MID :E'{iWireCode}' JU ;NOP;");
+        //        writer.WriteLine($"MOD N55 {sMidCoord} {sMidCoord} :E'#{iWireGauge}';NOP;");
+        //    }
+        //}
 
-            #region commented
-            //string command = $"ADD L154 :W0.0 :FILL {X1},{Y1} {X2},{Y2};;;;NOP";
-            //            GRI 2.0,2;
-            //            SHOW #E;
-            //TESTDIS;
-            //            ADD L154 72,148 348,148; ; NOP; ;
-            //            ADD N54 :R0: J8: F2: D: T1002: AC L154 72,148 'WIRENB' 210,148; NOP;
-            //            ADD N56 :R0: S10: D: J2: F2: T3006: AC L154 72,148 '#' 212,148;
-            //            ADD N59 :R0: D: J2: F2: T3009: AC L154 72,148 'LENGTH' 218,148;
-            //            ADD I2 sth_s: R0 88,148;
-            //            MOD N250 88,148 0,0 :L254 STOR_MID :E'CABLE_TYPE' JU; NOP;
-            //            TESTDIS_OFF;
-            //            ADD N58 :J7: T3003: D: F1: R0 'GROUPE' :AC I2 88,148 86.5,148.5; NOP;
-            //            ADD I2 sth_s: R0 332,148;
-            //            TESTDIS;
-            //            MOD N250 332,148 0,0 :L254 STOR_MID :E'CABLE_TYPE' JU; NOP;
-            //            TESTDIS_OFF;
-            //            ADD N58 :J7: T3003: D: F1: R0 'GROUPE' :AC I2 332,148 330.5,148.5; NOP;
-            //            pm_files_sav; ;
-            //            GRI 2,2;
+        //private static void InsertWireCode90(double iX, double iY, string wireCode, string wireGauge)
+        //{
+        //    const double iLength = 5.0; // Adjust this value based on original VB6 scope or declaration
+        //    string sMidCoord = $"{iX + iLength / 2},{iY}";
+
+        //    using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //    {
+        //        //writer.WriteLine($"ADD L154 {iX},{iY} {iX + iLength},{iY};NOP;");
+        //        writer.WriteLine($"Add N54 :D :F1 '{wireCode}' :R90 :J7 :AC L154 {sMidCoord} {iX - 1},{iY};NOP;");
+        //        writer.WriteLine($"Add N55 :D :F1 '#{wireGauge}' :R90 :J1 :AC L154 {sMidCoord} {iX - 1},{iY};NOP;");
+        //    }
+
+        //    //Console.WriteLine($"Add N54 :D :F1 '{wireCode}' :R90 :J7 :AC L154 {sMidCoord} {iX - 1},{iY};NOP;");
+        //    //Console.WriteLine($"Add N55 :D :F1 '#{wireGauge}' :R90 :J1 :AC L154 {sMidCoord} {iX - 1},{iY};NOP;");
+        //}
+
+        //public static void Simple2PointConnection(double p1x, double p1y, double p2x, double p2y, string wireCode, string wireGauge)
+        //{
+        //    double X1 = p1x, Y1 = p1y;
+        //    double X2 = p2x, Y2 = p2y;
+
+        //    #region commented
+        //    //string command = $"ADD L154 :W0.0 :FILL {X1},{Y1} {X2},{Y2};;;;NOP";
+        //    //            GRI 2.0,2;
+        //    //            SHOW #E;
+        //    //TESTDIS;
+        //    //            ADD L154 72,148 348,148; ; NOP; ;
+        //    //            ADD N54 :R0: J8: F2: D: T1002: AC L154 72,148 'WIRENB' 210,148; NOP;
+        //    //            ADD N56 :R0: S10: D: J2: F2: T3006: AC L154 72,148 '#' 212,148;
+        //    //            ADD N59 :R0: D: J2: F2: T3009: AC L154 72,148 'LENGTH' 218,148;
+        //    //            ADD I2 sth_s: R0 88,148;
+        //    //            MOD N250 88,148 0,0 :L254 STOR_MID :E'CABLE_TYPE' JU; NOP;
+        //    //            TESTDIS_OFF;
+        //    //            ADD N58 :J7: T3003: D: F1: R0 'GROUPE' :AC I2 88,148 86.5,148.5; NOP;
+        //    //            ADD I2 sth_s: R0 332,148;
+        //    //            TESTDIS;
+        //    //            MOD N250 332,148 0,0 :L254 STOR_MID :E'CABLE_TYPE' JU; NOP;
+        //    //            TESTDIS_OFF;
+        //    //            ADD N58 :J7: T3003: D: F1: R0 'GROUPE' :AC I2 332,148 330.5,148.5; NOP;
+        //    //            pm_files_sav; ;
+        //    //            GRI 2,2;
 
 
-            //Console.WriteLine(command); // Replace with file writing if needed
-            // If writing to a file instead of console:
-            #endregion
+        //    //Console.WriteLine(command); // Replace with file writing if needed
+        //    // If writing to a file instead of console:
+        //    #endregion
 
-            using (var writer = File.AppendText(Constants.el_ExecFilePath))
-            {
-                //string command = $"ADD L154 :W0.0 :FILL {X1},{Y1} {X2},{Y2};;;;NOP";
-                writer.WriteLine("GRI 2.0,2;");
-                writer.WriteLine("SHOW #E;");
-                writer.WriteLine("TESTDIS;");
+        //    using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //    {
+        //        //string command = $"ADD L154 :W0.0 :FILL {X1},{Y1} {X2},{Y2};;;;NOP";
+        //        writer.WriteLine("GRI 2.0,2;");
+        //        writer.WriteLine("SHOW #E;");
+        //        writer.WriteLine("TESTDIS;");
 
-                writer.WriteLine($"ADD L154 {X1},{Y1} {X2},{Y2} ;;NOP;;");
-                //writer.WriteLine($"ADD L154 72,148 348,148; ; NOP;;");
-                double X3 = (X1 + X2) / 2;
-                writer.WriteLine($"ADD N54 :R0 :J8 :F2 :D :T1002 :AC L154 {X1},{Y1} 'WIRENB' {X3},{Y1}; NOP;");
-                //writer.WriteLine("ADD N54 :R0: J8: F2: D: T1002: AC L154 72,148 'WIRENB' 210,148; NOP;");
+        //        writer.WriteLine($"ADD L154 {X1},{Y1} {X2},{Y2} ;;NOP;;");
+        //        //writer.WriteLine($"ADD L154 72,148 348,148; ; NOP;;");
+        //        double X3 = (X1 + X2) / 2;
+        //        writer.WriteLine($"ADD N54 :R0 :J8 :F2 :D :T1002 :AC L154 {X1},{Y1} 'WIRENB' {X3},{Y1}; NOP;");
+        //        //writer.WriteLine("ADD N54 :R0: J8: F2: D: T1002: AC L154 72,148 'WIRENB' 210,148; NOP;");
 
-                writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X1},{Y1} '#{wireGauge}' {X3+2},{Y1};");
-                //writer.WriteLine("ADD N56 :R0: S10: D: J2: F2: T3006: AC L154 72,148 '#' 212,148;");
+        //        writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X1},{Y1} '#{wireGauge}' {X3+2},{Y1};");
+        //        //writer.WriteLine("ADD N56 :R0: S10: D: J2: F2: T3006: AC L154 72,148 '#' 212,148;");
 
-                writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {X1},{Y1} 'LENGTH' {X3+8},{Y1};");
-                //writer.WriteLine("ADD N59 :R0: D: J2: F2: T3009: AC L154 72,148 'LENGTH' 218,148;");
+        //        writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {X1},{Y1} 'LENGTH' {X3+8},{Y1};");
+        //        //writer.WriteLine("ADD N59 :R0: D: J2: F2: T3009: AC L154 72,148 'LENGTH' 218,148;");
 
-                writer.WriteLine($"ADD I2 sth_s :R0 {X1+16},{Y1};");
-                //writer.WriteLine("ADD I2 sth_s: R0 88,148;");
+        //        writer.WriteLine($"ADD I2 sth_s :R0 {X1+16},{Y1};");
+        //        //writer.WriteLine("ADD I2 sth_s: R0 88,148;");
 
-                writer.WriteLine($"MOD N250 {X1 + 16},{Y2} 0,0 :L254 STOR_MID :E'{wireCode}' JU;NOP;");
-                //writer.WriteLine("MOD N250 88,148 0,0 :L254 STOR_MID :E'CABLE_TYPE' JU; NOP;");
+        //        writer.WriteLine($"MOD N250 {X1 + 16},{Y2} 0,0 :L254 STOR_MID :E'{wireCode}' JU;NOP;");
+        //        //writer.WriteLine("MOD N250 88,148 0,0 :L254 STOR_MID :E'CABLE_TYPE' JU; NOP;");
 
-                writer.WriteLine("TESTDIS_OFF;");
+        //        writer.WriteLine("TESTDIS_OFF;");
 
-                writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 'GROUPE' :AC I2 {X1 + 16},{Y1} {X1+16-1.5},{Y1}; NOP;");
-                //writer.WriteLine("ADD N58 :J7: T3003: D: F1: R0 'GROUPE' :AC I2 88,148 86.5,148.5; NOP;");
+        //        writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 'GROUPE' :AC I2 {X1 + 16},{Y1} {X1+16-1.5},{Y1}; NOP;");
+        //        //writer.WriteLine("ADD N58 :J7: T3003: D: F1: R0 'GROUPE' :AC I2 88,148 86.5,148.5; NOP;");
 
-                writer.WriteLine($"ADD I2 sth_s :R0 {X2-16},{Y2};");
-                //writer.WriteLine("ADD I2 sth_s: R0 332,148;");
+        //        writer.WriteLine($"ADD I2 sth_s :R0 {X2-16},{Y2};");
+        //        //writer.WriteLine("ADD I2 sth_s: R0 332,148;");
 
-                writer.WriteLine("TESTDIS;");
+        //        writer.WriteLine("TESTDIS;");
 
-                writer.WriteLine($"MOD N250 {X2 - 16},{Y2} 0,0 :L254 STOR_MID :E'{wireCode}' JU;NOP;");
-                //writer.WriteLine("MOD N250 332,148 0,0 :L254 STOR_MID :E'CABLE_TYPE' JU; NOP;");
+        //        writer.WriteLine($"MOD N250 {X2 - 16},{Y2} 0,0 :L254 STOR_MID :E'{wireCode}' JU;NOP;");
+        //        //writer.WriteLine("MOD N250 332,148 0,0 :L254 STOR_MID :E'CABLE_TYPE' JU; NOP;");
 
-                writer.WriteLine("TESTDIS_OFF;");
+        //        writer.WriteLine("TESTDIS_OFF;");
 
-                writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 'GROUPE' :AC I2 {X2 - 16},{Y2} {X2-16-1.5},{Y2};NOP;");
-                //writer.WriteLine("ADD N58 :J7: T3003: D: F1: R0 'GROUPE' :AC I2 332,148 330.5,148.5; NOP;");
-                //modOPCommand.El_Exec_Footer_Connection_Commands();
-                writer.WriteLine($":GRI");
-                //writer.WriteLine($"pm_view_win1_recall_n 9 ;");
-                //writer.WriteLine($"set_actual_layer LAYER_ORIG ;");
-                //writer.WriteLine($"pm_view_redraw; TESTDIS_OFF ;");
-                //writer.WriteLine($"pm_view_grid_on;");
-                writer.WriteLine($"pm_files_sav;;");
-                writer.WriteLine($"GRI ELECTRE_GRID_STH;");
-                //writer.WriteLine($"UNDO_END2;");
-                //writer.WriteLine($"UNDO :E;");
-                //writer.WriteLine("pm_files_sav ;;");
-                //GRI 2,2;
-                //writer.WriteLine(command);
-            }
-        }
+        //        writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 'GROUPE' :AC I2 {X2 - 16},{Y2} {X2-16-1.5},{Y2};NOP;");
+        //        //writer.WriteLine("ADD N58 :J7: T3003: D: F1: R0 'GROUPE' :AC I2 332,148 330.5,148.5; NOP;");
+        //        //modOPCommand.El_Exec_Footer_Connection_Commands();
+        //        writer.WriteLine($":GRI");
+        //        //writer.WriteLine($"pm_view_win1_recall_n 9 ;");
+        //        //writer.WriteLine($"set_actual_layer LAYER_ORIG ;");
+        //        //writer.WriteLine($"pm_view_redraw; TESTDIS_OFF ;");
+        //        //writer.WriteLine($"pm_view_grid_on;");
+        //        writer.WriteLine($"pm_files_sav;;");
+        //        writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+        //        //writer.WriteLine($"UNDO_END2;");
+        //        //writer.WriteLine($"UNDO :E;");
+        //        //writer.WriteLine("pm_files_sav ;;");
+        //        //GRI 2,2;
+        //        //writer.WriteLine(command);
+        //    }
+        //}
 
-        public static void Simple3PointConnection(double p1x, double p1y, double p2x, double p2y,string wireCode, string wireGauge, string c1, string c2,string fType, string tType,string fOri, string tOri)
-        {
-            double X1 = p1x, Y1 = p1y;
-            double X3 = p2x, Y3 = p2y;
-            double X2 = 0, Y2 = 0;
+        //public static void Simple3PointConnection(double p1x, double p1y, double p2x, double p2y,string wireCode, string wireGauge, string c1, string c2,string fType, string tType,string fOri, string tOri)
+        //{
+        //    double X1 = p1x, Y1 = p1y;
+        //    double X3 = p2x, Y3 = p2y;
+        //    double X2 = 0, Y2 = 0;
 
-            if (fType == "EQU")
-            {
-                X2 = X1;
-                Y2 = Y3;
-            }
-            else if (tType == "EQU")
-            {
-                X2 = X3;
-                Y2 = Y1;
-            }
+        //    if (fType == "EQU")
+        //    {
+        //        X2 = X1;
+        //        Y2 = Y3;
+        //    }
+        //    else if (tType == "EQU")
+        //    {
+        //        X2 = X3;
+        //        Y2 = Y1;
+        //    }
 
-            // Construct the command string
-            string command = $"ADD L154 :W0.0 :FILL {X1},{Y1} {X2},{Y2} {X3},{Y3};;;;NOP";
+        //    // Construct the command string
+        //    string command = $"ADD L154 :W0.0 :FILL {X1},{Y1} {X2},{Y2} {X3},{Y3};;;;NOP";
 
-            // Output to debug and optionally file
-            //Console.WriteLine("3Point " + command);
+        //    // Output to debug and optionally file
+        //    //Console.WriteLine("3Point " + command);
 
-            // If writing to a file instead of console:
-            
-            using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //    // If writing to a file instead of console:
 
-            {
-                writer.WriteLine(command);
-            }
+        //    using (var writer = File.AppendText(Constants.el_ExecFilePath))
 
-            // Insert label mid-way between Y2 and Y3 (for vertical placement)
-            double labelX = X2;
-            double labelY = Y2 + (Y3 - Y2) / 2;
-            InsertWireCode90(labelX, labelY, wireCode, wireGauge);
-        }
+        //    {
+        //        writer.WriteLine(command);
+        //    }
 
-        private static void InsertWireCode90(double iX, double iY, string wireCode, string wireGauge)
-        {
-            const double iLength = 5.0; // Adjust this value based on original VB6 scope or declaration
-            string sMidCoord = $"{iX + iLength / 2},{iY}";
+        //    // Insert label mid-way between Y2 and Y3 (for vertical placement)
+        //    double labelX = X2;
+        //    double labelY = Y2 + (Y3 - Y2) / 2;
+        //    InsertWireCode90(labelX, labelY, wireCode, wireGauge);
+        //}
 
-            using (var writer = File.AppendText(Constants.el_ExecFilePath))
-            {
-                //writer.WriteLine($"ADD L154 {iX},{iY} {iX + iLength},{iY};NOP;");
-                writer.WriteLine($"Add N54 :D :F1 '{wireCode}' :R90 :J7 :AC L154 {sMidCoord} {iX - 1},{iY};NOP;");
-                writer.WriteLine($"Add N55 :D :F1 '#{wireGauge}' :R90 :J1 :AC L154 {sMidCoord} {iX - 1},{iY};NOP;");
-            }
+        //public static void Simple4PointConnection_STP_ZLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Num)
+        //{
+        //    //double p12x, p12y, p23x, p23y;
+        //    double X1=0,Y1=0,X2=0,Y2=0,X3=0, Y3=0, X4=0, Y4=0;
+        //    X1 = p1x;
+        //    Y1= p1y;
+        //    X2 = p2x;
+        //    Y2= p2y;
+        //    X3 = (X1 + X2) / 2;
+        //    X4 = X3;
+        //    Y3 = Y1;
+        //    Y4 = Y2;
+        //    int wire_Type_Core_Number = Convert.ToInt16(wire_Type_Core_Num);
+        //    //p12x = (p1x + p2x) / 2; //p1x+150;
+        //    //p12y = p1y;//
+        //    //p23x = p12x;
+        //    //p23y= p12y-60;
+        //    using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //    {
+        //        //writer.WriteLine($"ADD L154 {iX},{iY} {iX + iLength},{iY};NOP;");
+        //        //writer.WriteLine(
+        //        writer.WriteLine($"GRI 2.0, 2;");
+        //        writer.WriteLine($"ADD L154 :W0");
 
-            //Console.WriteLine($"Add N54 :D :F1 '{wireCode}' :R90 :J7 :AC L154 {sMidCoord} {iX - 1},{iY};NOP;");
-            //Console.WriteLine($"Add N55 :D :F1 '#{wireGauge}' :R90 :J1 :AC L154 {sMidCoord} {iX - 1},{iY};NOP;");
-        }
+        //        writer.WriteLine($"{X1},{Y1}");
+        //        //writer.WriteLine($"74,238");
+        //        writer.WriteLine($"{X3},{Y3}");
+        //        //writer.WriteLine($"230,238");
+        //        writer.WriteLine($"{X4},{Y4}");
+        //        //writer.WriteLine($"230,172");
+        //        writer.WriteLine($"{X2},{Y2}");
+        //        //writer.WriteLine($"386,172");
+        //        writer.WriteLine($";;NOP;;");
+        //        writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X1},{Y1} '{iWireCode}' {X1*2},{Y1} ;NOP;");
+        //        //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 74,238 'STP__02' 152,238 ;NOP;");
+        //        writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X1},{Y1} '#{iWireGauge}' {X1 * 2+2},{Y1} ;");
+        //        //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 74,238 '#14' 154,238 ;");
+        //        writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X1},{Y1} '{wire_Type_Core_Number}' {X1 * 2 + 2+8},{Y1-1} ;");
+        //        //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 74,238 '1' 162,237 ;");
+        //        writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {X1},{Y1} '{wire_Length}' {X1 * 2 + 2 + 8},{Y1} ;");
+        //        //writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 74,238 'LLL' 162,238 ;");
+        //        writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X1},{Y1} '' {X1 * 2 + 2 + 8},{Y1} ;");
+        //        //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 74,238 '' 162,238 ;");
+        //        writer.WriteLine($"ADD L154 :W0");
+        //        writer.WriteLine($"{X1},{Y1-4}");
+        //        //writer.WriteLine($"74,234");
+        //        writer.WriteLine($"{X3-4},{Y3-4}");
+        //        //writer.WriteLine($"226,234");
+        //        writer.WriteLine($"{X4 - 4},{Y2 - 4}");
+        //        //writer.WriteLine($"226,168");
+        //        writer.WriteLine($"{X2},{Y2-4}");
+        //        //writer.WriteLine($"386,168");
+        //        writer.WriteLine($";;NOP;;");
+        //        writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X3-4},{Y2 - 4} '{iWireCode}' {X3 - 4+80},{Y2 - 4} ;NOP;");
+        //        //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 226,168 'STP__02' 306,168 ;NOP;");
+        //        writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X3 - 4},{Y2 - 4} '#{iWireGauge}' {X3 - 4 + 80+2},{Y2 - 4} ;");
+        //        //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 226,168 '#14' 308,168 ;");
+        //        writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X3 - 4},{Y2 - 4} '{wire_Type_Core_Number + 1}' {X3 - 4 + 80 + 2+8},{Y2 - 4-1} ;");
+        //        //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 226,168 '2' 316,167 ;");
+        //        writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {X3 - 4},{Y2 - 4} '{wire_Length}' {X3 - 4 + 80 + 2 + 8},{Y2 - 4} ;");
+        //        //writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 226,168 'LLL' 316,168 ;");
+        //        writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X3 - 4},{Y2 - 4} '' {X3 - 4 + 80 + 2 + 8},{Y2 - 4} ;");
+        //        //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 226,168 '' 316,168 ;");
+        //        writer.WriteLine($"ADD I2 sth_stp4 :R0 {X1+16},{Y1};");
+        //        //writer.WriteLine($"ADD I2 sth_stp4 :R0 90,238;");
+        //        writer.WriteLine($"TESTDIS;");
+        //        writer.WriteLine($"MOD N250 {X1+16},{Y1} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        //writer.WriteLine($"MOD N250 90,238 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
+        //        writer.WriteLine($"MOD N250 {X1 + 16},{Y1-4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        //writer.WriteLine($"MOD N250 90,234 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
+        //        writer.WriteLine($"TESTDIS_OFF;");
+        //        writer.WriteLine($":RAW");
+        //        writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X1 + 16},{Y1} {X1 + 16-1.5},{Y1+0.5};NOP;");
+        //        //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '004' :AC I2 90,238 88.5,238.5;NOP;");
+        //        writer.WriteLine($"MOD N253 {X1 + 16},{Y1} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
+        //        //writer.WriteLine($"MOD N253 90,238 0,0 STOR_MID :E'004' JU;NOP;");
+        //        writer.WriteLine($":GRI");
+        //        writer.WriteLine($"ADD I2 sth_stp4 :R0 {X2-16},{Y2};");
+        //        //writer.WriteLine($"ADD I2 sth_stp4 :R0 370,172;");
+        //        writer.WriteLine($"TESTDIS;");
+        //        writer.WriteLine($"MOD N250 {X2 - 16},{Y2} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        //writer.WriteLine($"MOD N250 370,172 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
+        //        writer.WriteLine($"MOD N250 {X2 - 16},{Y2-4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        //writer.WriteLine($"MOD N250 370,168 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
+        //        writer.WriteLine($"TESTDIS_OFF;");
+        //        writer.WriteLine($":RAW");
+        //        writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X2 - 16},{Y2} {X2 - 16-1.5},{Y2+0.5};NOP;");
+        //        //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '004' :AC I2 370,172 368.5,172.5;NOP;");
+        //        writer.WriteLine($"MOD N253 {X2 - 16},{Y2} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
+        //        //writer.WriteLine($"MOD N253 370,172 0,0 STOR_MID: E'004' JU; NOP;");
+        //        //modOPCommand.El_Exec_Footer_Connection_Commands();
+        //        writer.WriteLine($":GRI");
+        //        //writer.WriteLine($"pm_view_win1_recall_n 9 ;");
+        //        //writer.WriteLine($"set_actual_layer LAYER_ORIG ;");
+        //        //writer.WriteLine($"pm_view_redraw; TESTDIS_OFF ;");
+        //        //writer.WriteLine($"pm_view_grid_on;");
+        //        writer.WriteLine($"pm_files_sav;;");
+        //        writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+        //        //writer.WriteLine($"UNDO_END2;");
+        //        //writer.WriteLine($"UNDO :E;");
+        //        //MessageBox.Show("Simple4PointConnection_STP_ZLine Completed");
+        //    }
+        //}
 
-        public static void Simple4PointConnection_STP_ZLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Num)
-        {
-            //double p12x, p12y, p23x, p23y;
-            double X1=0,Y1=0,X2=0,Y2=0,X3=0, Y3=0, X4=0, Y4=0;
-            X1 = p1x;
-            Y1= p1y;
-            X2 = p2x;
-            Y2= p2y;
-            X3 = (X1 + X2) / 2;
-            X4 = X3;
-            Y3 = Y1;
-            Y4 = Y2;
-            int wire_Type_Core_Number = Convert.ToInt16(wire_Type_Core_Num);
-            //p12x = (p1x + p2x) / 2; //p1x+150;
-            //p12y = p1y;//
-            //p23x = p12x;
-            //p23y= p12y-60;
-            using (var writer = File.AppendText(Constants.el_ExecFilePath))
-            {
-                //writer.WriteLine($"ADD L154 {iX},{iY} {iX + iLength},{iY};NOP;");
-                //writer.WriteLine(
-                writer.WriteLine($"GRI 2.0, 2;");
-                writer.WriteLine($"ADD L154 :W0");
-                
-                writer.WriteLine($"{X1},{Y1}");
-                //writer.WriteLine($"74,238");
-                writer.WriteLine($"{X3},{Y3}");
-                //writer.WriteLine($"230,238");
-                writer.WriteLine($"{X4},{Y4}");
-                //writer.WriteLine($"230,172");
-                writer.WriteLine($"{X2},{Y2}");
-                //writer.WriteLine($"386,172");
-                writer.WriteLine($";;NOP;;");
-                writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X1},{Y1} '{iWireCode}' {X1*2},{Y1} ;NOP;");
-                //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 74,238 'STP__02' 152,238 ;NOP;");
-                writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X1},{Y1} '#{iWireGauge}' {X1 * 2+2},{Y1} ;");
-                //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 74,238 '#14' 154,238 ;");
-                writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X1},{Y1} '{wire_Type_Core_Number}' {X1 * 2 + 2+8},{Y1-1} ;");
-                //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 74,238 '1' 162,237 ;");
-                writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {X1},{Y1} '{wire_Length}' {X1 * 2 + 2 + 8},{Y1} ;");
-                //writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 74,238 'LLL' 162,238 ;");
-                writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X1},{Y1} '' {X1 * 2 + 2 + 8},{Y1} ;");
-                //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 74,238 '' 162,238 ;");
-                writer.WriteLine($"ADD L154 :W0");
-                writer.WriteLine($"{X1},{Y1-4}");
-                //writer.WriteLine($"74,234");
-                writer.WriteLine($"{X3-4},{Y3-4}");
-                //writer.WriteLine($"226,234");
-                writer.WriteLine($"{X4 - 4},{Y2 - 4}");
-                //writer.WriteLine($"226,168");
-                writer.WriteLine($"{X2},{Y2-4}");
-                //writer.WriteLine($"386,168");
-                writer.WriteLine($";;NOP;;");
-                writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X3-4},{Y2 - 4} '{iWireCode}' {X3 - 4+80},{Y2 - 4} ;NOP;");
-                //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 226,168 'STP__02' 306,168 ;NOP;");
-                writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X3 - 4},{Y2 - 4} '#{iWireGauge}' {X3 - 4 + 80+2},{Y2 - 4} ;");
-                //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 226,168 '#14' 308,168 ;");
-                writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X3 - 4},{Y2 - 4} '{wire_Type_Core_Number + 1}' {X3 - 4 + 80 + 2+8},{Y2 - 4-1} ;");
-                //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 226,168 '2' 316,167 ;");
-                writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {X3 - 4},{Y2 - 4} '{wire_Length}' {X3 - 4 + 80 + 2 + 8},{Y2 - 4} ;");
-                //writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 226,168 'LLL' 316,168 ;");
-                writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X3 - 4},{Y2 - 4} '' {X3 - 4 + 80 + 2 + 8},{Y2 - 4} ;");
-                //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 226,168 '' 316,168 ;");
-                writer.WriteLine($"ADD I2 sth_stp4 :R0 {X1+16},{Y1};");
-                //writer.WriteLine($"ADD I2 sth_stp4 :R0 90,238;");
-                writer.WriteLine($"TESTDIS;");
-                writer.WriteLine($"MOD N250 {X1+16},{Y1} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                //writer.WriteLine($"MOD N250 90,238 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
-                writer.WriteLine($"MOD N250 {X1 + 16},{Y1-4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                //writer.WriteLine($"MOD N250 90,234 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
-                writer.WriteLine($"TESTDIS_OFF;");
-                writer.WriteLine($":RAW");
-                writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X1 + 16},{Y1} {X1 + 16-1.5},{Y1+0.5};NOP;");
-                //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '004' :AC I2 90,238 88.5,238.5;NOP;");
-                writer.WriteLine($"MOD N253 {X1 + 16},{Y1} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
-                //writer.WriteLine($"MOD N253 90,238 0,0 STOR_MID :E'004' JU;NOP;");
-                writer.WriteLine($":GRI");
-                writer.WriteLine($"ADD I2 sth_stp4 :R0 {X2-16},{Y2};");
-                //writer.WriteLine($"ADD I2 sth_stp4 :R0 370,172;");
-                writer.WriteLine($"TESTDIS;");
-                writer.WriteLine($"MOD N250 {X2 - 16},{Y2} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                //writer.WriteLine($"MOD N250 370,172 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
-                writer.WriteLine($"MOD N250 {X2 - 16},{Y2-4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                //writer.WriteLine($"MOD N250 370,168 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
-                writer.WriteLine($"TESTDIS_OFF;");
-                writer.WriteLine($":RAW");
-                writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X2 - 16},{Y2} {X2 - 16-1.5},{Y2+0.5};NOP;");
-                //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '004' :AC I2 370,172 368.5,172.5;NOP;");
-                writer.WriteLine($"MOD N253 {X2 - 16},{Y2} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
-                //writer.WriteLine($"MOD N253 370,172 0,0 STOR_MID: E'004' JU; NOP;");
-                //modOPCommand.El_Exec_Footer_Connection_Commands();
-                writer.WriteLine($":GRI");
-                //writer.WriteLine($"pm_view_win1_recall_n 9 ;");
-                //writer.WriteLine($"set_actual_layer LAYER_ORIG ;");
-                //writer.WriteLine($"pm_view_redraw; TESTDIS_OFF ;");
-                //writer.WriteLine($"pm_view_grid_on;");
-                writer.WriteLine($"pm_files_sav;;");
-                writer.WriteLine($"GRI ELECTRE_GRID_STH;");
-                //writer.WriteLine($"UNDO_END2;");
-                //writer.WriteLine($"UNDO :E;");
-                //MessageBox.Show("Simple4PointConnection_STP_ZLine Completed");
-            }
-        }
+        //public static void Simple4PointConnection_TP_ZLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Num)
+        //{
+        //    //double p12x, p12y, p23x, p23y;
+        //    double X1 = 0, Y1 = 0, X2 = 0, Y2 = 0, X3 = 0, Y3 = 0, X4 = 0, Y4 = 0;string twisted_wire_symbol = string.Empty;
+        //    X1 = p1x;
+        //    Y1 = p1y;
+        //    X2 = p2x;
+        //    Y2 = p2y;
+        //    X3 = (X1 + X2) / 2;
+        //    X4 = X3;
+        //    Y3 = Y1;
+        //    Y4 = Y2;
+        //    int wire_Type_Core_Number = Convert.ToInt16(wire_Type_Core_Num);
+        //    if (wire_Type.Equals("TP")) { twisted_wire_symbol = "sth_tp4"; }
+        //    else if (wire_Type.Equals("QUADRAX")){ twisted_wire_symbol = "sth_quadrax4"; }
+        //    //)//Quadrax,sth_quadrax4,TP,sth_tp4
+        //    //p12x = (p1x + p2x) / 2; //p1x+150;
+        //    //p12y = p1y;//
+        //    //p23x = p12x;
+        //    //p23y= p12y-60;
+        //    using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //    {
+        //        //writer.WriteLine($"ADD L154 {iX},{iY} {iX + iLength},{iY};NOP;");
+        //        //writer.WriteLine(
+        //        writer.WriteLine($"GRI 2.0, 2;");
+        //        writer.WriteLine($"ADD L154 :W0");
 
-        public static void Simple4PointConnection_TP_ZLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Num)
-        {
-            //double p12x, p12y, p23x, p23y;
-            double X1 = 0, Y1 = 0, X2 = 0, Y2 = 0, X3 = 0, Y3 = 0, X4 = 0, Y4 = 0;string twisted_wire_symbol = string.Empty;
-            X1 = p1x;
-            Y1 = p1y;
-            X2 = p2x;
-            Y2 = p2y;
-            X3 = (X1 + X2) / 2;
-            X4 = X3;
-            Y3 = Y1;
-            Y4 = Y2;
-            int wire_Type_Core_Number = Convert.ToInt16(wire_Type_Core_Num);
-            if (wire_Type.Equals("TP")) { twisted_wire_symbol = "sth_tp4"; }
-            else if (wire_Type.Equals("QUADRAX")){ twisted_wire_symbol = "sth_quadrax4"; }
-            //)//Quadrax,sth_quadrax4,TP,sth_tp4
-            //p12x = (p1x + p2x) / 2; //p1x+150;
-            //p12y = p1y;//
-            //p23x = p12x;
-            //p23y= p12y-60;
-            using (var writer = File.AppendText(Constants.el_ExecFilePath))
-            {
-                //writer.WriteLine($"ADD L154 {iX},{iY} {iX + iLength},{iY};NOP;");
-                //writer.WriteLine(
-                writer.WriteLine($"GRI 2.0, 2;");
-                writer.WriteLine($"ADD L154 :W0");
+        //        writer.WriteLine($"{X1},{Y1}");
+        //        //writer.WriteLine($"74,238");
+        //        writer.WriteLine($"{X3},{Y3}");
+        //        //writer.WriteLine($"230,238");
+        //        writer.WriteLine($"{X4},{Y4}");
+        //        //writer.WriteLine($"230,172");
+        //        writer.WriteLine($"{X2},{Y2}");
+        //        //writer.WriteLine($"386,172");
+        //        writer.WriteLine($";;NOP;;");
+        //        writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X1},{Y1} '{iWireCode}' {X1 * 2},{Y1} ;NOP;");
+        //        //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 74,238 'STP__02' 152,238 ;NOP;");
+        //        writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X1},{Y1} '#{iWireGauge}' {X1 * 2 + 2},{Y1} ;");
+        //        //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 74,238 '#14' 154,238 ;");
+        //        writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X1},{Y1} '{wire_Type_Core_Number}' {X1 * 2 + 2 + 8},{Y1 - 1} ;");
+        //        //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 74,238 '1' 162,237 ;");
+        //        writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {X1},{Y1} '{wire_Length}' {X1 * 2 + 2 + 8},{Y1} ;");
+        //        //writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 74,238 'LLL' 162,238 ;");
+        //        writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X1},{Y1} '' {X1 * 2 + 2 + 8},{Y1} ;");
+        //        //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 74,238 '' 162,238 ;");
+        //        writer.WriteLine($"ADD L154 :W0");
+        //        writer.WriteLine($"{X1},{Y1 - 4}");
+        //        //writer.WriteLine($"74,234");
+        //        writer.WriteLine($"{X3 - 4},{Y3 - 4}");
+        //        //writer.WriteLine($"226,234");
+        //        writer.WriteLine($"{X4 - 4},{Y2 - 4}");
+        //        //writer.WriteLine($"226,168");
+        //        writer.WriteLine($"{X2},{Y2 - 4}");
+        //        //writer.WriteLine($"386,168");
+        //        writer.WriteLine($";;NOP;;");
+        //        writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X3 - 4},{Y2 - 4} '{iWireCode}' {X3 - 4 + 80},{Y2 - 4} ;NOP;");
+        //        //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 226,168 'STP__02' 306,168 ;NOP;");
+        //        writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X3 - 4},{Y2 - 4} '#{iWireGauge}' {X3 - 4 + 80 + 2},{Y2 - 4} ;");
+        //        //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 226,168 '#14' 308,168 ;");
+        //        writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X3 - 4},{Y2 - 4} '{wire_Type_Core_Number + 1}' {X3 - 4 + 80 + 2 + 8},{Y2 - 4 - 1} ;");
+        //        //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 226,168 '2' 316,167 ;");
+        //        writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {X3 - 4},{Y2 - 4} '{wire_Length}' {X3 - 4 + 80 + 2 + 8},{Y2 - 4} ;");
+        //        //writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 226,168 'LLL' 316,168 ;");
+        //        writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X3 - 4},{Y2 - 4} '' {X3 - 4 + 80 + 2 + 8},{Y2 - 4} ;");
+        //        //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 226,168 '' 316,168 ;");
+        //        writer.WriteLine($"ADD I2 {twisted_wire_symbol} :R0 {X1 + 16},{Y1};");
+        //        //writer.WriteLine($"ADD I2 sth_stp4 :R0 90,238;");
+        //        writer.WriteLine($"TESTDIS;");
+        //        writer.WriteLine($"MOD N250 {X1 + 16},{Y1} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        //writer.WriteLine($"MOD N250 90,238 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
+        //        writer.WriteLine($"MOD N250 {X1 + 16},{Y1 - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        //writer.WriteLine($"MOD N250 90,234 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
+        //        writer.WriteLine($"TESTDIS_OFF;");
+        //        writer.WriteLine($":RAW");
+        //        writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X1 + 16},{Y1} {X1 + 16 - 1.5},{Y1 + 0.5};NOP;");
+        //        //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '004' :AC I2 90,238 88.5,238.5;NOP;");
+        //        writer.WriteLine($"MOD N253 {X1 + 16},{Y1} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
+        //        //writer.WriteLine($"MOD N253 90,238 0,0 STOR_MID :E'004' JU;NOP;");
+        //        writer.WriteLine($":GRI");
+        //        writer.WriteLine($"ADD I2 {twisted_wire_symbol} :R0 {X2 - 16},{Y2};");
+        //        //writer.WriteLine($"ADD I2 sth_stp4 :R0 370,172;");
+        //        writer.WriteLine($"TESTDIS;");
+        //        writer.WriteLine($"MOD N250 {X2 - 16},{Y2} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        //writer.WriteLine($"MOD N250 370,172 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
+        //        writer.WriteLine($"MOD N250 {X2 - 16},{Y2 - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
+        //        //writer.WriteLine($"MOD N250 370,168 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
+        //        writer.WriteLine($"TESTDIS_OFF;");
+        //        writer.WriteLine($":RAW");
+        //        writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X2 - 16},{Y2} {X2 - 16 - 1.5},{Y2 + 0.5};NOP;");
+        //        //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '004' :AC I2 370,172 368.5,172.5;NOP;");
+        //        writer.WriteLine($"MOD N253 {X2 - 16},{Y2} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
+        //        //writer.WriteLine($"MOD N253 370,172 0,0 STOR_MID: E'004' JU; NOP;");
+        //        //modOPCommand.El_Exec_Footer_Connection_Commands();
+        //        writer.WriteLine($":GRI");
+        //        //writer.WriteLine($"pm_view_win1_recall_n 9 ;");
+        //        //writer.WriteLine($"set_actual_layer LAYER_ORIG ;");
+        //        //writer.WriteLine($"pm_view_redraw; TESTDIS_OFF ;");
+        //        //writer.WriteLine($"pm_view_grid_on;");
+        //        writer.WriteLine($"pm_files_sav;;");
+        //        writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+        //        //writer.WriteLine($"UNDO_END2;");
+        //        //writer.WriteLine($"UNDO :E;");
+        //        //MessageBox.Show("Simple4PointConnection_TP_ZLine Completed");
+        //    }
 
-                writer.WriteLine($"{X1},{Y1}");
-                //writer.WriteLine($"74,238");
-                writer.WriteLine($"{X3},{Y3}");
-                //writer.WriteLine($"230,238");
-                writer.WriteLine($"{X4},{Y4}");
-                //writer.WriteLine($"230,172");
-                writer.WriteLine($"{X2},{Y2}");
-                //writer.WriteLine($"386,172");
-                writer.WriteLine($";;NOP;;");
-                writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X1},{Y1} '{iWireCode}' {X1 * 2},{Y1} ;NOP;");
-                //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 74,238 'STP__02' 152,238 ;NOP;");
-                writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X1},{Y1} '#{iWireGauge}' {X1 * 2 + 2},{Y1} ;");
-                //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 74,238 '#14' 154,238 ;");
-                writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X1},{Y1} '{wire_Type_Core_Number}' {X1 * 2 + 2 + 8},{Y1 - 1} ;");
-                //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 74,238 '1' 162,237 ;");
-                writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {X1},{Y1} '{wire_Length}' {X1 * 2 + 2 + 8},{Y1} ;");
-                //writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 74,238 'LLL' 162,238 ;");
-                writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X1},{Y1} '' {X1 * 2 + 2 + 8},{Y1} ;");
-                //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 74,238 '' 162,238 ;");
-                writer.WriteLine($"ADD L154 :W0");
-                writer.WriteLine($"{X1},{Y1 - 4}");
-                //writer.WriteLine($"74,234");
-                writer.WriteLine($"{X3 - 4},{Y3 - 4}");
-                //writer.WriteLine($"226,234");
-                writer.WriteLine($"{X4 - 4},{Y2 - 4}");
-                //writer.WriteLine($"226,168");
-                writer.WriteLine($"{X2},{Y2 - 4}");
-                //writer.WriteLine($"386,168");
-                writer.WriteLine($";;NOP;;");
-                writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X3 - 4},{Y2 - 4} '{iWireCode}' {X3 - 4 + 80},{Y2 - 4} ;NOP;");
-                //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 226,168 'STP__02' 306,168 ;NOP;");
-                writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X3 - 4},{Y2 - 4} '#{iWireGauge}' {X3 - 4 + 80 + 2},{Y2 - 4} ;");
-                //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 226,168 '#14' 308,168 ;");
-                writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X3 - 4},{Y2 - 4} '{wire_Type_Core_Number + 1}' {X3 - 4 + 80 + 2 + 8},{Y2 - 4 - 1} ;");
-                //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 226,168 '2' 316,167 ;");
-                writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {X3 - 4},{Y2 - 4} '{wire_Length}' {X3 - 4 + 80 + 2 + 8},{Y2 - 4} ;");
-                //writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 226,168 'LLL' 316,168 ;");
-                writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X3 - 4},{Y2 - 4} '' {X3 - 4 + 80 + 2 + 8},{Y2 - 4} ;");
-                //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 226,168 '' 316,168 ;");
-                writer.WriteLine($"ADD I2 {twisted_wire_symbol} :R0 {X1 + 16},{Y1};");
-                //writer.WriteLine($"ADD I2 sth_stp4 :R0 90,238;");
-                writer.WriteLine($"TESTDIS;");
-                writer.WriteLine($"MOD N250 {X1 + 16},{Y1} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                //writer.WriteLine($"MOD N250 90,238 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
-                writer.WriteLine($"MOD N250 {X1 + 16},{Y1 - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                //writer.WriteLine($"MOD N250 90,234 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
-                writer.WriteLine($"TESTDIS_OFF;");
-                writer.WriteLine($":RAW");
-                writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X1 + 16},{Y1} {X1 + 16 - 1.5},{Y1 + 0.5};NOP;");
-                //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '004' :AC I2 90,238 88.5,238.5;NOP;");
-                writer.WriteLine($"MOD N253 {X1 + 16},{Y1} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
-                //writer.WriteLine($"MOD N253 90,238 0,0 STOR_MID :E'004' JU;NOP;");
-                writer.WriteLine($":GRI");
-                writer.WriteLine($"ADD I2 {twisted_wire_symbol} :R0 {X2 - 16},{Y2};");
-                //writer.WriteLine($"ADD I2 sth_stp4 :R0 370,172;");
-                writer.WriteLine($"TESTDIS;");
-                writer.WriteLine($"MOD N250 {X2 - 16},{Y2} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                //writer.WriteLine($"MOD N250 370,172 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
-                writer.WriteLine($"MOD N250 {X2 - 16},{Y2 - 4} 0,0 :L254 STOR_MID :E'{wire_Type}' JU;NOP;");
-                //writer.WriteLine($"MOD N250 370,168 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
-                writer.WriteLine($"TESTDIS_OFF;");
-                writer.WriteLine($":RAW");
-                writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X2 - 16},{Y2} {X2 - 16 - 1.5},{Y2 + 0.5};NOP;");
-                //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '004' :AC I2 370,172 368.5,172.5;NOP;");
-                writer.WriteLine($"MOD N253 {X2 - 16},{Y2} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
-                //writer.WriteLine($"MOD N253 370,172 0,0 STOR_MID: E'004' JU; NOP;");
-                //modOPCommand.El_Exec_Footer_Connection_Commands();
-                writer.WriteLine($":GRI");
-                //writer.WriteLine($"pm_view_win1_recall_n 9 ;");
-                //writer.WriteLine($"set_actual_layer LAYER_ORIG ;");
-                //writer.WriteLine($"pm_view_redraw; TESTDIS_OFF ;");
-                //writer.WriteLine($"pm_view_grid_on;");
-                writer.WriteLine($"pm_files_sav;;");
-                writer.WriteLine($"GRI ELECTRE_GRID_STH;");
-                //writer.WriteLine($"UNDO_END2;");
-                //writer.WriteLine($"UNDO :E;");
-                //MessageBox.Show("Simple4PointConnection_TP_ZLine Completed");
-            }
-
-        }
+        //}
 
         #region //Commented old Simple4PointConnection_ZLine_Optimized code on 19 november, 2025
         //public static void Simple4PointConnection_ZLine_Optimized(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Number)
@@ -1808,131 +1809,132 @@ namespace PanelDrawing.CommonOperations
 
         //*****************************************************************************
         #endregion
-        public static void Simple4PointConnection_Mono_ZLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Number)
-        {
-            //double p12x, p12y, p23x, p23y;
-            double X1 = 0, Y1 = 0, X2 = 0, Y2 = 0, X3 = 0, Y3 = 0, X4 = 0, Y4 = 0;
-            X1 = p1x;
-            Y1 = p1y;
-            X2 = p2x;
-            Y2 = p2y;
-            X3 = (X1 + X2) / 2;
-            X4 = X3;
-            Y3 = Y1;
-            Y4 = Y2;
-            string mono_wire_symbol = string.Empty;
-            if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00"))
-            { mono_wire_symbol = "sth_s"; }
-            else if(wire_Type.Equals("SS")) { mono_wire_symbol = "sth_ss"; }
-            else if (wire_Type.Equals("COAX")) { mono_wire_symbol = "sth_coax"; }
-            else if (wire_Type.Equals("TRIAX")) { mono_wire_symbol = "sth_triax"; }
-            //coax,sth_coax,triax,sth_triax
-            //p12x = (p1x + p2x) / 2; //p1x+150;
-            //p12y = p1y;//
-            //p23x = p12x;
-            //p23y= p12y-60;
-            using (var writer = File.AppendText(Constants.el_ExecFilePath))
-            {
-                //writer.WriteLine($"ADD L154 {iX},{iY} {iX + iLength},{iY};NOP;");
-                //writer.WriteLine(
-                writer.WriteLine($"GRI 2.0, 2;");
-                writer.WriteLine($"ADD L154 :W0");
 
-                writer.WriteLine($"{X1},{Y1}");
-                //writer.WriteLine($"74,238");
-                writer.WriteLine($"{X3},{Y3}");
-                //writer.WriteLine($"230,238");
-                writer.WriteLine($"{X4},{Y4}");
-                //writer.WriteLine($"230,172");
-                writer.WriteLine($"{X2},{Y2}");
-                //writer.WriteLine($"386,172");
-                writer.WriteLine($";;NOP;;");
-                writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X1},{Y1} '{iWireCode}' {X1 * 2},{Y1} ;NOP;");
-                //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 74,238 'STP__02' 152,238 ;NOP;");
-                writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X1},{Y1} '#{iWireGauge}' {X1 * 2 + 2},{Y1} ;");
-                //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 74,238 '#14' 154,238 ;");
-                writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X1},{Y1} '{wire_Type_Core_Number}' {X1 * 2 + 2 + 8},{Y1 - 1} ;");
-                //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 74,238 '1' 162,237 ;");
-                writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {X1},{Y1} '{wire_Length}' {X1 * 2 + 2 + 8},{Y1} ;");
-                //writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 74,238 'LLL' 162,238 ;");
-                writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X1},{Y1} '' {X1 * 2 + 2 + 8},{Y1} ;");
-                //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 74,238 '' 162,238 ;");
-                #region//Extra Z line Removed 
-                //writer.WriteLine($"ADD L154 :W0");
-                //writer.WriteLine($"{X1},{Y1 - 4}");
-                ////writer.WriteLine($"74,234");
-                //writer.WriteLine($"{X3 - 4},{Y3 - 4}");
-                ////writer.WriteLine($"226,234");
-                //writer.WriteLine($"{X4 - 4},{Y2 - 4}");
-                ////writer.WriteLine($"226,168");
-                //writer.WriteLine($"{X2},{Y2 - 4}");
-                ////writer.WriteLine($"386,168");
-                //writer.WriteLine($";;NOP;;");
-                //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X3 - 4},{Y2 - 4} '{iWireCode}' {X3 - 4 + 80},{Y2 - 4} ;NOP;");
-                ////writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 226,168 'STP__02' 306,168 ;NOP;");
-                //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X3 - 4},{Y2 - 4} '#{iWireGauge}' {X3 - 4 + 80 + 2},{Y2 - 4} ;");
-                ////writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 226,168 '#14' 308,168 ;");
-                //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X3 - 4},{Y2 - 4} '{groupId}' {X3 - 4 + 80 + 2 + 8},{Y2 - 4 - 1} ;");
-                ////writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 226,168 '2' 316,167 ;");
-                //writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {X3 - 4},{Y2 - 4} '{wire_Length}' {X3 - 4 + 80 + 2 + 8},{Y2 - 4} ;");
-                ////writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 226,168 'LLL' 316,168 ;");
-                //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X3 - 4},{Y2 - 4} '' {X3 - 4 + 80 + 2 + 8},{Y2 - 4} ;");
-                #endregion
-                //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 226,168 '' 316,168 ;");
-                writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {X1 + 16},{Y1};");
-                writer.WriteLine($"TESTDIS;");
-                //writer.WriteLine($"ADD I2 sth_s :R0 {X1 + 16},{Y1};");
-                //writer.WriteLine($"ADD I2 sth_stp4 :R0 90,238;");
-                //writer.WriteLine($"MOD N250 {X1 + 16},{Y1} 0,0 :L254 STOR_MID :E'SS' JU;NOP;");
-                //writer.WriteLine($"MOD N250 90,238 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
-                //writer.WriteLine($"MOD N250 {X1 + 16},{Y1 - 4} 0,0 :L254 STOR_MID :E'SS' JU;NOP;");
-                //writer.WriteLine($"MOD N250 90,234 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
-                //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X1 + 16},{Y1} {X1 + 16 - 1.5},{Y1 + 0.5};NOP;");
-                //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '004' :AC I2 90,238 88.5,238.5;NOP;");
-                writer.WriteLine($"TESTDIS_OFF;");
-                writer.WriteLine($":RAW");
-                writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X1 + 16},{Y1} {X1 + 16 - 1.5},{Y1 + 0.5};NOP;");
-                if (wire_Type.Equals("SS") || wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))
-                {
-                    writer.WriteLine($"MOD N253 {X1 + 16},{Y1} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
-                }
-                //writer.WriteLine($"MOD N253 90,238 0,0 STOR_MID :E'004' JU;NOP;");
-                writer.WriteLine($":GRI");
-                #region//Extra Z line symbol removed
-                //writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {X2 - 16},{Y2};");
-                ////writer.WriteLine($"ADD I2 sth_stp4 :R0 370,172;");
-                //writer.WriteLine($"TESTDIS;");
-                ////writer.WriteLine($"ADD I2 sth_s :R0 {X2 - 16},{Y2};");
-                //////writer.WriteLine($"ADD I2 sth_stp4 :R0 370,172;");
-                ////writer.WriteLine($"MOD N250 {X2 - 16},{Y2} 0,0 :L254 STOR_MID :E'SS' JU;NOP;");
-                ////writer.WriteLine($"MOD N250 370,172 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
-                ////writer.WriteLine($"MOD N250 {X2 - 16},{Y2 - 4} 0,0 :L254 STOR_MID :E'SS' JU;NOP;");
-                ////writer.WriteLine($"MOD N250 370,168 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
-                ////writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X2 - 16},{Y2} {X2 - 16 - 1.5},{Y2 + 0.5};NOP;");
-                ////writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '004' :AC I2 370,172 368.5,172.5;NOP;");
-                //writer.WriteLine($"TESTDIS_OFF;");
-                //writer.WriteLine($":RAW");
-                //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X2 - 16},{Y2} {X2 - 16 - 1.5},{Y2 + 0.5};NOP;");
-                //if (wire_Type.Equals("SS"))
-                //{
-                //    writer.WriteLine($"MOD N253 {X2 - 16},{Y2} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
-                //}
-                //writer.WriteLine($"MOD N253 370,172 0,0 STOR_MID: E'004' JU; NOP;");
-                #endregion
-                //modOPCommand.El_Exec_Footer_Connection_Commands();
-                writer.WriteLine($":GRI");
-                //writer.WriteLine($"pm_view_win1_recall_n 9 ;");
-                //writer.WriteLine($"set_actual_layer LAYER_ORIG ;");
-                //writer.WriteLine($"pm_view_redraw; TESTDIS_OFF ;");
-                //writer.WriteLine($"pm_view_grid_on;");
-                writer.WriteLine($"pm_files_sav;;");
-                writer.WriteLine($"GRI ELECTRE_GRID_STH;");
-                //writer.WriteLine($"UNDO_END2;");
-                //writer.WriteLine($"UNDO :E;");
-                //MessageBox.Show("Simple4PointConnection_Mono_ZLine Completed");
-            }
+        //public static void Simple4PointConnection_Mono_ZLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Number)
+        //{
+        //    //double p12x, p12y, p23x, p23y;
+        //    double X1 = 0, Y1 = 0, X2 = 0, Y2 = 0, X3 = 0, Y3 = 0, X4 = 0, Y4 = 0;
+        //    X1 = p1x;
+        //    Y1 = p1y;
+        //    X2 = p2x;
+        //    Y2 = p2y;
+        //    X3 = (X1 + X2) / 2;
+        //    X4 = X3;
+        //    Y3 = Y1;
+        //    Y4 = Y2;
+        //    string mono_wire_symbol = string.Empty;
+        //    if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00"))
+        //    { mono_wire_symbol = "sth_s"; }
+        //    else if(wire_Type.Equals("SS")) { mono_wire_symbol = "sth_ss"; }
+        //    else if (wire_Type.Equals("COAX")) { mono_wire_symbol = "sth_coax"; }
+        //    else if (wire_Type.Equals("TRIAX")) { mono_wire_symbol = "sth_triax"; }
+        //    //coax,sth_coax,triax,sth_triax
+        //    //p12x = (p1x + p2x) / 2; //p1x+150;
+        //    //p12y = p1y;//
+        //    //p23x = p12x;
+        //    //p23y= p12y-60;
+        //    using (var writer = File.AppendText(Constants.el_ExecFilePath))
+        //    {
+        //        //writer.WriteLine($"ADD L154 {iX},{iY} {iX + iLength},{iY};NOP;");
+        //        //writer.WriteLine(
+        //        writer.WriteLine($"GRI 2.0, 2;");
+        //        writer.WriteLine($"ADD L154 :W0");
 
-        }
+        //        writer.WriteLine($"{X1},{Y1}");
+        //        //writer.WriteLine($"74,238");
+        //        writer.WriteLine($"{X3},{Y3}");
+        //        //writer.WriteLine($"230,238");
+        //        writer.WriteLine($"{X4},{Y4}");
+        //        //writer.WriteLine($"230,172");
+        //        writer.WriteLine($"{X2},{Y2}");
+        //        //writer.WriteLine($"386,172");
+        //        writer.WriteLine($";;NOP;;");
+        //        writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X1},{Y1} '{iWireCode}' {X1 * 2},{Y1} ;NOP;");
+        //        //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 74,238 'STP__02' 152,238 ;NOP;");
+        //        writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X1},{Y1} '#{iWireGauge}' {X1 * 2 + 2},{Y1} ;");
+        //        //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 74,238 '#14' 154,238 ;");
+        //        writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X1},{Y1} '{wire_Type_Core_Number}' {X1 * 2 + 2 + 8},{Y1 - 1} ;");
+        //        //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 74,238 '1' 162,237 ;");
+        //        writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {X1},{Y1} '{wire_Length}' {X1 * 2 + 2 + 8},{Y1} ;");
+        //        //writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 74,238 'LLL' 162,238 ;");
+        //        writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X1},{Y1} '' {X1 * 2 + 2 + 8},{Y1} ;");
+        //        //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 74,238 '' 162,238 ;");
+        //        #region//Extra Z line Removed 
+        //        //writer.WriteLine($"ADD L154 :W0");
+        //        //writer.WriteLine($"{X1},{Y1 - 4}");
+        //        ////writer.WriteLine($"74,234");
+        //        //writer.WriteLine($"{X3 - 4},{Y3 - 4}");
+        //        ////writer.WriteLine($"226,234");
+        //        //writer.WriteLine($"{X4 - 4},{Y2 - 4}");
+        //        ////writer.WriteLine($"226,168");
+        //        //writer.WriteLine($"{X2},{Y2 - 4}");
+        //        ////writer.WriteLine($"386,168");
+        //        //writer.WriteLine($";;NOP;;");
+        //        //writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X3 - 4},{Y2 - 4} '{iWireCode}' {X3 - 4 + 80},{Y2 - 4} ;NOP;");
+        //        ////writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 226,168 'STP__02' 306,168 ;NOP;");
+        //        //writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X3 - 4},{Y2 - 4} '#{iWireGauge}' {X3 - 4 + 80 + 2},{Y2 - 4} ;");
+        //        ////writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 226,168 '#14' 308,168 ;");
+        //        //writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X3 - 4},{Y2 - 4} '{groupId}' {X3 - 4 + 80 + 2 + 8},{Y2 - 4 - 1} ;");
+        //        ////writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 226,168 '2' 316,167 ;");
+        //        //writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 {X3 - 4},{Y2 - 4} '{wire_Length}' {X3 - 4 + 80 + 2 + 8},{Y2 - 4} ;");
+        //        ////writer.WriteLine($"ADD N59 :R0 :D :J2 :F2 :T3009 :AC L154 226,168 'LLL' 316,168 ;");
+        //        //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X3 - 4},{Y2 - 4} '' {X3 - 4 + 80 + 2 + 8},{Y2 - 4} ;");
+        //        #endregion
+        //        //writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 226,168 '' 316,168 ;");
+        //        writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {X1 + 16},{Y1};");
+        //        writer.WriteLine($"TESTDIS;");
+        //        //writer.WriteLine($"ADD I2 sth_s :R0 {X1 + 16},{Y1};");
+        //        //writer.WriteLine($"ADD I2 sth_stp4 :R0 90,238;");
+        //        //writer.WriteLine($"MOD N250 {X1 + 16},{Y1} 0,0 :L254 STOR_MID :E'SS' JU;NOP;");
+        //        //writer.WriteLine($"MOD N250 90,238 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
+        //        //writer.WriteLine($"MOD N250 {X1 + 16},{Y1 - 4} 0,0 :L254 STOR_MID :E'SS' JU;NOP;");
+        //        //writer.WriteLine($"MOD N250 90,234 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
+        //        //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X1 + 16},{Y1} {X1 + 16 - 1.5},{Y1 + 0.5};NOP;");
+        //        //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '004' :AC I2 90,238 88.5,238.5;NOP;");
+        //        writer.WriteLine($"TESTDIS_OFF;");
+        //        writer.WriteLine($":RAW");
+        //        writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X1 + 16},{Y1} {X1 + 16 - 1.5},{Y1 + 0.5};NOP;");
+        //        if (wire_Type.Equals("SS") || wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))
+        //        {
+        //            writer.WriteLine($"MOD N253 {X1 + 16},{Y1} 0,0 STOR_MID :E'{groupId}' JU;NOP;");
+        //        }
+        //        //writer.WriteLine($"MOD N253 90,238 0,0 STOR_MID :E'004' JU;NOP;");
+        //        writer.WriteLine($":GRI");
+        //        #region//Extra Z line symbol removed
+        //        //writer.WriteLine($"ADD I2 {mono_wire_symbol} :R0 {X2 - 16},{Y2};");
+        //        ////writer.WriteLine($"ADD I2 sth_stp4 :R0 370,172;");
+        //        //writer.WriteLine($"TESTDIS;");
+        //        ////writer.WriteLine($"ADD I2 sth_s :R0 {X2 - 16},{Y2};");
+        //        //////writer.WriteLine($"ADD I2 sth_stp4 :R0 370,172;");
+        //        ////writer.WriteLine($"MOD N250 {X2 - 16},{Y2} 0,0 :L254 STOR_MID :E'SS' JU;NOP;");
+        //        ////writer.WriteLine($"MOD N250 370,172 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
+        //        ////writer.WriteLine($"MOD N250 {X2 - 16},{Y2 - 4} 0,0 :L254 STOR_MID :E'SS' JU;NOP;");
+        //        ////writer.WriteLine($"MOD N250 370,168 0,0 :L254 STOR_MID :E'STP' JU;NOP;");
+        //        ////writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X2 - 16},{Y2} {X2 - 16 - 1.5},{Y2 + 0.5};NOP;");
+        //        ////writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '004' :AC I2 370,172 368.5,172.5;NOP;");
+        //        //writer.WriteLine($"TESTDIS_OFF;");
+        //        //writer.WriteLine($":RAW");
+        //        //writer.WriteLine($"ADD N58 :J7 :T3003 :D :F1 :R0 '{groupId}' :AC I2 {X2 - 16},{Y2} {X2 - 16 - 1.5},{Y2 + 0.5};NOP;");
+        //        //if (wire_Type.Equals("SS"))
+        //        //{
+        //        //    writer.WriteLine($"MOD N253 {X2 - 16},{Y2} 0,0 STOR_MID :E'{groupId}' JU; NOP;");
+        //        //}
+        //        //writer.WriteLine($"MOD N253 370,172 0,0 STOR_MID: E'004' JU; NOP;");
+        //        #endregion
+        //        //modOPCommand.El_Exec_Footer_Connection_Commands();
+        //        writer.WriteLine($":GRI");
+        //        //writer.WriteLine($"pm_view_win1_recall_n 9 ;");
+        //        //writer.WriteLine($"set_actual_layer LAYER_ORIG ;");
+        //        //writer.WriteLine($"pm_view_redraw; TESTDIS_OFF ;");
+        //        //writer.WriteLine($"pm_view_grid_on;");
+        //        writer.WriteLine($"pm_files_sav;;");
+        //        writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+        //        //writer.WriteLine($"UNDO_END2;");
+        //        //writer.WriteLine($"UNDO :E;");
+        //        //MessageBox.Show("Simple4PointConnection_Mono_ZLine Completed");
+        //    }
+
+        //}
 
         #region //Commented old Simple2PointConnection_TP_StraightLine code on 19 november, 2025
         //public static void Simple2PointConnection_STP_StraightLine(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type, string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Num)
@@ -2236,158 +2238,158 @@ namespace PanelDrawing.CommonOperations
         //}
         #endregion
 
-        public static void Simple4PointConnection(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type)
-        {
-            string Obj1Type, Obj2Type;
-            string Obj1Name, Obj2Name;
-            string sObj1WirePoints = "", sObj2WirePoints = "";
+        //public static void Simple4PointConnection(double p1x, double p1y, double p2x, double p2y, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type)
+        //{
+        //    string Obj1Type, Obj2Type;
+        //    string Obj1Name, Obj2Name;
+        //    string sObj1WirePoints = "", sObj2WirePoints = "";
 
-            double X1, Y1, X2, Y2, X3, Y3, X4, y4;
-            double X14, y14;
+        //    double X1, Y1, X2, Y2, X3, Y3, X4, y4;
+        //    double X14, y14;
 
-            if (p1x < p2x)
-            {
-                X1 = p1x; Y1 = p1y;
-                X4 = p2x; y4 = p2y;
-                Obj1Type = iF_Type; Obj1Name = c1;
-                Obj2Type = iT_Type; Obj2Name = c2;
-            }
-            else
-            {
-                X1 = p2x; Y1 = p2y;
-                X4 = p1x; y4 = p1y;
-                Obj1Type = iT_Type; Obj1Name = c2;
-                Obj2Type = iF_Type; Obj2Name = c1;
-            }
+        //    if (p1x < p2x)
+        //    {
+        //        X1 = p1x; Y1 = p1y;
+        //        X4 = p2x; y4 = p2y;
+        //        Obj1Type = iF_Type; Obj1Name = c1;
+        //        Obj2Type = iT_Type; Obj2Name = c2;
+        //    }
+        //    else
+        //    {
+        //        X1 = p2x; Y1 = p2y;
+        //        X4 = p1x; y4 = p1y;
+        //        Obj1Type = iT_Type; Obj1Name = c2;
+        //        Obj2Type = iF_Type; Obj2Name = c1;
+        //    }
 
-            X14 = Math.Abs(X1 - X4);
-            y14 = Math.Abs(Y1 - y4);
+        //    X14 = Math.Abs(X1 - X4);
+        //    y14 = Math.Abs(Y1 - y4);
 
-            X2 = X1 + X14 / 2;
-            Y2 = Y1;
+        //    X2 = X1 + X14 / 2;
+        //    Y2 = Y1;
 
-            int ValueOfOffset_Wire = 5;
-            //if(!string.IsNullOrEmpty(Constants.arrCompNameForWireOffset))
-            Constants.arrCompNameForWireOffset = new string[0];
-            int EquIndex = Constants.arrCompNameForWireOffset.Length.Equals("0")?0: modStandard.RowOfFoundStringIn1Darray(X2.ToString(), Constants.arrCompNameForWireOffset);
+        //    int ValueOfOffset_Wire = 5;
+        //    //if(!string.IsNullOrEmpty(Constants.arrCompNameForWireOffset))
+        //    Constants.arrCompNameForWireOffset = new string[0];
+        //    int EquIndex = Constants.arrCompNameForWireOffset.Length.Equals("0")?0: modStandard.RowOfFoundStringIn1Darray(X2.ToString(), Constants.arrCompNameForWireOffset);
 
-            Console.WriteLine($"{X2}   {iWireCode}");
+        //    Console.WriteLine($"{X2}   {iWireCode}");
 
-            if (EquIndex == 0)
-            {
-                Array.Resize(ref Constants.arrCompNameForWireOffset, Constants.arrCompNameForWireOffset.Length + 1);
-                Array.Resize(ref Constants.arrCountForWireOffset, Constants.arrCompNameForWireOffset.Length);
-                Constants.arrCompNameForWireOffset[^1] = X2.ToString();
-                Constants.arrCountForWireOffset[^1] = 1.ToString();
-            }
-            else
-            {
-                Constants.arrCountForWireOffset[EquIndex] += 1;
-                X2 += (Convert.ToInt16(Constants.arrCountForWireOffset[EquIndex]) - 1) * Constants.WireSpacing_X;
-            }
+        //    if (EquIndex == 0)
+        //    {
+        //        Array.Resize(ref Constants.arrCompNameForWireOffset, Constants.arrCompNameForWireOffset.Length + 1);
+        //        Array.Resize(ref Constants.arrCountForWireOffset, Constants.arrCompNameForWireOffset.Length);
+        //        Constants.arrCompNameForWireOffset[^1] = X2.ToString();
+        //        Constants.arrCountForWireOffset[^1] = 1.ToString();
+        //    }
+        //    else
+        //    {
+        //        Constants.arrCountForWireOffset[EquIndex] += 1;
+        //        X2 += (Convert.ToInt16(Constants.arrCountForWireOffset[EquIndex]) - 1) * Constants.WireSpacing_X;
+        //    }
 
-            X3 = X2;
+        //    X3 = X2;
 
-            Y3 = Y1 < y4 ? Math.Abs(Y1 + y14) : Math.Abs(Y1 - y14);
+        //    Y3 = Y1 < y4 ? Math.Abs(Y1 + y14) : Math.Abs(Y1 - y14);
 
-            int F = 0, FoundY = 0;
+        //    int F = 0, FoundY = 0;
 
-            if (y4 == -22)
-            {
-                // Debug breakpoint
-            }
+        //    if (y4 == -22)
+        //    {
+        //        // Debug breakpoint
+        //    }
 
-            if (Obj1Type == "SPL" || Obj2Type == "SPL" || Obj1Type == "TBK" || Obj2Type == "TBK")
-            {
-                int Offset1 = 1;
-                switch (Obj1Type)
-                {
-                    case "TBK":
-                    case "SPL":
-                        int RowValue1 = Check_SPL_TBK_WireOverlapAndAppend(Obj1Name, Y1);
-                        if (RowValue1 != 0)
-                        {
-                            F = Convert.ToInt16(Constants.arrSlantSPL[RowValue1, Constants.SlantSPL_Count]);
-                        }
+        //    if (Obj1Type == "SPL" || Obj2Type == "SPL" || Obj1Type == "TBK" || Obj2Type == "TBK")
+        //    {
+        //        int Offset1 = 1;
+        //        switch (Obj1Type)
+        //        {
+        //            case "TBK":
+        //            case "SPL":
+        //                int RowValue1 = Check_SPL_TBK_WireOverlapAndAppend(Obj1Name, Y1);
+        //                if (RowValue1 != 0)
+        //                {
+        //                    F = Convert.ToInt16(Constants.arrSlantSPL[RowValue1, Constants.SlantSPL_Count]);
+        //                }
 
-                        if (y4 > Y1)
-                        {
-                            Console.WriteLine("obj1 - y4>y1");
-                            sObj1WirePoints = $"{X1},{Y1} {X1 + Offset1 * (RowValue1 == 0 ? 1 : F)},{Y1 + Offset1 * (RowValue1 == 0 ? 1 : F)} {X2},{Y2 + Offset1 * (RowValue1 == 0 ? 1 : F)}";
-                        }
-                        else if (y4 < Y1)
-                        {
-                            Console.WriteLine("obj1 - y4<y1");
-                            sObj1WirePoints = $"{X1},{Y1} {X1 + Offset1 * (RowValue1 == 0 ? 1 : F)},{Y1 - Offset1 * (RowValue1 == 0 ? 1 : F)} {X2},{Y2 - Offset1 * (RowValue1 == 0 ? 1 : F)}";
-                        }
-                        break;
+        //                if (y4 > Y1)
+        //                {
+        //                    Console.WriteLine("obj1 - y4>y1");
+        //                    sObj1WirePoints = $"{X1},{Y1} {X1 + Offset1 * (RowValue1 == 0 ? 1 : F)},{Y1 + Offset1 * (RowValue1 == 0 ? 1 : F)} {X2},{Y2 + Offset1 * (RowValue1 == 0 ? 1 : F)}";
+        //                }
+        //                else if (y4 < Y1)
+        //                {
+        //                    Console.WriteLine("obj1 - y4<y1");
+        //                    sObj1WirePoints = $"{X1},{Y1} {X1 + Offset1 * (RowValue1 == 0 ? 1 : F)},{Y1 - Offset1 * (RowValue1 == 0 ? 1 : F)} {X2},{Y2 - Offset1 * (RowValue1 == 0 ? 1 : F)}";
+        //                }
+        //                break;
 
-                    default:
-                        sObj1WirePoints = $"{X1},{Y1} {X2},{Y2}";
-                        break;
-                }
+        //            default:
+        //                sObj1WirePoints = $"{X1},{Y1} {X2},{Y2}";
+        //                break;
+        //        }
 
-                switch (Obj2Type)
-                {
-                    case "TBK":
-                    case "SPL":
-                        int RowValue2 = Check_SPL_TBK_WireOverlapAndAppend(Obj2Name, y4);
-                        if (RowValue2 != 0)
-                        {
-                            F = Convert.ToInt16(Constants.arrSlantSPL[RowValue2, Constants.SlantSPL_Count]);
-                        }
+        //        switch (Obj2Type)
+        //        {
+        //            case "TBK":
+        //            case "SPL":
+        //                int RowValue2 = Check_SPL_TBK_WireOverlapAndAppend(Obj2Name, y4);
+        //                if (RowValue2 != 0)
+        //                {
+        //                    F = Convert.ToInt16(Constants.arrSlantSPL[RowValue2, Constants.SlantSPL_Count]);
+        //                }
 
-                        if (y4 > Y1)
-                        {
-                            Console.WriteLine("obj2 - y4>y1");
-                            sObj2WirePoints = $"{X3},{Y3 - Offset1 * (RowValue2 == 0 ? 1 : F)} {X4 - Offset1 * (RowValue2 == 0 ? 1 : F)},{y4 - Offset1 * (RowValue2 == 0 ? 1 : F)} {X4},{y4}";
-                        }
-                        else if (y4 < Y1)
-                        {
-                            Console.WriteLine("obj2 - y4<y1");
-                            sObj2WirePoints = $"{X3},{Y3 + Offset1 * (RowValue2 == 0 ? 1 : F)} {X4 - Offset1 * (RowValue2 == 0 ? 1 : F)},{y4 + Offset1 * (RowValue2 == 0 ? 1 : F)} {X4},{y4}";
-                        }
-                        break;
+        //                if (y4 > Y1)
+        //                {
+        //                    Console.WriteLine("obj2 - y4>y1");
+        //                    sObj2WirePoints = $"{X3},{Y3 - Offset1 * (RowValue2 == 0 ? 1 : F)} {X4 - Offset1 * (RowValue2 == 0 ? 1 : F)},{y4 - Offset1 * (RowValue2 == 0 ? 1 : F)} {X4},{y4}";
+        //                }
+        //                else if (y4 < Y1)
+        //                {
+        //                    Console.WriteLine("obj2 - y4<y1");
+        //                    sObj2WirePoints = $"{X3},{Y3 + Offset1 * (RowValue2 == 0 ? 1 : F)} {X4 - Offset1 * (RowValue2 == 0 ? 1 : F)},{y4 + Offset1 * (RowValue2 == 0 ? 1 : F)} {X4},{y4}";
+        //                }
+        //                break;
 
-                    default:
-                        sObj2WirePoints = $"{X3},{Y3} {X4},{y4}";
-                        break;
-                }
+        //            default:
+        //                sObj2WirePoints = $"{X3},{Y3} {X4},{y4}";
+        //                break;
+        //        }
 
-                //Console.WriteLine($"ADD L154 :W0.0 :FILL {sObj1WirePoints} {sObj2WirePoints};;;;NOP");
-                File.AppendAllText(Constants.el_ExecFilePath, $"ADD L151 :W0.0 :FILL {sObj1WirePoints} {sObj2WirePoints};;;;NOP\n");
-            }
+        //        //Console.WriteLine($"ADD L154 :W0.0 :FILL {sObj1WirePoints} {sObj2WirePoints};;;;NOP");
+        //        File.AppendAllText(Constants.el_ExecFilePath, $"ADD L151 :W0.0 :FILL {sObj1WirePoints} {sObj2WirePoints};;;;NOP\n");
+        //    }
 
-            else
-            {
-                //string command = $"ADD L154 :W0.0 :FILL {X1},{Y1} {X2},{Y2} {X3},{Y3};;;;NOP";
-                File.AppendAllText(Constants.el_ExecFilePath, $"ADD L154 :W0.0 :FILL {X1},{Y1} {X2},{Y2} {X3},{Y3} {X4},{y4};;;;NOP\n");
-            }
+        //    else
+        //    {
+        //        //string command = $"ADD L154 :W0.0 :FILL {X1},{Y1} {X2},{Y2} {X3},{Y3};;;;NOP";
+        //        File.AppendAllText(Constants.el_ExecFilePath, $"ADD L154 :W0.0 :FILL {X1},{Y1} {X2},{Y2} {X3},{Y3} {X4},{y4};;;;NOP\n");
+        //    }
 
-            InsertWireCode90(X2, Y2 + (Y3 - Y2) / 2, iWireCode, iWireGauge);
-        }
+        //    InsertWireCode90(X2, Y2 + (Y3 - Y2) / 2, iWireCode, iWireGauge);
+        //}
 
-        public static int Check_SPL_TBK_WireOverlapAndAppend(string iName, double iY)
-        {
-            for (int r = 1; r <= Constants.SlantSPL_RowCounter; r++)
-            {
-                if (Constants.arrSlantSPL[r, Constants.SlantSPL_Yvalue].ToString() == iY.ToString() &&
-                    Constants.arrSlantSPL[r, Constants.SlantSPL_Name].ToString() == iName)
-                {
-                    Constants.arrSlantSPL[r, Constants.SlantSPL_Count] = Convert.ToInt16(Constants.arrSlantSPL[r, Constants.SlantSPL_Count]) + 1.ToString();
-                    return r;
-                }
-            }
+        //public static int Check_SPL_TBK_WireOverlapAndAppend(string iName, double iY)
+        //{
+        //    for (int r = 1; r <= Constants.SlantSPL_RowCounter; r++)
+        //    {
+        //        if (Constants.arrSlantSPL[r, Constants.SlantSPL_Yvalue].ToString() == iY.ToString() &&
+        //            Constants.arrSlantSPL[r, Constants.SlantSPL_Name].ToString() == iName)
+        //        {
+        //            Constants.arrSlantSPL[r, Constants.SlantSPL_Count] = Convert.ToInt16(Constants.arrSlantSPL[r, Constants.SlantSPL_Count]) + 1.ToString();
+        //            return r;
+        //        }
+        //    }
 
-            // If not found, append a new row
-            Constants.SlantSPL_RowCounter++;
-            Constants.arrSlantSPL[Constants.SlantSPL_RowCounter, Constants.SlantSPL_Name] = iName;
-            Constants.arrSlantSPL[Constants.SlantSPL_RowCounter, Constants.SlantSPL_Yvalue] = iY.ToString();
-            Constants.arrSlantSPL[Constants.SlantSPL_RowCounter, Constants.SlantSPL_Count] = 1.ToString();
+        //    // If not found, append a new row
+        //    Constants.SlantSPL_RowCounter++;
+        //    Constants.arrSlantSPL[Constants.SlantSPL_RowCounter, Constants.SlantSPL_Name] = iName;
+        //    Constants.arrSlantSPL[Constants.SlantSPL_RowCounter, Constants.SlantSPL_Yvalue] = iY.ToString();
+        //    Constants.arrSlantSPL[Constants.SlantSPL_RowCounter, Constants.SlantSPL_Count] = 1.ToString();
 
-            return 0;
-        }
-
+        //    return 0;
+        //}
+        #endregion
     }
 }
 

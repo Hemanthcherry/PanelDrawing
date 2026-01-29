@@ -1,20 +1,9 @@
 ﻿using PanelDrawing.Objects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PanelDrawing.CommonOperations
 {
     public static class Constants
     {
-        //Panel Component variables
-        // const variables
-        //C:\ELECTRE\electre_projects\PANEL_DRAWING
-
         // Data extraction related collections
         public static List<ElectreObject> dataExtractionList = new List<ElectreObject>();
         public static List<ElectreObject> dataExtractionListAbove = new List<ElectreObject>();
@@ -176,7 +165,7 @@ namespace PanelDrawing.CommonOperations
         public static string[] arrComponentsCreated;
         public static string[,] arrBorderInfo;
         public static string[] arrInfo;
-       // public static string[] arrPanelInfo;
+        // public static string[] arrPanelInfo;
         public static string[,] arrSlantSPL;
         public static string[] arrCompNameForWireOffset;
         public static string[] arrCountForWireOffset;
@@ -205,7 +194,7 @@ namespace PanelDrawing.CommonOperations
         public static List<string> lst_Orientation_Info;
         public static List<string> lst_WireCodes_Info_Processed;
         public static string[,] arr_My_Data;
-        
+
         // Wires Variables
         //public const int colLibCatalog_Macro = 1;
         //public const int colLibCatalog_InternalPartNumber = 3;

@@ -19,12 +19,6 @@ namespace PanelDrawing.Services.P2
 
             Constants.lst_WireCodes_Info_Processed = new List<string>();
 
-            // keep the small GRID writer as in original
-           // using (var writer = File.AppendText(Constants.el_ExecFilePath))
-           // {
-                //writer.WriteLine("GRID 2.0,2 ;");//, Constants.arrPanelDetails.GetLength(0)));
-           // }
-
             // iterate upgraded panelDetailsList (preserves original for-loop semantics)
             foreach (var pd in Constants.panelDetailsList)
             {
@@ -84,57 +78,17 @@ namespace PanelDrawing.Services.P2
             wire_code = arrTemp.Length > 0 ? arrTemp[0] : string.Empty;
             gauge = arrTemp.Length > 1 ? arrTemp[1] : string.Empty;
 
-            // Straight horizontal/overlap case
-            // if(p1y == p2y)
-         /*   if (false)
+         
+            if (iF_Ori == "T" || iF_Ori == "B" || iT_Ori == "T" || iT_Ori == "B")
             {
-                if (c1 == c2 && p1x == p2x)
-                {
-                    // overlapping wire scenario — do nothing
-                }
-                else
-                {
-                    //WireDrawing.DrawStraightLineConnection(
-                    //        p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
-
-                    //choose specialized straight - line routines based on wire_Type / wire_code
-                    //if (wire_Type.Equals("86A9S") || wire_Type.Equals("86A9SS") || wire_Type.Equals("S") || wire_Type.Equals("S0") || wire_Type.Equals("S00")
-                    //    || wire_code?.StartsWith("SS") == true | wire_Type.Equals("COAX") || wire_Type.Equals("TRIAX"))
-                    //{
-                    //    WireDrawing.Simple2PointConnection_Mono_StraightLine(
-                    //        p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
-                    //}
-                    if (wire_Type.Equals("TP") || wire_Type.Equals("QUADRAX"))
-                    {
-                        WireDrawing.Simple2PointConnection_TP_StraightLine(
-                            p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
-                    }
-                    else if (wire_Type.Equals("STP"))
-                    {
-                        WireDrawing.Simple2PointConnection_STP_StraightLine(
-                            p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
-                    }
-                    else
-                    {
-                        WireDrawing.Simple2PointConnection_Mono_StraightLine(
-                            p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number);
-                    }
-                }
+                //modOPCommand.Simple3PointConnection(p1x + 4, p1y, p2x + 4, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, iF_Ori, iT_Ori);
             }
             else
-            {*/
-                // If either orientation is Top/Bottom, original code had commented Simple3PointConnection call.
-                if (iF_Ori == "T" || iF_Ori == "B" || iT_Ori == "T" || iT_Ori == "B")
-                {
-                    //modOPCommand.Simple3PointConnection(p1x + 4, p1y, p2x + 4, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, iF_Ori, iT_Ori);
-                }
-                else
-                {
-                    // Z-line optimized routing (main path for non-horizontal)
-                    WireDrawing.DrawWire(
-                        p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, groupId, wire_Length, wire_Type, wire_Type_Core_Number, iF_Ori, iT_Ori);
-                }
-          //  }
+            {
+                // wire routing
+                WireDrawing.DrawWire(p1x, p1y, p2x, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, 
+                    groupId, wire_Length, wire_Type, wire_Type_Core_Number, iF_Ori, iT_Ori);
+            }
         }   
 
     }

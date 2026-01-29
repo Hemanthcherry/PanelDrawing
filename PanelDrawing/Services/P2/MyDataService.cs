@@ -176,20 +176,6 @@ namespace PanelDrawing.Services.P2
                     break;
                 }
             }
-        }
-
-        //private static void DeactivateRepetitiveConnections(string FC, string FP, string TC, string TP)
-        //{
-        //    var match = Constants.panelDetailsList.FirstOrDefault(x =>
-        //        x.FromConnector == FC &&
-        //        x.FromPin == FP &&
-        //        x.ToConnector == TC &&
-        //        x.ToPin == TP);
-
-        //    if (match != null)
-        //        match.Usage = "2";
-        //}
-
-       
+        }       
     }
 }
