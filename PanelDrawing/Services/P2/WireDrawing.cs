@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 
 namespace PanelDrawing.Services.P2
 {
@@ -19,6 +20,11 @@ namespace PanelDrawing.Services.P2
             {
                 bend = Offset + Constants.WiringOffset;
                 return X1 - bend;
+            }
+            else if (string.IsNullOrWhiteSpace(FromOrientation) && string.IsNullOrWhiteSpace(ToOrientation) && X1 > Offset + Constants.MarginX)
+            {
+                bend = Offset + Constants.WiringOffset;
+                return X1 - bend;                
             }
             else
             {
@@ -74,11 +80,27 @@ namespace PanelDrawing.Services.P2
             writer.WriteLine($"{X3},{Y3}");
             writer.WriteLine($"{X4},{Y4}");
             writer.WriteLine($"{X2},{Y2}");
+            writer.WriteLine($";;NOP;;");
 
             if (FromOrientation.Equals("R", StringComparison.OrdinalIgnoreCase) || ToOrientation.Equals("R", StringComparison.OrdinalIgnoreCase))
             {
                 //Source
-                writer.WriteLine($";;NOP;;");
+                writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X1},{Y1} '{iWireCode}' {X1 - 48},{Y1} ;NOP;");
+                writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X1},{Y1} '#{iWireGauge}' {X1 - 48 + 2},{Y1} ;");
+                writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X1},{Y1} '{wire_Type_Core_Number}' {X1 - 48 + 2 + 8},{Y1 + 1} ;");
+                writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {X1},{Y1} '{wire_Length}' {X1 - 48 + 2 + 8 + 2},{Y1} ;");
+                writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X1},{Y1} '' {X1 - 48 + 2 + 8 + 2},{Y1} ;");
+
+                //Destination
+                writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X2 - 25},{Y2} '{iWireCode}' {X2 - 25 * 2},{Y2} ;NOP;");
+                writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X2 - 25},{Y2} '#{iWireGauge}' {X2 - 25 * 2 + 2},{Y2} ;");
+                writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X2 - 25},{Y2} '{wire_Type_Core_Number}' {X2 - 25 * 2 + 2 + 8},{Y2 - 1} ;");
+                writer.WriteLine($"ADD N59 :R0  :D :J2 :F2 :T3009 :AC L154 {X2 - 25},{Y2} '{wire_Length}' {X2 - 25 * 2 + 2 + 8 + 2},{Y2} ;");
+                writer.WriteLine($"ADD N254 :R0 :T3017 :AC L154 {X2 - 25},{Y2} '' {X2 - 25 * 2 + 2 + 8 + 2},{Y2} ;");
+            }
+            else if (string.IsNullOrWhiteSpace(FromOrientation) && string.IsNullOrWhiteSpace(ToOrientation) && X1 > 80 + Constants.MarginX) // offset 80
+            {
+                //Source
                 writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X1},{Y1} '{iWireCode}' {X1 - 48},{Y1} ;NOP;");
                 writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X1},{Y1} '#{iWireGauge}' {X1 - 48 + 2},{Y1} ;");
                 writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X1},{Y1} '{wire_Type_Core_Number}' {X1 - 48 + 2 + 8},{Y1 + 1} ;");
@@ -95,7 +117,6 @@ namespace PanelDrawing.Services.P2
             else if (FromOrientation.Equals("L", StringComparison.OrdinalIgnoreCase) || ToOrientation.Equals("L", StringComparison.OrdinalIgnoreCase))
             {
                 //Source
-                writer.WriteLine($";;NOP;;");
                 writer.WriteLine($"ADD N54  :R0 :J8 :F2 :D :T1002 :AC L154 {X1},{Y1} '{iWireCode}' {X1 + 48},{Y1} ;NOP;");
                 writer.WriteLine($"ADD N56 :R0 :S10 :D :J2 :F2 :T3006 :AC L154 {X1},{Y1} '#{iWireGauge}' {X1 + 48 + 2},{Y1} ;");
                 writer.WriteLine($"ADD N252 :R0 :D :J3 :F1 :T4005 :AC L154 {X1},{Y1} '{wire_Type_Core_Number}' {X1 + 48 + 2 + 8},{Y1 - 1} ;");
@@ -114,7 +135,11 @@ namespace PanelDrawing.Services.P2
             {
                 int Direction = FromOrientation.Equals("R", StringComparison.OrdinalIgnoreCase) || ToOrientation.Equals("R", StringComparison.OrdinalIgnoreCase) ? -1 : +1;
 
-                DrawWireEndSymbol(writer, X1, Y1, Direction, wire_symbol, wire_Type, groupId); //source
+                if (string.IsNullOrWhiteSpace(FromOrientation) && string.IsNullOrWhiteSpace(ToOrientation) && X1 > 80 + Constants.MarginX)
+                {
+                    Direction = -1;
+                }
+                    DrawWireEndSymbol(writer, X1, Y1, Direction, wire_symbol, wire_Type, groupId); //source
                 DrawWireEndSymbol(writer, X2, Y2, Direction, wire_symbol, wire_Type, groupId); // destination
             }
         }
@@ -151,6 +176,29 @@ namespace PanelDrawing.Services.P2
             }  
         }
 
+        //public static double GetUniqueX3(double X3)
+        //{
+        //    if (Constants.UsedX3Values.Contains(X3))
+        //    {
+        //        return CheckX3Exists(X3 + 2);
+        //    }
+        //    return X3;           
+        //}
+
+        public static double GetUniqueX3(double x3)
+        {
+            const double step = 2.0;
+            const double tolerance = 2;
+
+            while (Constants.UsedX3Values.Any(v => Math.Abs(v - x3) <= tolerance))
+            {
+                x3 += step;
+            }
+
+            return x3;
+        }
+
+
         public static void DrawWire(double X1, double Y1, double X2, double Y2, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type,
             string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Number, string FromOrientation, string ToOrientation)
         {
@@ -163,9 +211,18 @@ namespace PanelDrawing.Services.P2
                 X3 = GetX3Value(FromOrientation, ToOrientation, X1);
             }
             else   // Straight & Z-line
-            {             
-                X3 = (X1 + X2) / 2 + 10 - Constants.WiringOffset;
+            {
+                if (Y1 <= Y2)
+                {
+                    X3 = (X1 + X2) / 2 + Constants.WiringOffset;
+                }
+                else
+                {
+                    X3 = (X1 + X2) / 2 - Constants.WiringOffset;
+                }
             }
+            X3 = GetUniqueX3(X3);
+            Constants.UsedX3Values.Add(X3);
             X4 = X3;
 
             Y3 = Y1;
@@ -195,7 +252,7 @@ namespace PanelDrawing.Services.P2
                 //writer.WriteLine($"pm_files_sav;;");
                 //writer.WriteLine($"GRI ELECTRE_GRID_STH;");
 
-                Constants.WiringOffset++;
+                Constants.WiringOffset+=4;
 
                 if (!Constants.lst_WireCodes_Info_Processed.Contains(iWireCode))
                     Constants.lst_WireCodes_Info_Processed.Add(iWireCode);

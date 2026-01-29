@@ -59,6 +59,7 @@ namespace PanelDrawing.CommonOperations
         public static double WiringOffset = 0;
         public static List<string> fromConnectorProcessed_P2 = new List<string>();
 
+        public static HashSet<double> UsedX3Values = new HashSet<double>();
 
         public static string borderInfoFilePath = string.Empty;//@"C:\ELECTRE\electre_customize\system\Border_info.csv";
         public static string panelInfoFilePath = string.Empty;//@"C:\electre_projects\PANEL_DWG2\PANEL_DWG2_PANELDRAWINGS\templ\TempFiles\PanelInfo.txt";

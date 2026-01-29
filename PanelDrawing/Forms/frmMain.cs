@@ -30,7 +30,7 @@ namespace Panel_Drawing.Forms
             bool IsComponentsCreated = false;
             bool IsComponentsWiringCreated = false;
             #region//Environment Variable Settings
-           // Constants.Env_Variable_Electre_Proj_Path = "C:\\ELECTRE\\electre_projects\\PANELDRAWING_JAN07\\";
+            Constants.Env_Variable_Electre_Proj_Path = "C:\\ELECTRE\\electre_projects\\JAN_29_PANELDWG\\";
             if (string.IsNullOrEmpty(Constants.Env_Variable_Electre_Proj_Path))
             {
                 MessageBox.Show($"Project Path not passed as an arguement, Please provide in Custom_Program.vbs file in Electre_Customize/system/vbs path");

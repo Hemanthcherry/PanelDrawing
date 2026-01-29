@@ -52,14 +52,20 @@ namespace PanelDrawing.Services.P2
                     X1 += 10;
                 }
 
-                if (!Constants.fromConnectorProcessed_P2.Contains(c1))
-                {
-                    Constants.fromConnectorProcessed_P2.Add(c1);
-                    Constants.WiringOffset = 0;  // Assigning Offest to default when New Connector wiring starts
-                }
+                //if (!Constants.fromConnectorProcessed_P2.Contains(c1))
+                //{
+                //    Constants.fromConnectorProcessed_P2.Add(c1);
+                //    Constants.WiringOffset = 0;  // Assigning Offest to default when New Connector wiring starts
+                //}
                 // preserve original behaviour: only route if X1 < X2 => only left to right
                 if (X1 <= X2)
                 {
+                    if (!Constants.fromConnectorProcessed_P2.Contains(c1))
+                    {
+                        Constants.fromConnectorProcessed_P2.Add(c1);
+                        Constants.WiringOffset = 0;  // Assigning Offest to default when New Connector wiring starts
+                    }
+
                     ConnectionRequired(X1, Y1, X2, Y2, c1, c2, WireCode, F_Type, T_Type, F_Ori, T_Ori, GroupId, Wire_Length, Wire_Type, Wire_Type_Number);
                 }
             }
@@ -71,14 +77,17 @@ namespace PanelDrawing.Services.P2
             string gauge = string.Empty;
             string wire_code = string.Empty;
 
-            if (string.IsNullOrEmpty(wCode))
-                wCode = string.Empty;
+            if (!string.IsNullOrWhiteSpace(wCode))
+            {
+                var arrTemp = wCode.Split('/');
 
-            var arrTemp = wCode.Split('/');
-            wire_code = arrTemp.Length > 0 ? arrTemp[0] : string.Empty;
-            gauge = arrTemp.Length > 1 ? arrTemp[1] : string.Empty;
+                wire_code = arrTemp[0];
 
-         
+                if (arrTemp.Length > 1)
+                    gauge = arrTemp[1];
+            }
+
+
             if (iF_Ori == "T" || iF_Ori == "B" || iT_Ori == "T" || iT_Ori == "B")
             {
                 //modOPCommand.Simple3PointConnection(p1x + 4, p1y, p2x + 4, p2y, wire_code, gauge, c1, c2, iF_Type, iT_Type, iF_Ori, iT_Ori);
