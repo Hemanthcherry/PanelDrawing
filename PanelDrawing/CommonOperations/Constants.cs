@@ -162,7 +162,8 @@ namespace PanelDrawing.CommonOperations
         public static string strAssosiatePNinfo = string.Empty;
         public static string[] arrUpdatedPanelDetails;
         public static bool bIsComponentPlaced = false;
-        public static string[] arrPinsOfEqu;
+        // public static string[] arrPinsOfEqu;
+        public static List<string> listPinsOfEqu;
         public static string[] arrComponentsCreated;
         public static string[,] arrBorderInfo;
         public static string[] arrInfo;

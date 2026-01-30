@@ -9,14 +9,14 @@ namespace PanelDrawing.Services.P1
 {
     public class EQUDoubleConnector
     {
-        public static void GraLine(double X0,double Y0,int iNumberOfPins,string CompName,string[] pinList,string partNumber,string associatedPNs,string equipmentBoxName,string baseConnectorName)
+        public static void GraLine(double X0,double Y0,int iNumberOfPins,string CompName,List<string> pinList,string partNumber,string associatedPNs,string equipmentBoxName,string baseConnectorName)
         {
             // Skip if already drawn
             if (Constants.processedItems.Contains(baseConnectorName))
                 return;
 
             int pinStep = -4;
-            int totalPins = pinList.Length;
+            int totalPins = pinList.Count;
 
             // 1. Read orientation info
             string info =
@@ -51,7 +51,7 @@ namespace PanelDrawing.Services.P1
             //  SEGMENT 2 (PINS)
             string o2 = isHalfL ? "L" : isHalfR ? "R" : baseOrientation;
 
-            for (int i = 0; i < pinList.Length; i++)
+            for (int i = 0; i < pinList.Count; i++)
                 EquSeg2(X0, Y0 + pinStep * i, pinList[i], Constants.el_ExecFilePath, o2, baseConnectorName, CompName, info);
 
             //  SEGMENT 3 (VERTICAL BODY)

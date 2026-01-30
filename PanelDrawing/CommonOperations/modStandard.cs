@@ -26,10 +26,10 @@ namespace PanelDrawing.CommonOperations
             return true;
         }
       
-        public static string[] PinsOfConnector(string connector)
+        public static List<string> PinsOfConnector(string connector)
         {
             if (string.IsNullOrWhiteSpace(connector))
-                return Array.Empty<string>();
+                return new List<string>();
 
             connector = connector.Trim();
 
@@ -52,7 +52,7 @@ namespace PanelDrawing.CommonOperations
                 }
             }
 
-            return pins.ToArray();
+            return pins.ToList();
         }
 
         public static List<string> GetPinsofOOTBRelay(string connector)

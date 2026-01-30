@@ -10,7 +10,7 @@ namespace PanelDrawing.Services.P1
 {
     public class GraLine_DIS
     {
-        public static void GraLine(double X0, double Y0, int iNumberOfPins, string CompName, string[] arrpinsCollection, string partnumber, string assopns, string DisEquipmentBoxRefName)
+        public static void GraLine(double X0, double Y0, int iNumberOfPins, string CompName, List<string> arrpinsCollection, string partnumber, string assopns, string DisEquipmentBoxRefName)
         {
             // Break connector base name (removes last 2 chars)
             string baseName = CompName.Length > 2 ? CompName[..^2] : CompName;
@@ -60,13 +60,13 @@ namespace PanelDrawing.Services.P1
                 return; // no valid orientation → cannot draw
 
             int incre = -4;
-            int T = arrpinsCollection.Length;
+            int T = arrpinsCollection.Count;
 
             // Draw DIS Header
             DisSeg1(X0, Y0, Constants.el_ExecFilePath, orientation);
 
             // Draw each pin segment
-            for (int i = 0; i < arrpinsCollection.Length; i++)
+            for (int i = 0; i < arrpinsCollection.Count; i++)
             {
                 DisSeg2(X0, Y0 + incre * i, arrpinsCollection[i], Constants.el_ExecFilePath, orientation, baseName, CompName);
             }

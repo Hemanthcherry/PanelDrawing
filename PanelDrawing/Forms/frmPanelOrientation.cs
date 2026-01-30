@@ -42,16 +42,16 @@ namespace Panel_Drawing.Forms
 
         private void AddPinsInfo()
         {
-            if (Constants.arrPinsOfEqu == null)
+            if (Constants.listPinsOfEqu == null)
             {
                 MessageBox.Show("Collection not available for List Display");
                 return;
             }
             listPins.Items.Clear();
-            var pinsCollection = from i in Constants.arrPinsOfEqu
+            var pinsCollection = from i in Constants.listPinsOfEqu
                                  where (!string.IsNullOrEmpty(i))
                                  select i;
-            if (Constants.arrPinsOfEqu.Count(x => !string.IsNullOrEmpty(x)) > 0)
+            if (Constants.listPinsOfEqu.Count(x => !string.IsNullOrEmpty(x)) > 0)
             {
                 foreach (string item in pinsCollection)
                 {
@@ -169,7 +169,7 @@ namespace Panel_Drawing.Forms
 
         private void AddArrayToListBox(string[] iarr, ListBox listBox)
         {
-            var df = (from i1 in Constants.arrPinsOfEqu
+            var df = (from i1 in Constants.listPinsOfEqu
                       where (!string.IsNullOrEmpty(i1))
                       select i1).ToArray();
             listBox.Items.Clear();

@@ -18,6 +18,7 @@ namespace PanelDrawing.Objects
         public string GroupId { get; set; }
         public string WireLength { get; set; }
         public string WireType { get; set; }
+        public string SymbolName { get; set; }
         public string CBTypeName { get; set; }
         public string CBVoltage { get; set; }
         public string AssociatedPartNumbers { get; set; }

@@ -87,12 +87,12 @@ namespace PanelDrawing.Services.P1
             // ⚙️ Split into Above and Below lists
             // "Above" → component info (no wiring)
             Constants.dataExtractionListAbove = Constants.dataExtractionList
-                .Where(x => string.IsNullOrEmpty(x.WireNumber) && string.IsNullOrEmpty(x.Layer))
+                .Where(x => string.IsNullOrEmpty(x.WireNumber))
                 .ToList();
 
             // "Below" → wiring info (contains wire number or layer)
             Constants.dataExtractionListBelow = Constants.dataExtractionList
-                .Where(x => !string.IsNullOrEmpty(x.WireNumber)) //|| !string.IsNullOrEmpty(x.Layer))
+                .Where(x => !string.IsNullOrEmpty(x.WireNumber))
                 .ToList();
 
             Constants.listPanels = Constants.dataExtractionList

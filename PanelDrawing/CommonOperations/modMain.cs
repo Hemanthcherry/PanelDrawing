@@ -96,13 +96,13 @@ namespace PanelDrawing.CommonOperations
             }
 
             posX = Math.Round(posX);
-            if(posX % 2 == 0)
+            if(posX % 2 != 0)
             {
                 posX = posX + 1;
             }
 
             posY = Math.Round(posY);
-            if(posY % 2 == 0)
+            if(posY % 2 != 0)
             {
                 posY = posY + 1;
             }
@@ -147,6 +147,18 @@ namespace PanelDrawing.CommonOperations
                     Constants.CursorX = Constants.CursorX_EQU_DIS + compWidth;
                 }
 
+                posX = Math.Round(posX);
+                if (posX % 2 != 0)
+                {
+                    posX = posX + 1;
+                }
+
+                posY = Math.Round(posY);
+                if (posY % 2 != 0)
+                {
+                    posY = posY + 1;
+                }
+
                 return (posX, posY);
             }
             else
@@ -178,13 +190,13 @@ namespace PanelDrawing.CommonOperations
                     Constants.RowHeight = compHeight;
 
                 posX = Math.Round(posX);
-                if (posX % 2 == 0)
+                if (posX % 2 != 0)
                 {
                     posX = posX + 1;
                 }
 
                 posY = Math.Round(posY);
-                if (posY % 2 == 0)
+                if (posY % 2 != 0)
                 {
                     posY = posY + 1;
                 }
@@ -311,7 +323,7 @@ namespace PanelDrawing.CommonOperations
 
                 double CompXdist = 0.0;
                 double CompYdist = 0.0;
-                frmPanelOri frmpanelori = new frmPanelOri();
+                //frmPanelOri frmpanelori = new frmPanelOri();
 
                 switch (CompType)
                 {
@@ -375,7 +387,7 @@ namespace PanelDrawing.CommonOperations
 
                     case "TER":
                         var tbkPins = modStandard.PinsOfConnector(CompDwgName);
-                        if (tbkPins.Length == 0)
+                        if (tbkPins.Count == 0)
                         {
                             MessageBox.Show($"{CompDwgName} Pins Not Available");
                             continue;
@@ -409,10 +421,10 @@ namespace PanelDrawing.CommonOperations
 
                     case "EQU":
                         var equPins = modStandard.PinsOfConnector(CompDwgName);
-                       //var distinctPins = equPins.Distinct().ToArray();
-                        Constants.arrPinsOfEqu = equPins.Distinct().ToArray();
-                        int NoOfPins = equPins.Length;
-                        frmpanelori.lblEquName.Text = CompDwgName;
+                        //var distinctPins = equPins.Distinct().ToArray();
+                        Constants.listPinsOfEqu = equPins;
+                        int NoOfPins = equPins.Count;
+                       // frmpanelori.lblEquName.Text = CompDwgName;
                         Constants.txtEquName = CompDwgName;
                         // Update panelDetailsList
                         foreach (var row in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
@@ -438,7 +450,7 @@ namespace PanelDrawing.CommonOperations
 
                             if (!Constants.remainingItems.Contains(root))
                             {
-                                EQUDoubleConnector.GraLine(CompXdist, CompYdist, Constants.arrPinsOfEqu.Length, CompDwgName, Constants.arrPinsOfEqu, CompPN, AssocPNs, EquipBox, root);
+                                EQUDoubleConnector.GraLine(CompXdist, CompYdist, Constants.listPinsOfEqu.Count, CompDwgName, Constants.listPinsOfEqu, CompPN, AssocPNs, EquipBox, root);
 
                                 Constants.remainingItems.Add(root);
                             }
@@ -446,29 +458,30 @@ namespace PanelDrawing.CommonOperations
                         else
                         {
                             //frmpanelori.lblEquName.Text = CompDwgName;
-                            frmpanelori.ShowDialog();
+                            // frmpanelori.ShowDialog();
 
-                            var side = frmpanelori.SelectedSide;
+                            //var side = frmpanelori.SelectedSide;
+                            var side = comp.SymbolName.Trim().Contains("contact_sth_mr")? "LEFT" : "RIGHT";
 
                             // Get position based on LEFT / RIGHT
                             //(CompXdist, CompYdist) = GetNextEquPosition(side,40,compHeight: Constants.arrPinsOfEqu.Length * 10);
-                            (CompXdist, CompYdist) = GetNextEquPosition(side, 40, CompHeightEQU);
+                             (CompXdist, CompYdist) = GetNextEquPosition(side, 40, CompHeightEQU);
 
-                            EQUSingleConnector.DrawEquSymbolUsedPins(CompXdist, CompYdist, CompMaxPin, CompDwgName,side, SampleEquPinNumber, CompPN, frmpanelori, AssocPNs, EquipBox, Looms);
+                            EQUSingleConnector.DrawEquSymbolUsedPins(CompXdist, CompYdist, CompMaxPin, CompDwgName,side, SampleEquPinNumber, CompPN, /*frmpanelori,*/ AssocPNs, EquipBox, Looms);
 
-                            frmpanelori.Close();
+                            //frmpanelori.Close();
                         }
                         continue;
 
                     case "DIS":
                      
                         var disPins = modStandard.PinsOfConnector(CompDwgName);
-                        if (disPins.Length == 0)
+                        if (disPins.Count == 0)
                         {
                             MessageBox.Show($"{CompDwgName} Pins Not Available");
                             continue;
                         }
-                        int yCoordinate_DIS = (disPins.Length * 4) + 12 + 18;
+                        int yCoordinate_DIS = (disPins.Count * 4) + 12 + 18;
 
                         foreach (var pd in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
                         {
@@ -495,7 +508,7 @@ namespace PanelDrawing.CommonOperations
                         (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, yCoordinate_DIS, CompType);
                         //}
 
-                        GraLine_DIS.GraLine(CompXdist, CompYdist, disPins.Length, CompDwgName, disPins, CompPN, AssocPNs, EquipBox);
+                        GraLine_DIS.GraLine(CompXdist, CompYdist, disPins.Count, CompDwgName, disPins, CompPN, AssocPNs, EquipBox);
                         continue;
 
                     case "MSW":
@@ -814,6 +827,7 @@ namespace PanelDrawing.CommonOperations
                 string samplePin = firstDEBelow?.PinNumber ?? "";
                 string cbTypeName = firstDEBelow?.EquipmentName ?? "";
                 string cbVoltage = firstDEBelow?.Voltage ?? "";
+                string symbolName = firstDEBelow?.SymbolName ?? "";
 
                 // STEP 6: Shunts (for TBK/TER)
                 var shuntList = "";
@@ -860,6 +874,7 @@ namespace PanelDrawing.CommonOperations
                     WireLength = firstDEBelow?.Length ?? "",
                     WireType = firstDEBelow?.CableType ?? "",
                     CBTypeName = cbTypeName,
+                    SymbolName = symbolName,
                     CBVoltage = cbVoltage,
                     AssociatedPartNumbers = string.Join(";", associatedPNs),
                     EquipmentBox = equipInfo,

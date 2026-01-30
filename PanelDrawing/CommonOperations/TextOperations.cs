@@ -1,20 +1,151 @@
 ﻿using Panel_Drawing.Forms;
 using PanelDrawing.Objects;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace PanelDrawing.CommonOperations
 {
     public class TextOperations
-    {     
+    {
+        //public static List<PanelDetailsRow> SortPanelDetails(List<PanelDetailsRow> rows)
+        //{
+        //    return rows
+        //        .OrderBy(r => r.FromConnector, StringComparer.OrdinalIgnoreCase)
+        //        .ThenBy(r => NormalizePin(r.FromPin))
+        //        .ThenBy(r => r.WireCode)
+        //        .ToList();
+        //}
+
+        //public static List<PanelDetailsRow> SortPanelDetails(List<PanelDetailsRow> rows)
+        //{
+        //    var result = rows
+        //        .Select(r => new
+        //        {
+        //            Row = r,
+        //            Wire = ParseWireCode(r.WireCode)
+        //        })
+        //        .OrderBy(x => x.Row.FromConnector, StringComparer.OrdinalIgnoreCase)
+
+        //        // 1️⃣ Group by base wire (STQ_78/12)
+        //        .ThenBy(x => x.Wire.BaseWire, StringComparer.OrdinalIgnoreCase)
+
+        //        // 2️⃣ Paired cables first, mono later
+        //        .ThenBy(x => x.Wire.IsMono) // false (paired) < true (mono)
+
+        //        // 3️⃣ Core number ordering (1,2,3,4)
+        //        .ThenBy(x => x.Wire.CoreNumber)
+
+        //        // 4️⃣ Pin ordering (stable & predictable)
+        //        .ThenBy(x => NormalizePin(x.Row.FromPin))
+
+        //        .Select(x => x.Row)
+        //        .ToList();
+
+        //    return result;
+        //}
+
         public static List<PanelDetailsRow> SortPanelDetails(List<PanelDetailsRow> rows)
         {
-            return rows
-                .OrderBy(r => r.FromConnector, StringComparer.OrdinalIgnoreCase)
+            var result = new List<PanelDetailsRow>();
+            int i = 0;
+
+            rows = rows.OrderBy(r => r.FromConnector, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(r => NormalizePin(r.FromPin))
-                .ThenBy(r => r.WireCode)
                 .ToList();
+
+            while (i < rows.Count)
+            {
+                var current = rows[i];
+                var wire = ParseWireCode(current.WireCode);
+
+                // Mono cable → copy as-is
+                if (wire.IsMono)
+                {
+                    result.Add(current);
+                    i++;
+                    continue;
+                }
+
+                // Paired cable → detect contiguous block
+                var block = new List<(PanelDetailsRow Row, WireInfo Wire)>();
+
+                int j = i;
+                while (j < rows.Count)
+                {
+                    var w = ParseWireCode(rows[j].WireCode);
+
+                    if (w.IsMono || w.BaseWire != wire.BaseWire)
+                        break;
+
+                    block.Add((rows[j], w));
+                    j++;
+                }
+
+                // Sort ONLY inside the block by core number
+                foreach (var item in block.OrderBy(b => b.Wire.CoreNumber))
+                    result.Add(item.Row);
+
+                i = j;
+            }
+
+            return result;
         }
+
+        private static WireInfo ParseWireCode(string wireCode)
+        {
+            var parts = wireCode.Split('/');
+
+            if (parts.Length == 2)
+            {
+                return new WireInfo
+                {
+                    BaseWire = wireCode,
+                    IsMono = true,
+                    CoreNumber = 0
+                };
+            }
+
+            return new WireInfo
+            {
+                BaseWire = $"{parts[0]}/{parts[1]}",
+                IsMono = false,
+                CoreNumber = int.Parse(parts[2])
+            };
+        }
+
+        //private static WireInfo ParseWireCode(string wireCode)
+        //{
+        //    // Examples:
+        //    // STQ_78/12/1  -> paired
+        //    // SS_79/12     -> mono
+
+        //    var parts = wireCode.Split('/');
+
+        //    if (parts.Length == 2)
+        //    {
+        //        // Mono cable
+        //        return new WireInfo
+        //        {
+        //            BaseWire = wireCode,
+        //            IsMono = true,
+        //            CoreNumber = 0
+        //        };
+        //    }
+
+        //    if (parts.Length == 3 && int.TryParse(parts[2], out int core))
+        //    {
+        //        return new WireInfo
+        //        {
+        //            BaseWire = $"{parts[0]}/{parts[1]}",
+        //            IsMono = false,
+        //            CoreNumber = core
+        //        };
+        //    }
+
+        //    throw new FormatException($"Invalid WireCode: {wireCode}");
+        //}
+
 
         private static string NormalizePin(string pin)
         {
@@ -31,7 +162,7 @@ namespace PanelDrawing.CommonOperations
             }));
         }
 
-        // Split pin into segments: numbers as int, letters as string
+        //Split pin into segments: numbers as int, letters as string
         private static List<object> SplitAlphaNumeric(string input)
         {
             var parts = new List<object>();
@@ -222,4 +353,11 @@ namespace PanelDrawing.CommonOperations
         //}
         #endregion
     }
+    public sealed class WireInfo
+    {
+        public string BaseWire { get; init; } = "";
+        public bool IsMono { get; init; }
+        public int CoreNumber { get; init; } // 0 for mono
+    }
+
 }

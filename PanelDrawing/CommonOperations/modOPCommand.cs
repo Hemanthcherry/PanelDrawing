@@ -22,14 +22,16 @@ namespace PanelDrawing.CommonOperations
                 //EDI mytemp_new_a4; SAV(CHR(34) + 'C:\ELECTRE\electre_projects\PANEL_DR03\Schem\CCCCC_12345' + CHR(34));
                 writer.WriteLine("EDI " + SheetTemplateName + "; SAV (CHR(34)+" + Constants.quotationMark + "" + Constants.Elec_Proj_Schem_Folder_Path + "\\" + pnlnum + "" + Constants.quotationMark + "+CHR(34));");
                 //Open the new drawing
-               // writer.WriteLine("NEW_OPEN_DRAWING " + Constants.quotationMark + pnlnum + Constants.quotationMark + ";"); //'Open the new drawing
-                writer.WriteLine($"EDI {pnlnum}");
-                writer.WriteLine("MOD_TAG 2012 '" + pnlnum + "'; ");// 'Modify the titleblock attributes
-                writer.WriteLine("MOD_TAG 2011 '" + strnum + "'; ");
-                writer.WriteLine("MOD_TAG 2013 '" + pnlnum + "'; ");
-                writer.WriteLine("PRT_NAM; ");
+                // writer.WriteLine("NEW_OPEN_DRAWING " + Constants.quotationMark + pnlnum + Constants.quotationMark + ";"); //'Open the new drawing
+                // writer.WriteLine($"EDI {pnlnum}"); // Commented this line on Jan, 30, 2026
+                writer.WriteLine($"EDI (CHR(34)+{Constants.quotationMark}{pnlnum}{Constants.quotationMark}+CHR(34));");
+                writer.WriteLine($"MOD_TAG 2012 '{pnlnum}';");
+                writer.WriteLine($"MOD_TAG 2011 '{strnum}';");
+                writer.WriteLine($"MOD_TAG 2013 '{pnlnum}';");
+
+                writer.WriteLine("PRT_NAM;");
                 writer.WriteLine("GRID 0.5,2;");
-                writer.WriteLine("REMOVE :A; ");// 'Shut the template to avoid sharing issue
+                writer.WriteLine("REMOVE :A;");
             }
             //FileStream fileStream = new FileStream(el_ExecfilePath,File.);
         }
@@ -113,14 +115,14 @@ namespace PanelDrawing.CommonOperations
             }
         } 
 
-        public static void AddOOTB_TER_SymbolForTerminal(string iConnectorNameForComment, double X0, double Y0, string iPartNumber, string el_Execfilpath,string IROT, string[] arrPin,string temp_TERTBK_Shunt_info)  //'Symbolname is Macroname
+        public static void AddOOTB_TER_SymbolForTerminal(string iConnectorNameForComment, double X0, double Y0, string iPartNumber, string el_Execfilpath,string IROT, List<string> arrPin,string temp_TERTBK_Shunt_info)  //'Symbolname is Macroname
         {
             int incre = 0;
             //using (StreamWriter writer = File.AppendText(el_Execfilpath))
             using (var writer = File.AppendText(el_Execfilpath))
             {
                 //writer.WriteLine($"ADD I1 sth_tb_head_t :R{IROT} {X0},{Y0};");//header
-                for (int d = 0; d <= arrPin.Length - 1; d++)
+                for (int d = 0; d <= arrPin.Count - 1; d++)
                 {
                     writer.WriteLine($"ADD I0 sth_tb_body2 :R{IROT} {X0},{Y0 - incre};");
                     writer.WriteLine($"MOD N51 {X0},{Y0 - incre} 0,0 :E'{arrPin[d]}';");
@@ -146,14 +148,14 @@ namespace PanelDrawing.CommonOperations
                     incre = incre + 4;
                 }
                 
-                writer.WriteLine($"ADD I1 sth_tb_foot_new_t :R{IROT} {X0},{Y0 - arrPin.Length * 4};");//footer
-                writer.WriteLine($"ADD L101 {X0-6},{Y0} {X0-6},{Y0 - arrPin.Length * 4};;;;NOP;");
-                writer.WriteLine($"ADD L101 {X0 + 6},{Y0} {X0 + 6},{Y0 - arrPin.Length * 4};;;;NOP;");
-                writer.WriteLine($"ADD R254  {X0 - 6},{Y0 - 12 - (arrPin.Length) * 4} {X0 + 6},{Y0 + 6};;;NOP;");
+                writer.WriteLine($"ADD I1 sth_tb_foot_new_t :R{IROT} {X0},{Y0 - arrPin.Count * 4};");//footer
+                writer.WriteLine($"ADD L101 {X0-6},{Y0} {X0-6},{Y0 - arrPin.Count * 4};;;;NOP;");
+                writer.WriteLine($"ADD L101 {X0 + 6},{Y0} {X0 + 6},{Y0 - arrPin.Count * 4};;;;NOP;");
+                writer.WriteLine($"ADD R254  {X0 - 6},{Y0 - 12 - (arrPin.Count) * 4} {X0 + 6},{Y0 + 6};;;NOP;");
                 writer.WriteLine($"ADD N53 :T1001 :F4.0 :R0 :D :J4 :AC R254 {X0},{Y0 + 6} '{iConnectorNameForComment}' {X0},{Y0 + 6+2};");
-                writer.WriteLine($"ADD info_sth_cmd {X0-4},{Y0 -11 -3 - arrPin.Length * 4};");
-                writer.WriteLine($"MOD N2 {X0-4},{Y0 - 13 -4 - arrPin.Length * 4} 0,0 STOR_MID :F1.0:L253 :E'{iConnectorNameForComment}' JU ;");
-                writer.WriteLine($"MOD N52 {X0-4},{Y0 - 15 -4 - arrPin.Length * 4} 0,0 STOR_MID :E'{iPartNumber}' JU ;");
+                writer.WriteLine($"ADD info_sth_cmd {X0-4},{Y0 -11 -3 - arrPin.Count * 4};");
+                writer.WriteLine($"MOD N2 {X0-4},{Y0 - 13 -4 - arrPin.Count * 4} 0,0 STOR_MID :F1.0:L253 :E'{iConnectorNameForComment}' JU ;");
+                writer.WriteLine($"MOD N52 {X0-4},{Y0 - 15 -4 - arrPin.Count * 4} 0,0 STOR_MID :E'{iPartNumber}' JU ;");
                 writer.WriteLine($"TESTDIS_OFF;;");
                 writer.WriteLine($"pm_files_sav;");
                 writer.WriteLine($";;NOP;");

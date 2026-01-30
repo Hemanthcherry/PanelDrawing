@@ -139,7 +139,7 @@ namespace PanelDrawing.Services.P2
                 {
                     Direction = -1;
                 }
-                    DrawWireEndSymbol(writer, X1, Y1, Direction, wire_symbol, wire_Type, groupId); //source
+                DrawWireEndSymbol(writer, X1, Y1, Direction, wire_symbol, wire_Type, groupId); //source
                 DrawWireEndSymbol(writer, X2, Y2, Direction, wire_symbol, wire_Type, groupId); // destination
             }
         }
@@ -198,7 +198,6 @@ namespace PanelDrawing.Services.P2
             return x3;
         }
 
-
         public static void DrawWire(double X1, double Y1, double X2, double Y2, string iWireCode, string iWireGauge, string c1, string c2, string iF_Type, string iT_Type,
             string groupId, string wire_Length, string wire_Type, string wire_Type_Core_Number, string FromOrientation, string ToOrientation)
         {
@@ -210,7 +209,7 @@ namespace PanelDrawing.Services.P2
             {
                 X3 = GetX3Value(FromOrientation, ToOrientation, X1);
             }
-            else   // Straight & Z-line
+            else  // Z-line
             {
                 if (Y1 <= Y2)
                 {

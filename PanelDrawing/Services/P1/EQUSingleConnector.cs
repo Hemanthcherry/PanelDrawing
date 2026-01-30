@@ -11,23 +11,14 @@ namespace PanelDrawing.Services.P1
     public class EQUSingleConnector
     {
         public static void DrawEquSymbolUsedPins(double X0, double Y0, string iNumberOfMaxPins, string iEquName, string side, string iSamplePinNumber,
-             string iPartNumber, frmPanelOri f, string assoPNs, string EquBoxExist, string LoomsExist)
+             string iPartNumber, /*frmPanelOri f,*/ string assoPNs, string EquBoxExist, string LoomsExist)
         {
-            // keep original variable names and behavior
-            int Counter = 0;
-            int L = 0;
-            string[] arrPins;
-            int TotalUsedPinsInConnector = 0;
-            int incre_x = 4;
+            List<string> arrPins = new List<string>();
             int incre_y = -4;
-            int I = 0;
-            string Ori = string.Empty;
+            int I = 0;            
             string IsFullConnector = string.Empty;
-            int T = 0; // number of pin entries (length of arrPins)
 
-            // validate form grid
-            if (f == null || f.grdOriInfo == null || f.grdOriInfo.RowCount == 0)
-                return;
+            string Ori = side == "LEFT" ? "L" : "R";
 
             // parse maximum pins
             int numberOfPins = 0;
@@ -36,135 +27,107 @@ namespace PanelDrawing.Services.P1
                 numberOfPins = 0; // fallback (same as your old code)
             }
 
-            // LEFT CONNECTOR (grid column 0)
-            var leftCell = f.grdOriInfo[1, 0].Value;
-            if (leftCell != null && !string.IsNullOrEmpty(leftCell.ToString()))
+            int l = 0;
+            arrPins = Constants.listPinsOfEqu;
+
+            // The VB6 code used "T - 1" checks repeatedly; replicate those semantics
+            if (arrPins.Count - 1 < numberOfPins)
             {
-                Ori = "L";
-                int l = 0;
+                IsFullConnector = "no";
+            }
+            else if (arrPins.Count == numberOfPins)
+            {
+                IsFullConnector = "yes";
+            }
 
-                // preserve the original behavior: split, distinct, keep unsorted order except duplicate removal
-                var arrPinsTempLeft = leftCell.ToString().Split(',');
-                arrPins = arrPinsTempLeft.Distinct().ToArray();
+            // keep same call so existing seg methods will handle file writing
+            EquSeg1(X0, Y0, Ori, "Full", iEquName, Constants.el_ExecFilePath);
 
-                T = arrPins.Length;
+            // iterate pins with original indexing (1 .. T-1)
+            for (int i = 0; i < arrPins.Count; i++)
+            {
+                double yPin = Y0 + incre_y * (I - 1) + l - 4;
+                // call pin segment writer
+                EquSeg2(X0, yPin, arrPins[i].ToString(), Ori, Constants.el_ExecFilePath);
+                l = l - 4;
+            }
+            
+            // vertical lines
+            EquSeg3(X0 - 7.5, Y0, incre_y * (arrPins.Count), Ori, Constants.el_ExecFilePath);
 
-                // The VB6 code used "T - 1" checks repeatedly; replicate those semantics
-                if (T - 1 < numberOfPins)
-                {
-                    IsFullConnector = "no";
-                }
-                else if (T == numberOfPins)
-                {
-                    IsFullConnector = "yes";
-                }
+            Y0 -= 4;
 
-                // Coordinate settings (preserve your existing scaling / counters)
-                //X0 = 40;
-                //if (T - 1 <= 2)
-                //    Constants.Simple_EQU_Left_Cur_Height_Incre_Count = T * 4;
+            // Rectangle (LLx, LLy, URx, URy) — original call
+            EquSeg4(X0, Y0 - Math.Abs(incre_y) * arrPins.Count, X0, Y0, iEquName, Ori, Constants.el_ExecFilePath);
 
-                //Y0 = 65 + Constants.Sample_Equ_Left_Cur_Height_Count;
-                //Constants.Sample_Equ_Left_Cur_Height_Count = Constants.Sample_Equ_Left_Cur_Height_Count+ T * 4 + 8 + 4 * 4 + Constants.Simple_EQU_Left_Cur_Height_Incre_Count;
+            // Footer — preserve original signature and pass IsFullConnector
+            EquSeg5(X0, Y0 + incre_y * (arrPins.Count - 1), Ori, "Full", iEquName, Constants.el_ExecFilePath, IsFullConnector);
 
-                // HEADER
-                // note: old signature was modOPCommand.EquSeg1(X0, Y0, Ori, "Full", iEquName, Constants.el_ExecFilePath)
-                // keep same call so existing seg methods will handle file writing
-                EquSeg1(X0, Y0, Ori, "Full", iEquName, Constants.el_ExecFilePath);
+            // change Y0 so partnumber and equipment box placed correctly (same as original)
+            Y0 = Y0 - Math.Abs(incre_y) * arrPins.Count;
+            EquSegPartNumber(X0, Y0 - 10, iEquName, iPartNumber, Constants.el_ExecFilePath, assoPNs);
 
-                // iterate pins with original indexing (1 .. T-1)
-                for (int i = 1; i <= T - 1; i++)
-                {
-                    double yPin = Y0 + incre_y * (I - 1) + l - 4;
-                    // call pin segment writer
-                    EquSeg2(X0, yPin, arrPins[i].ToString(), Ori, Constants.el_ExecFilePath);
-                    l = l - 4;
-                }
+            // Equipment box if present
+            if (!string.IsNullOrWhiteSpace(EquBoxExist) && !string.Equals(EquBoxExist, "+", StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(EquBoxExist, "LOC", StringComparison.OrdinalIgnoreCase))
+            {
+                SegEquipmentBox(X0 - 8, Y0 + 4 - Math.Abs(incre_y) * arrPins.Count, X0 + 16, Y0 + 20, EquBoxExist, Ori, Constants.el_ExecFilePath);
+            }
 
-                // vertical lines
-                EquSeg3(X0 - 7.5, Y0, incre_y * (T - 1), Ori, Constants.el_ExecFilePath);
+            Y0 = Y0 - 50; // as original
 
-                // Rectangle (LLx, LLy, URx, URy) — original call
-                EquSeg4(X0, Y0 - Math.Abs(incre_y) * T, X0, Y0, iEquName, Ori, Constants.el_ExecFilePath);
-
-                // Footer — preserve original signature and pass IsFullConnector
-                EquSeg5(X0, Y0 + incre_y * (T - 1), Ori, "Full", iEquName, Constants.el_ExecFilePath, IsFullConnector);
-
-                // change Y0 so partnumber and equipment box placed correctly (same as original)
-                Y0 = Y0 - Math.Abs(incre_y) * T;
-                EquSegPartNumber(X0, Y0 - 10, iEquName, iPartNumber, Constants.el_ExecFilePath, assoPNs);
-
-                // Equipment box if present
-                if (!string.IsNullOrWhiteSpace(EquBoxExist) && !string.Equals(EquBoxExist, "+", StringComparison.OrdinalIgnoreCase)
-                        && !string.Equals(EquBoxExist, "LOC", StringComparison.OrdinalIgnoreCase))
-                {
-                    SegEquipmentBox(X0 - 8, Y0 + 4 - Math.Abs(incre_y) * T, X0 + 16, Y0 + 20, EquBoxExist, Ori, Constants.el_ExecFilePath);
-                }
-
-                Y0 = Y0 - 50; // as original
-            } // end left connector
+            // end left connector
 
             // RIGHT CONNECTOR (grid column 1)
-            var rightCell = f.grdOriInfo[1, 1].Value;
-            if (rightCell != null && !string.IsNullOrEmpty(rightCell.ToString()))
-            {
-                Ori = "R";
-                int r = 0;
+            //var rightCell = f.grdOriInfo[1, 1].Value;
+            //if (rightCell != null && !string.IsNullOrEmpty(rightCell.ToString()))
+            //if(side == "RIGHT")
+            //{
+            //    Ori = "R";
+            //    int r = 0;
+            //    arrPins = Constants.listPinsOfEqu;
+            //    T = arrPins.Count;
 
-                var arrPinsTempRight = rightCell.ToString().Split(',');
-                arrPins = arrPinsTempRight.Distinct().ToArray();
+            //    if (T - 1 < numberOfPins)
+            //    {
+            //        IsFullConnector = "no";
+            //    }
+            //    else if (T == numberOfPins)
+            //    {
+            //        IsFullConnector = "yes";
+            //    }
 
-                T = arrPins.Length;
+            //    // Header
+            //    EquSeg1(X0, Y0, Ori, "Full", iEquName, Constants.el_ExecFilePath);
 
-                if (T - 1 < numberOfPins)
-                {
-                    IsFullConnector = "no";
-                }
-                else if (T == numberOfPins)
-                {
-                    IsFullConnector = "yes";
-                }
+            //    // iterate pins (1..T-1) preserve original arithmetic
+            //    for (int i0 = 0; i0 <= T; i0++)
+            //    {
+            //        double yPin = Y0 + incre_y * (I - 1) + r - 4;
+            //        EquSeg2(X0, yPin, arrPins[i0], Ori, Constants.el_ExecFilePath);
+            //        r = r - 4;
+            //    }
 
-                // Coordinate settings for right connector (preserve your counters)
-                //X0 = Constants.SheetWidth - 30;
-                //if (T - 1 <= 2)
-                //    Constants.Simple_EQU_Right_Cur_Height_Decre_Count = T * 4;
+            //    // vertical lines
+            //    EquSeg3(X0 - 7.5, Y0, incre_y * (T - 1), Ori, Constants.el_ExecFilePath);
 
-                //Y0 = Constants.SheetHeight - Constants.Sample_Equ_Right_Cur_Height_Count - 24;
-                //Constants.Sample_Equ_Right_Cur_Height_Count = Constants.Sample_Equ_Right_Cur_Height_Count
-                //    + T * 4 + 8 + 4 * 4 + Constants.Simple_EQU_Right_Cur_Height_Decre_Count;
+            //    // rectangle
+            //    EquSeg4(X0, Y0 - Math.Abs(incre_y) * T, X0, Y0, iEquName, Ori, Constants.el_ExecFilePath);
 
-                // Header
-                EquSeg1(X0, Y0, Ori, "Full", iEquName, Constants.el_ExecFilePath);
+            //    // footer and partnumber
+            //    EquSeg5(X0, Y0 + incre_y * (T - 1), Ori, "Full", iEquName, Constants.el_ExecFilePath, IsFullConnector);
 
-                // iterate pins (1..T-1) preserve original arithmetic
-                for (int i0 = 1; i0 <= T - 1; i0++)
-                {
-                    double yPin = Y0 + incre_y * (I - 1) + r - 4;
-                    EquSeg2(X0, yPin, arrPins[i0], Ori, Constants.el_ExecFilePath);
-                    r = r - 4;
-                }
+            //    Y0 = Y0 - Math.Abs(incre_y) * T;
+            //    EquSegPartNumber(X0, Y0 - 10, iEquName, iPartNumber, Constants.el_ExecFilePath, assoPNs);
 
-                // vertical lines
-                EquSeg3(X0 - 7.5, Y0, incre_y * (T - 1), Ori, Constants.el_ExecFilePath);
+            //    if (!string.IsNullOrWhiteSpace(EquBoxExist) && !string.Equals(EquBoxExist, "+", StringComparison.OrdinalIgnoreCase)
+            //             && !string.Equals(EquBoxExist, "LOC", StringComparison.OrdinalIgnoreCase))
+            //    {
+            //        SegEquipmentBox(X0 - 8, Y0 + 4 - Math.Abs(incre_y) * T, X0 + 16, Y0 + 20, EquBoxExist, Ori, Constants.el_ExecFilePath);
+            //    }
 
-                // rectangle
-                EquSeg4(X0, Y0 - Math.Abs(incre_y) * T, X0, Y0, iEquName, Ori, Constants.el_ExecFilePath);
-
-                // footer and partnumber
-                EquSeg5(X0, Y0 + incre_y * (T - 1), Ori, "Full", iEquName, Constants.el_ExecFilePath, IsFullConnector);
-
-                Y0 = Y0 - Math.Abs(incre_y) * T;
-                EquSegPartNumber(X0, Y0 - 10, iEquName, iPartNumber, Constants.el_ExecFilePath, assoPNs);
-
-                if (!string.IsNullOrWhiteSpace(EquBoxExist) && !string.Equals(EquBoxExist, "+", StringComparison.OrdinalIgnoreCase)
-                         && !string.Equals(EquBoxExist, "LOC", StringComparison.OrdinalIgnoreCase))
-                {
-                    SegEquipmentBox(X0 - 8, Y0 + 4 - Math.Abs(incre_y) * T, X0 + 16, Y0 + 20, EquBoxExist, Ori, Constants.el_ExecFilePath);
-                }
-
-                Y0 = Y0 - 50;
-            } // end right connector
+            //    Y0 = Y0 - 50;
+            //} // end right connector
 
             #region//Top and bottom Connecter
             //if (!string.IsNullOrEmpty((string)f.grdOriInfo[1,2].Value))
@@ -281,14 +244,14 @@ namespace PanelDrawing.Services.P1
                 {
                     writer.WriteLine($"ADD I1 {Symb} {X0},{Y0};;NOP;");
                 }
-                else if (iOrientation == "B")
-                {
-                    writer.WriteLine($"ADD I1 {Symb} :R90 {X0},{Y0};;NOP;");
-                }
-                else if (iOrientation == "T")
-                {
-                    writer.WriteLine($"ADD I1 {Symb} :R90 {X0},{Y0 + 7.5};;NOP;");
-                }
+                //else if (iOrientation == "B")
+                //{
+                //    writer.WriteLine($"ADD I1 {Symb} :R90 {X0},{Y0};;NOP;");
+                //}
+                //else if (iOrientation == "T")
+                //{
+                //    writer.WriteLine($"ADD I1 {Symb} :R90 {X0},{Y0 + 7.5};;NOP;");
+                //}
             }
         }
 
@@ -312,20 +275,20 @@ namespace PanelDrawing.Services.P1
                 PinNumber_y = Y0 - 2;
                 Rotation = 0;
             }
-            else if (iOrientation == "B")
-            {
-                Symb = "contact_sth_mr";
-                PinNumber_x = X0;
-                PinNumber_y = Y0;
-                Rotation = 90;
-            }
-            else if (iOrientation == "T")
-            {
-                Symb = "contact_sth_ml";
-                PinNumber_x = X0 - 1;
-                PinNumber_y = Y0 + 5;
-                Rotation = 90;
-            }
+            //else if (iOrientation == "B")
+            //{
+            //    Symb = "contact_sth_mr";
+            //    PinNumber_x = X0;
+            //    PinNumber_y = Y0;
+            //    Rotation = 90;
+            //}
+            //else if (iOrientation == "T")
+            //{
+            //    Symb = "contact_sth_ml";
+            //    PinNumber_x = X0 - 1;
+            //    PinNumber_y = Y0 + 5;
+            //    Rotation = 90;
+            //}
             else
             {
                 Symb = "contact_sth_ml";
@@ -360,16 +323,16 @@ namespace PanelDrawing.Services.P1
                     writer.WriteLine($"ADD L214 {X0},{Y0} {X0},{Y0 + iLength}; ; ; ; NOP;");
                     writer.WriteLine($"ADD L214 {X0 + w},{Y0} {X0 + w},{Y0 + iLength}; ; ; ; NOP;");
                 }
-                else if (iOrientation == "B")
-                {
-                    writer.WriteLine($"ADD L214 {X0},{Y0} {X0 + 8},{Y0}; ; ; ; NOP;");
-                    writer.WriteLine($"ADD L214 {X0},{Y0 - w} {X0 + 8},{Y0 - w}; ; ; ; NOP;");
-                }
-                else if (iOrientation == "T")
-                {
-                    writer.WriteLine($"ADD L214 {X0},{Y0} {X0 + iLength},{Y0}; ; ; ; NOP;");
-                    writer.WriteLine($"ADD L214 {X0},{Y0 + w} {X0 + iLength},{Y0 + w}; ; ; ; NOP;");
-                }
+                //else if (iOrientation == "B")
+                //{
+                //    writer.WriteLine($"ADD L214 {X0},{Y0} {X0 + 8},{Y0}; ; ; ; NOP;");
+                //    writer.WriteLine($"ADD L214 {X0},{Y0 - w} {X0 + 8},{Y0 - w}; ; ; ; NOP;");
+                //}
+                //else if (iOrientation == "T")
+                //{
+                //    writer.WriteLine($"ADD L214 {X0},{Y0} {X0 + iLength},{Y0}; ; ; ; NOP;");
+                //    writer.WriteLine($"ADD L214 {X0},{Y0 + w} {X0 + iLength},{Y0 + w}; ; ; ; NOP;");
+                //}
                 writer.WriteLine($"GRID 0.5,2;");
             }
         }
@@ -385,23 +348,23 @@ namespace PanelDrawing.Services.P1
                 if (iOrientation == "R")
                 {
                     writer.WriteLine($"ADD R254 {LL_x - w},{LL_y - O} {UR_x + 2},{UR_y + O * 2};;;NOP;");
-                    writer.WriteLine($"ADD N53 '{iEquName}' :T1001 :F3.0 :D :AC R254 {LL_x - w},{LL_y - O} {LL_x - 5},{UR_y + O * 2};;NOP;");
+                    writer.WriteLine($"ADD N53 '{iEquName}' :T1001 :F3.0 :D :AC R254 {LL_x - w},{LL_y + 1} {LL_x - 5},{UR_y + O * 2 + 1};;NOP;");
                 }
                 else if (iOrientation == "L")
                 {
                     writer.WriteLine($"ADD R254 {LL_x - 2.5},{LL_y - O} {UR_x + w},{UR_y + O * 2};;;NOP;");
-                    writer.WriteLine($"ADD N53 '{iEquName}' :T1001 :F3.0 :D :AC R254 {LL_x},{LL_y - O} {LL_x + 1},{UR_y + O * 2};;NOP;");
+                    writer.WriteLine($"ADD N53 '{iEquName}' :T1001 :F3.0 :D :AC R254 {LL_x},{LL_y + 1} {LL_x + 1},{UR_y + O * 2 + 1};;NOP;");
                 }
-                else if (iOrientation == "B")
-                {
-                    writer.WriteLine($"ADD R254 {LL_x - 8},{LL_y - 2} {LL_x + 16},{LL_y + 4};;;NOP;");
-                    writer.WriteLine($"ADD N53 '{iEquName}' :T1001 :F3.0 :R0 :D :AC R254 {LL_x - 8},{LL_y - 2} {LL_x - 1},{LL_y + 6};;NOP;");
-                }
-                else if (iOrientation == "T")
-                {
-                    writer.WriteLine($"ADD R254 {LL_x - 2 * O},{LL_y - w} {UR_x + 2 * O},{UR_y};;;NOP;");
-                    writer.WriteLine($"ADD N53 '{iEquName}' :T1001 :F3.0 :R0 :D :AC R254 {LL_x - 2 * O},{LL_y - w} {LL_x - 1},{UR_y + 2 * O + 4};;NOP;");
-                }
+                //else if (iOrientation == "B")
+                //{
+                //    writer.WriteLine($"ADD R254 {LL_x - 8},{LL_y - 2} {LL_x + 16},{LL_y + 4};;;NOP;");
+                //    writer.WriteLine($"ADD N53 '{iEquName}' :T1001 :F3.0 :R0 :D :AC R254 {LL_x - 8},{LL_y - 2} {LL_x - 1},{LL_y + 6};;NOP;");
+                //}
+                //else if (iOrientation == "T")
+                //{
+                //    writer.WriteLine($"ADD R254 {LL_x - 2 * O},{LL_y - w} {UR_x + 2 * O},{UR_y};;;NOP;");
+                //    writer.WriteLine($"ADD N53 '{iEquName}' :T1001 :F3.0 :R0 :D :AC R254 {LL_x - 2 * O},{LL_y - w} {LL_x - 1},{UR_y + 2 * O + 4};;NOP;");
+                //}
             }
         }
 
@@ -444,14 +407,14 @@ namespace PanelDrawing.Services.P1
                 {
                     writer.WriteLine($"ADD I1 {Symb} {X0},{Y0 + 2};;NOP;");
                 }
-                else if (iOrientation == "B")
-                {
-                    writer.WriteLine($"ADD I1 {Symb} :R90 {X0 + 8},{Y0};;NOP;");
-                }
-                else if (iOrientation == "T")
-                {
-                    writer.WriteLine($"ADD I1 {Symb} :R90 {X0},{Y0 + 7.5};;NOP;");
-                }
+                //else if (iOrientation == "B")
+                //{
+                //    writer.WriteLine($"ADD I1 {Symb} :R90 {X0 + 8},{Y0};;NOP;");
+                //}
+                //else if (iOrientation == "T")
+                //{
+                //    writer.WriteLine($"ADD I1 {Symb} :R90 {X0},{Y0 + 7.5};;NOP;");
+                //}
             }
         }
 
@@ -499,16 +462,16 @@ namespace PanelDrawing.Services.P1
                     writer.WriteLine($"ADD R252 {LL_x - 2.5},{LL_y - O} {UR_x + w},{UR_y + O * 2};;;NOP;");
                     writer.WriteLine($"ADD N202 '{iEquName}' :T1001 :F3.0 :D :AC R252 {LL_x},{LL_y - O} {LL_x + 1},{UR_y + O * 2};;NOP;");
                 }
-                else if (iOrientation == "B")
-                {
-                    writer.WriteLine($"ADD R252 {LL_x - 8},{LL_y - 2} {LL_x + 16},{LL_y + 4};;;NOP;");
-                    writer.WriteLine($"ADD N202 '{iEquName}' :T1001 :F3.0 :R0 :D :AC R252 {LL_x - 8},{LL_y - 2} {LL_x - 1},{LL_y + 6};;NOP;");
-                }
-                else if (iOrientation == "T")
-                {
-                    writer.WriteLine($"ADD R252 {LL_x - 2 * O},{LL_y - w} {UR_x + 2 * O},{UR_y};;;NOP;");
-                    writer.WriteLine($"ADD N202 '{iEquName}' :T1001 :F3.0 :R0 :D :AC R252 {LL_x - 2 * O},{LL_y - w} {LL_x - 1},{UR_y + 2 * O + 4};;NOP;");
-                }
+                //else if (iOrientation == "B")
+                //{
+                //    writer.WriteLine($"ADD R252 {LL_x - 8},{LL_y - 2} {LL_x + 16},{LL_y + 4};;;NOP;");
+                //    writer.WriteLine($"ADD N202 '{iEquName}' :T1001 :F3.0 :R0 :D :AC R252 {LL_x - 8},{LL_y - 2} {LL_x - 1},{LL_y + 6};;NOP;");
+                //}
+                //else if (iOrientation == "T")
+                //{
+                //    writer.WriteLine($"ADD R252 {LL_x - 2 * O},{LL_y - w} {UR_x + 2 * O},{UR_y};;;NOP;");
+                //    writer.WriteLine($"ADD N202 '{iEquName}' :T1001 :F3.0 :R0 :D :AC R252 {LL_x - 2 * O},{LL_y - w} {LL_x - 1},{UR_y + 2 * O + 4};;NOP;");
+                //}
             }
         }
     }
