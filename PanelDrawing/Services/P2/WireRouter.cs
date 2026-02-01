@@ -1,4 +1,5 @@
 ﻿using PanelDrawing.CommonOperations;
+using PanelDrawing.Logs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,8 @@ namespace PanelDrawing.Services.P2
             string WireCode = string.Empty, GroupId = string.Empty, Wire_Length = string.Empty, Wire_Type = string.Empty, Wire_Type_Number = string.Empty, strPin = string.Empty;
 
             Constants.lst_WireCodes_Info_Processed = new List<string>();
+
+            AppLog.Info("P2 Wiring routing started......");
 
             // iterate upgraded panelDetailsList (preserves original for-loop semantics)
             foreach (var pd in Constants.panelDetailsList)
@@ -65,6 +68,8 @@ namespace PanelDrawing.Services.P2
                         Constants.fromConnectorProcessed_P2.Add(c1);
                         Constants.WiringOffset = 0;  // Assigning Offest to default when New Connector wiring starts
                     }
+                    AppLog.Info($"Routing wire {pd.WireCode} " + $"from {pd.FromConnector}:{pd.FromPin} " 
+                                + $"to {pd.ToConnector}:{pd.ToPin}");
 
                     ConnectionRequired(X1, Y1, X2, Y2, c1, c2, WireCode, F_Type, T_Type, F_Ori, T_Ori, GroupId, Wire_Length, Wire_Type, Wire_Type_Number);
                 }
@@ -86,6 +91,7 @@ namespace PanelDrawing.Services.P2
                 if (arrTemp.Length > 1)
                     gauge = arrTemp[1];
             }
+            AppLog.Info($"Wire {wCode} routing decision started. " + $"From={c1}({iF_Type},{iF_Ori}) To={c2}({iT_Type},{iT_Ori})");
 
 
             if (iF_Ori == "T" || iF_Ori == "B" || iT_Ori == "T" || iT_Ori == "B")

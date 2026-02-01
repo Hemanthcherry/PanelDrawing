@@ -51,7 +51,7 @@ namespace PanelDrawing.CommonOperations
         public static double MarginX = 60; // Horizontal margin
         public static double MarginXEQU = 60;
         public static double MarginYEQU = 40;
-        public static double MarginY = 80; // Vertical margin
+        public static double MarginY = 100; // Vertical margin
         public static double ComponentSpacingX = 30;  // Horizontal space between components
         public static double ComponentSpacingY = 30;  // vertical space between components
         // Coordinates section end

@@ -155,7 +155,7 @@ namespace PanelDrawing.Services.P1
         public static (string PanelNumber, string PanelName) LoadPanelDetails(string filePath)
         {
             if (!File.Exists(filePath))
-                throw new FileNotFoundException($"Data extraction file not found at: {filePath}");
+                throw new FileNotFoundException($"Panel Info file not found at: {filePath}");
 
             var lines = File.ReadAllLines(filePath).Where(l => !string.IsNullOrWhiteSpace(l)).ToList();
 

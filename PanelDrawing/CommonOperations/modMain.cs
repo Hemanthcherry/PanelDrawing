@@ -1,4 +1,5 @@
 ﻿using Panel_Drawing.Forms;
+using PanelDrawing.Logs;
 using PanelDrawing.Objects;
 using PanelDrawing.Services.P1;
 using System.Diagnostics;
@@ -269,6 +270,7 @@ namespace PanelDrawing.CommonOperations
 
         public static void InitiateStep1()
         {
+            AppLog.Info($"P1 Components Placement Started...........");
             InitializeLayout();
 
             Constants.processedItems = new List<string>();
@@ -295,7 +297,6 @@ namespace PanelDrawing.CommonOperations
                 .ThenBy(c => c.ComponentType) // Group remaining types together
                 .ThenBy(c => c.ComponentName) // Ensure alphabetical order within groups
                 .ToList();
-
 
             foreach (var comp in components)
             {
@@ -325,389 +326,404 @@ namespace PanelDrawing.CommonOperations
                 double CompYdist = 0.0;
                 //frmPanelOri frmpanelori = new frmPanelOri();
 
-                switch (CompType)
+                AppLog.Info($"Component {CompDwgName} ({CompType}) started placement");
+                try
                 {
-                    case "SPL":
-                        if (string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(30, 30, CompType);
-                            modOPCommand.AddSymbolSPL(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                        }
-                        else
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                    switch (CompType)
+                    {
+                        case "SPL":
+                            if (string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(30, 30, CompType);
+                                modOPCommand.AddSymbolSPL_OOTB(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                AppLog.Info($"OOTB Component {CompDwgName} ({CompType}) placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
 
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                           // modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, CompDwgName);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        continue;
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                // modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, CompDwgName);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
 
-                    case "SCB":
-                        //int T = (CompType == "TCB") ? 3 : 1;
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-
-                            //var scbPins = modStandard.PinsOfConnector(CompDwgName);
-                            //if (scbPins.Length == 0)
-                            //{
-                            //    MessageBox.Show($"{CompDwgName} Pins Not Available");
-                            //    continue;
-                            //}
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddCBSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, CBVoltage, Constants.el_ExecFilePath, CompType);
-                        }
-                        continue;
-
-                    case "TCB":
-
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-
-                            //var tcbPins = modStandard.PinsOfConnector(CompDwgName);
-                            //if (tcbPins.Length == 0)
-                            //{
-                            //    MessageBox.Show($"{CompDwgName} Pins Not Available");
-                            //    continue;
-                            //}
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddCBSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, CBVoltage, Constants.el_ExecFilePath, CompType);
-                        }
-                        continue;
-
-                    case "TBK":
+                        case "TBK":
                         /*(CompXdist, CompYdist) = GetNextComponentPosition(80, 100);
 
                         modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
                         modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, CompDwgName);
                         continue;*/
 
-                    case "TER":
-                        var tbkPins = modStandard.PinsOfConnector(CompDwgName);
-                        if (tbkPins.Count == 0)
-                        {
-                            MessageBox.Show($"{CompDwgName} Pins Not Available");
-                            continue;
-                        }
-                        if (string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-
-                            modOPCommand.AddOOTB_TER_SymbolForTerminal(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, "0", tbkPins, ShuntInfo);
-                        }
-                        else
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                            //modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, CompDwgName);
-                        }
-                        continue;
-
-                    case "SWT":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        //modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, CompDwgName);
-                        continue;
-
-                    case "EQU":
-                        var equPins = modStandard.PinsOfConnector(CompDwgName);
-                        //var distinctPins = equPins.Distinct().ToArray();
-                        Constants.listPinsOfEqu = equPins;
-                        int NoOfPins = equPins.Count;
-                       // frmpanelori.lblEquName.Text = CompDwgName;
-                        Constants.txtEquName = CompDwgName;
-                        // Update panelDetailsList
-                        foreach (var row in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
-                        {
-                            row.Usage = SampleEquPinNumber;
-                            row.FromType = CompType;
-                            row.GroupId = GroupId;
-                            row.WireLength = Wire_Length;
-                            row.WireType = Wire_Type;
-                        }
-
-                        bool isDouble = CompDwgName.Contains("_J") ||
-                            Regex.IsMatch(CompDwgName.Last().ToString(), "[a-hj-np-zA-HJ-NP-Z]");
-
-                        //(CompXdist, CompYdist) = GetNextComponentPosition(80, 100);
-                        int CompHeightEQU = (NoOfPins * 4) + 20 + 20; 
-
-                        if (isDouble)
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeightEQU, CompType);
-
-                            string root = CompDwgName.Split('_')[0];
-
-                            if (!Constants.remainingItems.Contains(root))
+                        case "TER":
+                            var tbkPins = modStandard.PinsOfConnector(CompDwgName);
+                            if (tbkPins.Count == 0)
                             {
-                                EQUDoubleConnector.GraLine(CompXdist, CompYdist, Constants.listPinsOfEqu.Count, CompDwgName, Constants.listPinsOfEqu, CompPN, AssocPNs, EquipBox, root);
-
-                                Constants.remainingItems.Add(root);
+                                MessageBox.Show($"{CompDwgName} Pins Not Available");
+                                continue;
                             }
-                        }
-                        else
-                        {
-                            //frmpanelori.lblEquName.Text = CompDwgName;
-                            // frmpanelori.ShowDialog();
+                            if (string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
 
-                            //var side = frmpanelori.SelectedSide;
-                            var side = comp.SymbolName.Trim().Contains("contact_sth_mr")? "LEFT" : "RIGHT";
+                                modOPCommand.AddOOTB_TER_SymbolForTerminal(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, "0", tbkPins, ShuntInfo);
+                                AppLog.Info($"OOTB Component {CompDwgName} ({CompType}) placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
 
-                            // Get position based on LEFT / RIGHT
-                            //(CompXdist, CompYdist) = GetNextEquPosition(side,40,compHeight: Constants.arrPinsOfEqu.Length * 10);
-                             (CompXdist, CompYdist) = GetNextEquPosition(side, 40, CompHeightEQU);
-
-                            EQUSingleConnector.DrawEquSymbolUsedPins(CompXdist, CompYdist, CompMaxPin, CompDwgName,side, SampleEquPinNumber, CompPN, /*frmpanelori,*/ AssocPNs, EquipBox, Looms);
-
-                            //frmpanelori.Close();
-                        }
-                        continue;
-
-                    case "DIS":
-                     
-                        var disPins = modStandard.PinsOfConnector(CompDwgName);
-                        if (disPins.Count == 0)
-                        {
-                            MessageBox.Show($"{CompDwgName} Pins Not Available");
-                            continue;
-                        }
-                        int yCoordinate_DIS = (disPins.Count * 4) + 12 + 18;
-
-                        foreach (var pd in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
-                        {
-                            pd.Usage = SampleEquPinNumber;
-                            pd.FromType = CompType;
-                        }
-
-                        string baseName = CompDwgName.Length > 2 ? CompDwgName[..^2] : CompDwgName;
-
-                        // If already processed → exit
-                        if (Constants.processedItems.Contains(baseName))
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                                //modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, CompDwgName);
+                            }
                             continue;
 
-                      /*  bool doubleSide = Constants.dataExtractionListBelow.Any(x => x.ConnectorName.StartsWith(baseName, StringComparison.OrdinalIgnoreCase)
-                                                                 && !x.ConnectorName.Equals(CompDwgName, StringComparison.OrdinalIgnoreCase)
-                                                                 && x.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase));*/
+                        case "EQU":
+                            var equPins = modStandard.PinsOfConnector(CompDwgName);
+                            Constants.listPinsOfEqu = equPins;
 
-                       /* if (doubleSide)
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, yCoordinate_DIS, "DISDouble");
-                        }
-                        else
-                        {*/
-                        (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, yCoordinate_DIS, CompType);
-                        //}
+                            int NoOfPins = equPins.Count;
+                            Constants.txtEquName = CompDwgName;
 
-                        GraLine_DIS.GraLine(CompXdist, CompYdist, disPins.Count, CompDwgName, disPins, CompPN, AssocPNs, EquipBox);
-                        continue;
+                            // Update panelDetailsList
+                            foreach (var row in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
+                            {
+                                row.Usage = SampleEquPinNumber;
+                                row.FromType = CompType;
+                                row.GroupId = GroupId;
+                                row.WireLength = Wire_Length;
+                                row.WireType = Wire_Type;
+                            }
 
-                    case "MSW":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break; 
+                            //bool isDouble = CompDwgName.Contains("_J") ||
+                            //    Regex.IsMatch(CompDwgName.Last().ToString(), "[a-hj-np-zA-HJ-NP-Z]");
+                            bool isDouble =
+                                Regex.IsMatch(CompDwgName, @"_[Jj](?:[1-9]|1\d|2[0-4])$") ||
+                                Regex.IsMatch(CompDwgName, @"_[A-HJ-NP-Za-hj-np-z]$");
 
-                    case "REL":                                               
-                        var relPins = modStandard.GetPinsofOOTBRelay(CompDwgName);
-                        int yCoordinateREL = (relPins.Count * 5) + 40;
 
-                        //(CompXdist, CompYdist) = GetNextComponentPosition(60, yCoordinateREL);
-                        //modOPCommand.AddSymbolREL_OOTB(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, relPins);
+                            //(CompXdist, CompYdist) = GetNextComponentPosition(80, 100);
+                            int CompHeightEQU = (NoOfPins * 4) + 20 + 20;
 
-                        if (string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, yCoordinateREL, CompType);
-                            modOPCommand.AddSymbolREL_OOTB(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, relPins);
-                        }
-                        else
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
+                            if (isDouble)
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeightEQU, CompType);
 
-                        break;
+                                string root = CompDwgName.Split('_')[0];
 
-                    case "IND":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                                if (!Constants.remainingItems.Contains(root))
+                                {
+                                    EQUDoubleConnector.GraLine(CompXdist, CompYdist, Constants.listPinsOfEqu.Count, CompDwgName, Constants.listPinsOfEqu, CompPN, AssocPNs, EquipBox, root);
 
-                    case "BUS":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                                    Constants.remainingItems.Add(root);
+                                }
+                            }
+                            else
+                            {
+                                //frmpanelori.lblEquName.Text = CompDwgName;
+                                // frmpanelori.ShowDialog();
+                                //var side = frmpanelori.SelectedSide;
+                                var side = comp.SymbolName.Trim().Contains("contact_sth_mr") ? "LEFT" : "RIGHT";
 
-                    case "ANT":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                                // Get position based on LEFT / RIGHT
+                                //(CompXdist, CompYdist) = GetNextEquPosition(side,40,compHeight: Constants.arrPinsOfEqu.Length * 10);
+                                (CompXdist, CompYdist) = GetNextEquPosition(side, 40, CompHeightEQU);
 
-                    case "DD":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                                EQUSingleConnector.DrawEquSymbolUsedPins(CompXdist, CompYdist, CompMaxPin, CompDwgName, side, SampleEquPinNumber, CompPN, /*frmpanelori,*/ AssocPNs, EquipBox, Looms);
+                                //frmpanelori.Close();
+                            }
+                            AppLog.Info($"OOTB Component {CompDwgName} ({CompType}) placed at X={CompXdist}, Y={CompYdist}");
+                            continue;
 
-                    case "FUS":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                        case "DIS":
+                            var disPins = modStandard.PinsOfConnector(CompDwgName);
+                            if (disPins.Count == 0)
+                            {
+                                MessageBox.Show($"{CompDwgName} Pins Not Available");
+                                continue;
+                            }
+                            int yCoordinate_DIS = (disPins.Count * 4) + 12 + 18;
 
-                    //case "CNT":
-                    //    modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                    //    modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                    //    break;
+                            foreach (var pd in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
+                            {
+                                pd.Usage = SampleEquPinNumber;
+                                pd.FromType = CompType;
+                            }
 
-                    case "SNR":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                            string baseName = CompDwgName.Length > 2 ? CompDwgName[..^2] : CompDwgName;
 
-                    case "GND" or "GROUND":
-                        if (string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(20, 20, CompType);
-                            modOPCommand.AddSymbolGND(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                        }
-                        else
-                        { 
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
+                            // If already processed → exit
+                            if (Constants.processedItems.Contains(baseName))
+                                continue;
 
-                        break;
+                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, yCoordinate_DIS, CompType);
 
-                    //case "ML":
-                    //    modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                    //    modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                    //    break;
+                            GraLine_DIS.GraLine(CompXdist, CompYdist, disPins.Count, CompDwgName, disPins, CompPN, AssocPNs, EquipBox);
+                            AppLog.Info($"OOTB Component {CompDwgName} ({CompType}) placed at X={CompXdist}, Y={CompYdist}"); 
+                            continue;
 
-                    case "EM" or "ERM":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                        case "SWT":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
 
-                    case "LMP":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            //modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, CompDwgName);
+                            continue;
 
-                    //case "M1" or "M2":
-                    //    modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                    //    modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                    //    break;
+                        case "MSW":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
 
-                    case "TRK":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                        case "GND" or "GROUND":
+                            if (string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(20, 20, CompType);
+                                modOPCommand.AddSymbolGND(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                AppLog.Info($"OOTB Component {CompDwgName} ({CompType}) placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
 
-                    case "NEW":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                        case "SCB":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddCBSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, CBVoltage, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
 
-                    case "RES":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                        case "TCB":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddCBSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, CBVoltage, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
 
-                    case "CAP":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                        case "REL":
+                            var relPins = modStandard.GetPinsofOOTBRelay(CompDwgName);
+                            int yCoordinateREL = (relPins.Count * 5) + 40;
 
-                    case "IDT":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                            //(CompXdist, CompYdist) = GetNextComponentPosition(60, yCoordinateREL);
+                            //modOPCommand.AddSymbolREL_OOTB(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, relPins);
 
-                    case "POT":
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                            if (string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, yCoordinateREL, CompType);
+                                modOPCommand.AddSymbolREL_OOTB(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, relPins);
+                                AppLog.Info($"OOTB Component {CompDwgName} ({CompType}) placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
 
-                    default:
-                        if (!string.IsNullOrEmpty(MacroName))
-                        {
-                            (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                            modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
-                            modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
-                        }
-                        break;
+                        case "IND":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        case "BUS":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        case "ANT":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        case "DD":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        case "FUS":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        //case "CNT":
+                        //    modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                        //    modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                        //    break;
+
+                        case "SNR":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        //case "ML":
+                        //    modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                        //    modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                        //    break;
+
+                        case "EM" or "ERM":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        case "LMP":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        //case "M1" or "M2":
+                        //    modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                        //    modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                        //    break;
+
+                        case "TRK":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        case "NEW":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        case "RES":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        case "CAP":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        case "IDT":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        case "POT":
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            continue;
+
+                        default:
+                            if (!string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
+                                modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
+                                AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                AppLog.Warn($"No Macro defined for Component {CompDwgName} ({CompType}). Skipping placement.");
+                            }
+                            continue;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppLog.Error($"Component {CompDwgName} ({CompType}) placement failed", ex);
+                    continue;
                 }
             }
-        }        
+
+            AppLog.Info($"P1 Components Placement Completed............");
+        }
 
         public static void UpdatePanelDetailsTextFile(List<PanelDetailsRow> panelDetailsList)
         {

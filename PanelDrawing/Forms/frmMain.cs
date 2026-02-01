@@ -1,6 +1,7 @@
 ﻿//using Microsoft.Vbe.Interop;
 using PanelDrawing.CommonOperations;
 using PanelDrawing.Forms;
+using PanelDrawing.Logs;
 using PanelDrawing.Objects;
 using PanelDrawing.Services.P1;
 using PanelDrawing.Services.P2;
@@ -26,16 +27,15 @@ namespace Panel_Drawing.Forms
         }
         
         public void frmMain_Load(object sender, EventArgs e)
-        {           
-            bool IsComponentsCreated = false;
-            bool IsComponentsWiringCreated = false;
+        {
             #region//Environment Variable Settings
-            Constants.Env_Variable_Electre_Proj_Path = "C:\\ELECTRE\\electre_projects\\JAN_29_PANELDWG\\";
             if (string.IsNullOrEmpty(Constants.Env_Variable_Electre_Proj_Path))
             {
+                AppLog.Error("Project Path not passed as argument. Application will exit.");
                 MessageBox.Show($"Project Path not passed as an arguement, Please provide in Custom_Program.vbs file in Electre_Customize/system/vbs path");
                 Application.Exit();
             }
+
             Constants.panelInfoFilePath = string.Concat(Constants.Env_Variable_Electre_Proj_Path, @"\templ\TempFiles\PanelInfo.txt");//@"C:\electre_projects\PANEL_DWG2\PANEL_DWG2_PANELDRAWINGS\templ\TempFiles\PanelInfo.txt";
             Constants.Electre_Temp_Folder_Path = string.Concat(Constants.Env_Variable_Electre_Proj_Path, @"\templ\TempFiles\");
             Constants.dataExtractionFilePath = string.Concat(Constants.Env_Variable_Electre_Proj_Path, @"\schema\data_extraction.csv"); //@"C:\electre_projects\PANEL_DWG2\PANEL_DWG2_PANELDRAWINGS\schema\data_extraction.csv";
@@ -139,6 +139,7 @@ namespace Panel_Drawing.Forms
             }
             #endregion
 
+            AppLog.Info($"Project started. Path = {Constants.Env_Variable_Electre_Proj_Path}");
             lstSheetSizes.Enabled = false;
             modMain.InitiateOutPutFile(Constants.el_ExecFilePath);
             modOPCommand.NewSheetWithTB(Constants.el_ExecFilePath, lblPanelNumber.Text, "001", Constants.SheetTemplateName);

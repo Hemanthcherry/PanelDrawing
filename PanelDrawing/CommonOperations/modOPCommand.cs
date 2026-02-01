@@ -49,7 +49,7 @@ namespace PanelDrawing.CommonOperations
             }
         }
 
-        public static void AddSymbolSPL(string refName, double X0, double Y0, string iPartNumber, string el_Execfilpath)  //'Symbolname is Macroname
+        public static void AddSymbolSPL_OOTB(string refName, double X0, double Y0, string iPartNumber, string el_Execfilpath)  //'Symbolname is Macroname
         {
             //using (StreamWriter writer = File.AppendText(el_Execfilpath))
             using (var writer = File.AppendText(el_Execfilpath))

@@ -1,4 +1,5 @@
 ﻿using PanelDrawing.CommonOperations;
+using PanelDrawing.Logs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -203,7 +204,13 @@ namespace PanelDrawing.Services.P2
         {
             double  X3 = 0, Y3 = 0, X4 = 0, Y4 = 0;
 
+            AppLog.Info($"P2 Routing started for wire {iWireCode} " + $"from {c1} to {c2}");
+
             bool isCType = (X1 == X2) || Math.Abs(X1 - X2) < 50;
+
+            string routeType = (Y1 == Y2) ? "STRAIGHT" : isCType ? "C-TYPE" :"Z-TYPE";
+
+            AppLog.Info($"Wire {iWireCode} routing type decided as {routeType}");
 
             if (isCType) // C-Line 
             {
@@ -228,8 +235,9 @@ namespace PanelDrawing.Services.P2
             Y4 = Y2;
 
             string wire_symbol = Constants.GetWireSymbol(wire_Type);
-
-            using (var writer = File.AppendText(Constants.el_ExecFilePath))
+            try
+            {
+                using (var writer = File.AppendText(Constants.el_ExecFilePath))
             {
                 writer.WriteLine($"GRI 0.5, 2;");
                 writer.WriteLine($"ADD L154 :W0");
@@ -255,6 +263,13 @@ namespace PanelDrawing.Services.P2
 
                 if (!Constants.lst_WireCodes_Info_Processed.Contains(iWireCode))
                     Constants.lst_WireCodes_Info_Processed.Add(iWireCode);
+            }
+                AppLog.Info($"Wire {iWireCode} routed successfully " + $"from {c1} to {c2}");
+            }
+            catch (Exception ex)
+            {
+                AppLog.Error($"Wire {iWireCode} routing failed from {c1} to {c2}", ex);
+                throw;
             }
         }
 
