@@ -44,53 +44,116 @@ namespace PanelDrawing.CommonOperations
 
         //    return result;
         //}
-
         public static List<PanelDetailsRow> SortPanelDetails(List<PanelDetailsRow> rows)
         {
-            var result = new List<PanelDetailsRow>();
-            int i = 0;
-
-            rows = rows.OrderBy(r => r.FromConnector, StringComparer.OrdinalIgnoreCase)
+            // 1️⃣ Pin-first ordering
+            var pinSorted = rows
+                .OrderBy(r => r.FromConnector, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(r => NormalizePin(r.FromPin))
                 .ToList();
 
-            while (i < rows.Count)
-            {
-                var current = rows[i];
-                var wire = ParseWireCode(current.WireCode);
+            var result = new List<PanelDetailsRow>();
+            var processedBaseWires = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                // Mono cable → copy as-is
+            foreach (var row in pinSorted)
+            {
+                var wire = ParseWireCode(row.WireCode);
+
+                // 🔹 Mono → keep at pin position
                 if (wire.IsMono)
                 {
-                    result.Add(current);
-                    i++;
+                    result.Add(row);
                     continue;
                 }
 
-                // Paired cable → detect contiguous block
-                var block = new List<(PanelDetailsRow Row, WireInfo Wire)>();
+                // 🔹 Paired → output only once per BaseWire
+                if (processedBaseWires.Contains(wire.BaseWire))
+                    continue;
 
-                int j = i;
-                while (j < rows.Count)
-                {
-                    var w = ParseWireCode(rows[j].WireCode);
+                // Collect all cores of this paired wire
+                var pairedBlock = pinSorted
+                    .Where(r =>
+                    {
+                        var w = ParseWireCode(r.WireCode);
+                        return !w.IsMono && w.BaseWire.Equals(wire.BaseWire, StringComparison.OrdinalIgnoreCase);
+                    })
+                    .Select(r => new { Row = r, Core = ParseWireCode(r.WireCode).CoreNumber })
+                    .OrderBy(x => x.Core)
+                    .Select(x => x.Row);
 
-                    if (w.IsMono || w.BaseWire != wire.BaseWire)
-                        break;
-
-                    block.Add((rows[j], w));
-                    j++;
-                }
-
-                // Sort ONLY inside the block by core number
-                foreach (var item in block.OrderBy(b => b.Wire.CoreNumber))
-                    result.Add(item.Row);
-
-                i = j;
+                result.AddRange(pairedBlock);
+                processedBaseWires.Add(wire.BaseWire);
             }
 
             return result;
         }
+
+        public static void Export_PanelEquOri(StreamWriter writer, List<string> pinsList, string ori)
+        {
+            var orientation = ori.Equals("RIGHT", StringComparison.OrdinalIgnoreCase) ? "R" : "L";
+            if (pinsList.Count>0)
+            {
+                for (int i = 0; i < pinsList.Count; i++)
+                {
+                    writer.WriteLine($"{Constants.txtEquName};{pinsList[i]};{orientation}");
+                }
+            }
+        }
+
+
+        //public static List<PanelDetailsRow> SortPanelDetails(List<PanelDetailsRow> rows)
+        //{
+        //    var result = new List<PanelDetailsRow>();
+        //    int i = 0;
+
+        //    rows = rows.OrderBy(r => r.FromConnector, StringComparer.OrdinalIgnoreCase)
+        //        .ThenBy(r => NormalizePin(r.FromPin))
+        //        .ToList();
+
+        //    while (i < rows.Count)
+        //    {
+        //        var current = rows[i];
+        //        if (result.Contains(current))
+        //        {
+        //            i++;
+        //            continue;
+        //        }
+        //        var wire = ParseWireCode(current.WireCode);
+
+        //        // Mono cable → copy as-is
+        //        if (wire.IsMono)
+        //        {
+        //            result.Add(current);
+        //            i++;
+        //            continue;
+        //        }
+
+        //        // Paired cable → detect contiguous block
+        //        var block = new List<(PanelDetailsRow Row, WireInfo Wire)>();              
+
+        //        int j = i;
+        //        while (j < rows.Count)
+        //        {
+        //            var w = ParseWireCode(rows[j].WireCode);
+
+        //            if (!w.IsMono && w.BaseWire == wire.BaseWire)
+        //            {
+        //                block.Add((rows[j], w));
+        //            }
+        //            j++;
+        //        }
+        //        // Sort ONLY inside the block by core number
+        //        foreach (var item in block.OrderBy(b => b.Wire.CoreNumber))
+        //            if (!result.Contains(item.Row))
+        //            {
+        //                result.Add(item.Row);
+        //            }
+
+        //        i ++;
+        //    }
+
+        //    return result;
+        //}
 
         private static WireInfo ParseWireCode(string wireCode)
         {
@@ -252,31 +315,31 @@ namespace PanelDrawing.CommonOperations
              return string.Join("_", parts.Select(p => p is int n ? n.ToString("D6") : p.ToString()));
          }*/
 
-        //public static string[] ConvertListInto1DArray(List<string> lstlist)
-        //{
-        //    string[] arrtemp = new string[lstlist[0].Split(',').Count()*lstlist.Count];
-        //    int intTempCount = 0;
-        //    for (int i = 0; i <= lstlist.Count - 1; i++)
-        //    {
-        //        for (int j = 0; j <= lstlist[i].Split(',').Count()-1; j++)
-        //        {
-        //            string[] temparr = lstlist[i].Split(',');
-        //            arrtemp[intTempCount] = temparr[j];//lstlist[i].Split(',').ToString();
-        //            intTempCount++;
-        //        }
-        //    }
-        //    return arrtemp;
-        //}
+        public static string[] ConvertListInto1DArray(List<string> lstlist)
+        {
+            string[] arrtemp = new string[lstlist[0].Split(',').Count() * lstlist.Count];
+            int intTempCount = 0;
+            for (int i = 0; i <= lstlist.Count - 1; i++)
+            {
+                for (int j = 0; j <= lstlist[i].Split(',').Count() - 1; j++)
+                {
+                    string[] temparr = lstlist[i].Split(',');
+                    arrtemp[intTempCount] = temparr[j];//lstlist[i].Split(',').ToString();
+                    intTempCount++;
+                }
+            }
+            return arrtemp;
+        }
 
-        //public static List<string> ConvertTextFileIntoList(string txtFileName)
-        //{
-        //    List<string> lstlineInfo = new List<string>();
-        //    foreach (string line in File.ReadLines(txtFileName))
-        //    {
-        //        lstlineInfo.Add(line);
-        //    }
-        //    return lstlineInfo;
-        //}      
+        public static List<string> ConvertTextFileIntoList(string txtFileName)
+        {
+            List<string> lstlineInfo = new List<string>();
+            foreach (string line in File.ReadLines(txtFileName))
+            {
+                lstlineInfo.Add(line);
+            }
+            return lstlineInfo;
+        }
 
 
         /*public static string[,] ConvertTextFileDataInto2DArray(string textFilePath)

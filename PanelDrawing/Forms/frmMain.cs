@@ -103,7 +103,7 @@ namespace Panel_Drawing.Forms
             #region // Commented P2 EXE Auto fill sheet details for Production Release Purpose --- Button Validation
             //if (File.Exists(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails)))// && Environment.GetEnvironmentVariable("PD1_Flag", EnvironmentVariableTarget.Machine).Equals("PD1") && Environment.GetEnvironmentVariable("PD2_Flag", EnvironmentVariableTarget.Machine).Equals("PD2"))
             //{
-            //    Load Form for Create Wiring
+            //   // Load Form for Create Wiring
             //    lstSheetSizes.Enabled = false;
             //    btnPanelComponents.Enabled = false;
             //    string[] arrtemp = TextOperations.ConvertListInto1DArray(TextOperations.ConvertTextFileIntoList(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.ComponentsCreatedTextFileName)));
@@ -194,7 +194,7 @@ namespace Panel_Drawing.Forms
             CommonOperation.CreateTemp_El_Exec_File(Constants.El_Exec_Temp_P2);
             CommonOperation.CloseVbsFiles(Constants.Custom_Programs_File);
             MessageBox.Show("Wire Routing Of Selected Panel Components Completed..");
-            File.Delete(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.ComponentsCreatedTextFileName));
+            //File.Delete(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.ComponentsCreatedTextFileName));
             this.Close();//Exit from this app
         }
 

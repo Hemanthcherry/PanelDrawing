@@ -324,7 +324,7 @@ namespace PanelDrawing.CommonOperations
 
                 double CompXdist = 0.0;
                 double CompYdist = 0.0;
-                //frmPanelOri frmpanelori = new frmPanelOri();
+                frmPanelOri frmpanelori = new frmPanelOri();
 
                 AppLog.Info($"Component {CompDwgName} ({CompType}) started placement");
                 try
@@ -424,9 +424,16 @@ namespace PanelDrawing.CommonOperations
                             else
                             {
                                 //frmpanelori.lblEquName.Text = CompDwgName;
-                                // frmpanelori.ShowDialog();
+                                //frmpanelori.ShowDialog();
                                 //var side = frmpanelori.SelectedSide;
                                 var side = comp.SymbolName.Trim().Contains("contact_sth_mr") ? "LEFT" : "RIGHT";
+
+                                Constants.sPanelEQUori_File = string.Concat(Constants.Electre_Temp_Folder_Path, Constants.textPanelPartNumber, " " + "- " + Constants.txtEquName, " - PanelEquOri.txt");
+
+                                using (StreamWriter writer = new StreamWriter(Constants.sPanelEQUori_File))
+                                {
+                                    TextOperations.Export_PanelEquOri(writer, equPins, side);
+                                }
 
                                 // Get position based on LEFT / RIGHT
                                 //(CompXdist, CompYdist) = GetNextEquPosition(side,40,compHeight: Constants.arrPinsOfEqu.Length * 10);
