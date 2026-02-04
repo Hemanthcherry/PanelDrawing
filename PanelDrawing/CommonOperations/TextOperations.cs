@@ -90,12 +90,12 @@ namespace PanelDrawing.CommonOperations
 
         public static void Export_PanelEquOri(StreamWriter writer, List<string> pinsList, string ori)
         {
-            var orientation = ori.Equals("RIGHT", StringComparison.OrdinalIgnoreCase) ? "R" : "L";
+           // var orientation = ori.Equals("RIGHT", StringComparison.OrdinalIgnoreCase) ? "R" : "L";
             if (pinsList.Count>0)
             {
                 for (int i = 0; i < pinsList.Count; i++)
                 {
-                    writer.WriteLine($"{Constants.txtEquName};{pinsList[i]};{orientation}");
+                    writer.WriteLine($"{Constants.txtEquName};{pinsList[i]};{ori}");
                 }
             }
         }

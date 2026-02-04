@@ -1,4 +1,5 @@
 ﻿using PanelDrawing.CommonOperations;
+using PanelDrawing.Logs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,8 +35,10 @@ namespace PanelDrawing.Services.P1
             };
 
             if (string.IsNullOrEmpty(baseOrientation))
+            {
+                AppLog.Warn($"EQU component '{CompName}' orientation not found for info '{info}', skipping symbol placement.");
                 return;
-
+            }
             bool isHalfL = info == "cont_sth_half_l";
             bool isHalfR = info == "cont_sth_half_r";
 
@@ -133,7 +136,8 @@ namespace PanelDrawing.Services.P1
                 {
                     if (!isHalfLeft)
                     {
-                        writer.WriteLine($"ADD Cont_sth_mg_hal {x},{y};");
+                        //writer.WriteLine($"ADD Cont_sth_mg_hal {x},{y};"); //Commented on Feb_04Commented on Feb_04
+                        writer.WriteLine($"ADD Cont_sth_mg {x},{y};");
                         writer.WriteLine($"MOD N51 {x + 0.8},{y} 0,0 :E '{pinNumber}'; NOP;");
                         writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x},{y} :T4320 {x},{y - 2};NOP;");
                     }
@@ -187,13 +191,13 @@ namespace PanelDrawing.Services.P1
                 if (strOri.Equals("L"))
                 {
                     writer.WriteLine($"ADD L214 {X0},{Y0} {X0},{Y0 + L}; ; ; ; NOP;");
-                    writer.WriteLine($"ADD L214 {X0 + 7.5 - 0.1 + 0.01 + 0.002},{Y0} {X0 + 7.5 - 0.1 + 0.01 + 0.002},{Y0 + L}; ; ; ; NOP;");
+                    writer.WriteLine($"ADD L214 {X0 + 7.5},{Y0} {X0 + 7.5},{Y0 + L}; ; ; ; NOP;");
                     writer.WriteLine($"ADD L214 {X0 + 10},{Y0} {X0 + 10},{Y0 + L}; ; ; ; NOP;");
                 }
                 if (strOri.Equals("R"))
                 {
                     writer.WriteLine($"ADD L214 {X0 + 10},{Y0} {X0 + 10},{Y0 + L}; ; ; ; NOP;");
-                    writer.WriteLine($"ADD L214 {X0 + 7.9 + 5 - 0.3 - 0.01 - 0.002},{Y0} {X0 + 7.9 + 5 - 0.3 - 0.01 - 0.002},{Y0 + L}; ; ; ; NOP;");
+                    writer.WriteLine($"ADD L214 {X0 + 7.5 + 5},{Y0} {X0 + 7.5 + 5},{Y0 + L}; ; ; ; NOP;");
                     writer.WriteLine($"ADD L214 {X0 + 10 + 10},{Y0} {X0 + 10 + 10},{Y0 + L}; ; ; ; NOP;");
                 }
             }
@@ -220,16 +224,20 @@ namespace PanelDrawing.Services.P1
                     int halfOffset = tempOri.Equals("cont_sth_half_l", StringComparison.OrdinalIgnoreCase) ? 0 : 4;
 
                     // MAIN RECTANGLE
-                    w.WriteLine($"ADD R254 {LL_x + 8 - widthSpaceIncrease + 2.5 },{LL_y} {UR_x + 12 - widthSpaceIncrease + 2.5},{UR_y + 8};");
+                    //w.WriteLine($"ADD R254 {LL_x + 8 - widthSpaceIncrease + 2.5 },{LL_y} {UR_x + 12 - widthSpaceIncrease + 2.5},{UR_y + 8};");
+                    w.WriteLine($"ADD R254 {LL_x - 5},{LL_y} {LL_x + 3},{UR_y + 8};");
 
                     // HEADER LABEL RECTANGLE
-                    w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3 + 10},{LL_y - 30 - 48 + 8 + 8 + 2} '{compName}' {UR_x + 8 + 10},{UR_y + 4 - 6 - 12 + 8 + 8 + 2};");
+                    // w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3 + 10},{LL_y - 30 - 48 + 8 + 8 + 2} '{compName}' {UR_x + 8 + 10},{UR_y + 4 - 6 - 12 + 8 + 8 + 2};");
+                    w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 15},{LL_y - 30 - 48 + 8 + 8 + 4} '{compName}' {UR_x},{UR_y + 4 - 6 - 12 + 8 + 8 + 4};");
 
                     // COMPONENT NAME
-                    w.WriteLine($"ADD N253 '{compName}' {LL_x + 2 + 10},{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
+                    //w.WriteLine($"ADD N253 '{compName}' {LL_x + 2 + 10},{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
+                    w.WriteLine($"ADD N253 '{compName}' {LL_x - 15},{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
 
                     // PART NUMBER
-                    w.WriteLine($"ADD N52 '{partNumber}' {LL_x + 3 + 10},{LL_y} :F1.0;;NOP;");
+                    // w.WriteLine($"ADD N52 '{partNumber}' {LL_x + 3 + 10},{LL_y} :F1.0;;NOP;");
+                    w.WriteLine($"ADD N52 '{partNumber}' {LL_x - 15},{LL_y - 2} :F1.0;;NOP;");
 
                     int dy = 0;
                     // ASSOCIATED PART NUMBERS
@@ -240,13 +248,13 @@ namespace PanelDrawing.Services.P1
                             if (pn != partNumber)
                             {
                                 dy += 4;
-                                w.WriteLine($"ADD N52 '{pn}' {LL_x + 5 + 10},{LL_y - dy} :F1.0;;NOP;");
+                                w.WriteLine($"ADD N52 '{pn}' {LL_x - 15},{LL_y - dy} :F1.0;;NOP;");
                             }
                         }
                     }
 
                     // N-MARKER
-                    w.WriteLine($"ADD N255 'N' {LL_x + 12 + 10},{LL_y - dy -4} :F1.0 :T4326 :D;;NOP;");
+                    w.WriteLine($"ADD N255 'N' {LL_x - 10},{LL_y - dy -4} :F1.0 :T4326 :D;;NOP;");
 
                     //  OPPOSITE CONNECTOR (LEFT SIDE)
 

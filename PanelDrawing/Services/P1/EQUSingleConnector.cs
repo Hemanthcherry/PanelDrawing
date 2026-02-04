@@ -10,7 +10,7 @@ namespace PanelDrawing.Services.P1
 {
     public class EQUSingleConnector
     {
-        public static void DrawEquSymbolUsedPins(double X0, double Y0, string iNumberOfMaxPins, string iEquName, string side, string iSamplePinNumber,
+        public static void DrawEquSymbolUsedPins(double X0, double Y0, string iNumberOfMaxPins, string iEquName, string Ori, string iSamplePinNumber,
              string iPartNumber, /*frmPanelOri f,*/ string assoPNs, string EquBoxExist, string LoomsExist)
         {
             List<string> arrPins = new List<string>();
@@ -18,7 +18,7 @@ namespace PanelDrawing.Services.P1
             int I = 0;            
             string IsFullConnector = string.Empty;
 
-            string Ori = side == "LEFT" ? "L" : "R";
+            //string Ori = side == "LEFT" ? "L" : "R";
 
             // parse maximum pins
             int numberOfPins = 0;

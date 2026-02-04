@@ -1,4 +1,5 @@
 ﻿using PanelDrawing.CommonOperations;
+using PanelDrawing.Logs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,7 +58,10 @@ namespace PanelDrawing.Services.P1
             };
 
             if (string.IsNullOrEmpty(orientation))
+            {
+                AppLog.Warn($"DIS component '{CompName}' orientation not found for info '{info}', skipping symbol placement.");
                 return; // no valid orientation → cannot draw
+            }
 
             int incre = -4;
             int T = arrpinsCollection.Count;
@@ -122,7 +126,7 @@ namespace PanelDrawing.Services.P1
                 {
                     siblingConnector =
                         Constants.dataExtractionListAbove.Where(row => row.ConnectorName.Equals(pairedConnector, StringComparison.OrdinalIgnoreCase) &&
-                           // !string.IsNullOrEmpty(row.CoreNumber) &&
+                            // !string.IsNullOrEmpty(row.CoreNumber) &&
                             row.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
                         .Select(row => row.ConnectorName)
                         .FirstOrDefault();
@@ -131,7 +135,8 @@ namespace PanelDrawing.Services.P1
 
                 if (Ori.Equals("L"))
                 {
-                    writer.WriteLine($"ADD Cont_sth_mg_hal {X0},{Y0};");//oRIG
+                    // writer.WriteLine($"ADD Cont_sth_mg_hal {X0},{Y0};");// Commented on Feb_04
+                    writer.WriteLine($"ADD Cont_sth_mg {X0},{Y0};");//oRIG
                     writer.WriteLine($"MOD N51 {X0 + 0.8},{Y0} 0,0 :E '{N}'; NOP;");
                     writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0},{Y0} :T4320 {X0},{Y0 - 2};NOP;");
 
@@ -150,14 +155,14 @@ namespace PanelDrawing.Services.P1
 
                     if (hasSibling)
                     {
-                        writer.WriteLine($"ADD Cont_sth_mg_hal {X0},{Y0};");//oRIG
+                        //writer.WriteLine($"ADD Cont_sth_mg_hal {X0},{Y0};");//Commented on Feb_04
+                        writer.WriteLine($"ADD Cont_sth_mg {X0},{Y0};");
                         writer.WriteLine($"MOD N51 {X0 + 0.8},{Y0} 0,0 :E '{N}'; NOP;");
                         writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0},{Y0} :T4320 {X0},{Y0 - 2};NOP;");
                     }
-                }               
+                }
             }
-        }   
-
+        }
         public static void DisSeg3(double X0, double Y0, double L, string filePath, string strOri)
         {
             using (var writer = File.AppendText(filePath))
@@ -165,7 +170,7 @@ namespace PanelDrawing.Services.P1
                 if (strOri.Equals("L"))
                 {
                     writer.WriteLine($"ADD L214 {X0},{Y0} {X0},{Y0 + L}; ; ; ; NOP;");
-                    writer.WriteLine($"ADD L214 {X0 + 7.5 - 0.1 + 0.05},{Y0} {X0 + 7.5 - 0.1 + 0.05},{Y0 + L}; ; ; ; NOP;");
+                    writer.WriteLine($"ADD L214 {X0 + 7.5},{Y0} {X0 + 7.5},{Y0 + L}; ; ; ; NOP;");
                     // writer.WriteLine($"ADD L214 {X0 + 7.5 - 0.1 + 0.01 + 0.002},{Y0} {X0 + 7.5 - 0.1 + 0.01 + 0.002},{Y0 + L}; ; ; ; NOP;");
                     writer.WriteLine($"ADD L214 {X0 + 10},{Y0} {X0 + 10},{Y0 + L}; ; ; ; NOP;");
                 }
@@ -173,16 +178,16 @@ namespace PanelDrawing.Services.P1
                 {
                     writer.WriteLine($"ADD L214 {X0 + 10},{Y0} {X0 + 10},{Y0 + L}; ; ; ; NOP;");
                     //writer.WriteLine($"ADD L214 {X0 + 7.9 + 5 - 0.3 - 0.01 - 0.002},{Y0} {X0 + 7.9 + 5 - 0.3 - 0.01 - 0.002},{Y0 + L}; ; ; ; NOP;");
-                    writer.WriteLine($"ADD L214 {X0 + 7.9 + 5 - 0.3 - 0.05},{Y0} {X0 + 7.9 + 5 - 0.3 - 0.05},{Y0 + L}; ; ; ; NOP;");
+                    writer.WriteLine($"ADD L214 {X0 + 7.9 + 5 - 0.3},{Y0} {X0 + 7.9 + 5 - 0.3},{Y0 + L}; ; ; ; NOP;");
                     writer.WriteLine($"ADD L214 {X0 + 10 + 10},{Y0} {X0 + 10 + 10},{Y0 + L}; ; ; ; NOP;");
                 }
             }
-        }    
+        }
 
-        public static void DisSeg4(double LL_x, double LL_y, double UR_x, double UR_y, string CompName, string filePath, string Ori, string partnumber, string assoPNs,string BaseName)
+        public static void DisSeg4(double LL_x, double LL_y, double UR_x, double UR_y, string CompName, string filePath, string Ori, string partnumber, string assoPNs, string BaseName)
         {
             //double w = 6;   // Width
-           // double O = 4;   // Offset
+            // double O = 4;   // Offset
             using (var writer = File.AppendText(filePath))
             {
                 bool isLeft = Ori.Equals("L", StringComparison.OrdinalIgnoreCase);
@@ -212,35 +217,35 @@ namespace PanelDrawing.Services.P1
                 if (isLeft)
                 {
                     if (string.IsNullOrEmpty(siblingName))
-                    {                        
+                    {
                         writer.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 4},{UR_y + 8} ;"); // 480 80
-                        writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 2},{UR_y + 4} '{CompName}' {LL_x - 2},{UR_y + 4};");
-                        writer.WriteLine($"ADD N253 '{CompName}' {LL_x - 15 },{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
-                        writer.WriteLine($"ADD N52 '{partnumber}' {LL_x - 15},{LL_y - 1} :F1.0;;NOP;");
-                        writer.WriteLine($"MOD N52 {LL_x -  15},{LL_y - 1} 0,0 :E '{partnumber}';NOP;");
-                        writer.WriteLine($"ADD N255 'N' {LL_x - 10},{LL_y - 4} :F1.0 :T4326 :D;;NOP;");
+                        writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 2},{UR_y + 8} '{CompName}' {LL_x - 2},{UR_y + 8};");
+                        writer.WriteLine($"ADD N253 '{CompName}' {LL_x - 15},{LL_y} :F1.0 :T1001 :D;;NOP;");
+                        writer.WriteLine($"ADD N52 '{partnumber}' {LL_x - 15},{LL_y - 4} :F1.0;;NOP;");
+                        writer.WriteLine($"MOD N52 {LL_x - 15},{LL_y - 4} 0,0 :E '{partnumber}';NOP;");
+                        writer.WriteLine($"ADD N255 'N' {LL_x - 10},{LL_y - 8} :F1.0 :T4326 :D;;NOP;");
                     }
                     else
                     {
                         writer.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 4},{UR_y + 8} ;");
-                        writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x + 38},{UR_y + 4} '{CompName}' {LL_x + 38},{UR_y + 4};");
-                        writer.WriteLine($"ADD N253 '{CompName}' {LL_x + 10},{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
-                        writer.WriteLine($"ADD N52 '{partnumber}' {LL_x + 10},{LL_y - 1} :F1.0;;NOP;");
-                        writer.WriteLine($"MOD N52 {LL_x + 10},{LL_y - 1} 0,0 :E '{partnumber}';NOP;");
-                        writer.WriteLine($"ADD N255 'N' {LL_x + 10},{LL_y - 4} :F1.0 :T4326 :D;;NOP;");
+                        writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x + 38},{UR_y + 8} '{CompName}' {LL_x + 38},{UR_y + 8};");
+                        writer.WriteLine($"ADD N253 '{CompName}' {LL_x + 10},{LL_y} :F1.0 :T1001 :D;;NOP;");
+                        writer.WriteLine($"ADD N52 '{partnumber}' {LL_x + 10},{LL_y - 4} :F1.0;;NOP;");
+                        writer.WriteLine($"MOD N52 {LL_x + 10},{LL_y - 4} 0,0 :E '{partnumber}';NOP;");
+                        writer.WriteLine($"ADD N255 'N' {LL_x + 10},{LL_y - 8} :F1.0 :T4326 :D;;NOP;");
 
                         if (!string.IsNullOrEmpty(siblingName))
                         {
                             writer.WriteLine($"ADD R254  {LL_x + 6},{LL_y} {UR_x + 14},{UR_y + 8} ;");
-                            writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 7},{UR_y + 4} '{siblingName}' {LL_x - 7},{UR_y + 4};");
-                            writer.WriteLine($"ADD N253 '{siblingName}' {LL_x - 18},{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
-                            writer.WriteLine($"ADD N52 '{siblingPN}' {LL_x - 20},{LL_y - 1} :F1.0;;NOP;");
-                            writer.WriteLine($"MOD N52 {LL_x - 20},{LL_y - 1} 0,0 :E '{siblingPN}';NOP;");
-                            writer.WriteLine($"ADD N255 'N' {LL_x - 2},{LL_y - 4} :F1.0 :T4326 :D;;NOP;");
+                            writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 2},{UR_y + 8} '{siblingName}' {LL_x - 2},{UR_y + 8};");
+                            writer.WriteLine($"ADD N253 '{siblingName}' {LL_x - 18},{LL_y} :F1.0 :T1001 :D;;NOP;");
+                            writer.WriteLine($"ADD N52 '{siblingPN}' {LL_x - 24},{LL_y - 4} :F1.0;;NOP;");
+                            writer.WriteLine($"MOD N52 {LL_x - 24},{LL_y - 4} 0,0 :E '{siblingPN}';NOP;");
+                            writer.WriteLine($"ADD N255 'N' {LL_x - 2},{LL_y - 8} :F1.0 :T4326 :D;;NOP;");
                         }
                     }
 
-
+                    LL_y -= 8;
                     //Included Assosiate PartNumbers for Break Connectors Family
                     if (!string.IsNullOrEmpty(assoPNs))
                     {
@@ -255,38 +260,39 @@ namespace PanelDrawing.Services.P1
                                 writer.WriteLine($"ADD N52 '{arrassopns[assopns]}' {LL_x + 2 + 3},{LL_y - decre} :F1.0;;NOP;");
                             }
                         }
-                    }             
+                    }
                 }
                 if (isRight)
                 {
                     if (string.IsNullOrEmpty(siblingName))
                     {
                         writer.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 4},{UR_y + 8} ;");
-                        writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x + 38},{UR_y + 4} '{CompName}' {LL_x + 38},{UR_y + 4};");
-                        writer.WriteLine($"ADD N253 '{CompName}' {LL_x + 10},{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
-                        writer.WriteLine($"ADD N52 '{partnumber}' {LL_x + 10},{LL_y - 1} :F1.0;;NOP;");
-                        writer.WriteLine($"MOD N52 {LL_x + 10},{LL_y - 1} 0,0 :E '{partnumber}';NOP;");
-                        writer.WriteLine($"ADD N255 'N' {LL_x + 10},{LL_y - 4} :F1.0 :T4326 :D;;NOP;");
+                        writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x + 38},{UR_y + 8} '{CompName}' {LL_x + 38},{UR_y + 8};");
+                        writer.WriteLine($"ADD N253 '{CompName}' {LL_x + 10},{LL_y} :F1.0 :T1001 :D;;NOP;");
+                        writer.WriteLine($"ADD N52 '{partnumber}' {LL_x + 10},{LL_y - 4} :F1.0;;NOP;");
+                        writer.WriteLine($"MOD N52 {LL_x + 10},{LL_y - 4} 0,0 :E '{partnumber}';NOP;");
+                        writer.WriteLine($"ADD N255 'N' {LL_x + 10},{LL_y - 8} :F1.0 :T4326 :D;;NOP;");
                     }
                     else
                     {
                         writer.WriteLine($"ADD R254  {LL_x + 6},{LL_y} {UR_x + 14},{UR_y + 8} ;");
-                        writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 7},{UR_y + 4}'{CompName}' {LL_x - 7},{UR_y + 4};");
-                        writer.WriteLine($"ADD N253 '{CompName}' {LL_x - 18},{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
-                        writer.WriteLine($"ADD N52 '{partnumber}'  {LL_x - 20},{LL_y - 1} :F1.0;;NOP;");
-                        writer.WriteLine($"MOD N52  {LL_x - 20},{LL_y - 1} 0,0 :E '{partnumber}';NOP;");
-                        writer.WriteLine($"ADD N255 'N' {LL_x - 2},{LL_y - 4} :F1.0 :T4326 :D;;NOP;");
+                        writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 2},{UR_y + 8}'{CompName}' {LL_x - 2},{UR_y + 8};");
+                        writer.WriteLine($"ADD N253 '{CompName}' {LL_x - 18},{LL_y} :F1.0 :T1001 :D;;NOP;");
+                        writer.WriteLine($"ADD N52 '{partnumber}'  {LL_x - 24},{LL_y - 4} :F1.0;;NOP;");
+                        writer.WriteLine($"MOD N52  {LL_x - 24},{LL_y - 4} 0,0 :E '{partnumber}';NOP;");
+                        writer.WriteLine($"ADD N255 'N' {LL_x - 2},{LL_y - 8} :F1.0 :T4326 :D;;NOP;");
 
                         if (!string.IsNullOrEmpty(siblingName))
                         {
                             writer.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 4},{UR_y + 8} ;");
-                            writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x + 38},{UR_y + 4} '{siblingName}' {LL_x + 38},{UR_y + 4};");
-                            writer.WriteLine($"ADD N253 '{siblingName}' {LL_x + 10},{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
-                            writer.WriteLine($"ADD N52 '{siblingPN}' {LL_x + 10},{LL_y - 1} :F1.0;;NOP;");
-                            writer.WriteLine($"MOD N52 {LL_x + 10},{LL_y - 1} 0,0 :E '{siblingPN}';NOP;");
-                            writer.WriteLine($"ADD N255 'N' {LL_x + 10},{LL_y - 4} :F1.0 :T4326 :D;;NOP;");
+                            writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x + 38},{UR_y + 8} '{siblingName}' {LL_x + 38},{UR_y + 8};");
+                            writer.WriteLine($"ADD N253 '{siblingName}' {LL_x + 10},{LL_y} :F1.0 :T1001 :D;;NOP;");
+                            writer.WriteLine($"ADD N52 '{siblingPN}' {LL_x + 10},{LL_y - 4} :F1.0;;NOP;");
+                            writer.WriteLine($"MOD N52 {LL_x + 10},{LL_y - 4} 0,0 :E '{siblingPN}';NOP;");
+                            writer.WriteLine($"ADD N255 'N' {LL_x + 10},{LL_y - 8} :F1.0 :T4326 :D;;NOP;");
                         }
                     }
+                    LL_y -= 8;
                     //Included Assosiate PartNumbers for Break Connectors Family
                     if (!string.IsNullOrEmpty(assoPNs))
                     {
@@ -302,11 +308,10 @@ namespace PanelDrawing.Services.P1
                             }
                         }
                     }
-                    
+
                 }
             }
         }
-
         public static void DisSeg5(double X0, double Y0, string filePath, string strOri)
         {
             using (var writer = File.AppendText(filePath))

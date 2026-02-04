@@ -41,15 +41,15 @@ namespace PanelDrawing.CommonOperations
         public static (double X, double Y) GetNextEquPosition(string side, double compWidth, double compHeight)
         {
             // Validate
-            if (!side.Equals("LEFT", StringComparison.OrdinalIgnoreCase) &&
-                !side.Equals("RIGHT", StringComparison.OrdinalIgnoreCase))
+            if (!side.Equals("L", StringComparison.OrdinalIgnoreCase) &&
+                !side.Equals("R", StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentException("EQU position must be LEFT or RIGHT");
 
             double posX;
             double posY;
 
             // ⚡ X-Coordinate (Left/Right)
-            if (side.Equals("LEFT", StringComparison.OrdinalIgnoreCase))
+            if (side.Equals("L", StringComparison.OrdinalIgnoreCase))
             {
                 if (Constants.CursorY_EQU_Left - compHeight < Constants.MarginYEQU)
                 {
@@ -426,20 +426,21 @@ namespace PanelDrawing.CommonOperations
                                 //frmpanelori.lblEquName.Text = CompDwgName;
                                 //frmpanelori.ShowDialog();
                                 //var side = frmpanelori.SelectedSide;
-                                var side = comp.SymbolName.Trim().Contains("contact_sth_mr") ? "LEFT" : "RIGHT";
+                              
+                                var Ori = comp.SymbolName.Trim().Contains("contact_sth_mr") ? "L" : "R";
 
                                 Constants.sPanelEQUori_File = string.Concat(Constants.Electre_Temp_Folder_Path, Constants.textPanelPartNumber, " " + "- " + Constants.txtEquName, " - PanelEquOri.txt");
 
                                 using (StreamWriter writer = new StreamWriter(Constants.sPanelEQUori_File))
                                 {
-                                    TextOperations.Export_PanelEquOri(writer, equPins, side);
+                                    TextOperations.Export_PanelEquOri(writer, equPins, Ori);
                                 }
 
                                 // Get position based on LEFT / RIGHT
                                 //(CompXdist, CompYdist) = GetNextEquPosition(side,40,compHeight: Constants.arrPinsOfEqu.Length * 10);
-                                (CompXdist, CompYdist) = GetNextEquPosition(side, 40, CompHeightEQU);
+                                (CompXdist, CompYdist) = GetNextEquPosition(Ori, 40, CompHeightEQU);
 
-                                EQUSingleConnector.DrawEquSymbolUsedPins(CompXdist, CompYdist, CompMaxPin, CompDwgName, side, SampleEquPinNumber, CompPN, /*frmpanelori,*/ AssocPNs, EquipBox, Looms);
+                                EQUSingleConnector.DrawEquSymbolUsedPins(CompXdist, CompYdist, CompMaxPin, CompDwgName, Ori, SampleEquPinNumber, CompPN, /*frmpanelori,*/ AssocPNs, EquipBox, Looms);
                                 //frmpanelori.Close();
                             }
                             AppLog.Info($"OOTB Component {CompDwgName} ({CompType}) placed at X={CompXdist}, Y={CompYdist}");

@@ -9,7 +9,7 @@ namespace PanelDrawing
         [STAThread]
         static void Main(string[] args)
         {
-           Constants.Env_Variable_Electre_Proj_Path = "C:\\ELECTRE\\electre_projects\\PANEL_DRAWING\\";
+           Constants.Env_Variable_Electre_Proj_Path = "C:\\ELECTRE\\electre_projects\\PANEL_DRAWING_FEB_4\\";
 
             if (args.Length > 0)
             {
