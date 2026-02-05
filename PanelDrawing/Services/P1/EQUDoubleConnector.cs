@@ -29,8 +29,8 @@ namespace PanelDrawing.Services.P1
             {
                 "cont_sth_md" => "R",
                 "cont_sth_mg" => "L",
-                "cont_sth_half_l" => "R",
-                "cont_sth_half_r" => "L",
+                "cont_sth_half_l" => "L",
+                "cont_sth_half_r" => "R",
                 _ => ""
             };
 
@@ -111,50 +111,50 @@ namespace PanelDrawing.Services.P1
                 bool isHalfLeft = tempOrientation.Equals("cont_sth_half_l", StringComparison.OrdinalIgnoreCase);
                 bool isHalfRight = tempOrientation.Equals("cont_sth_half_r", StringComparison.OrdinalIgnoreCase);
 
-                // Find sibling connector (A/B or J1/J2 type)
-                var pairedConnector =
-                    Constants.listComponentsWithPartNumber
-                    .Where(n => !string.IsNullOrEmpty(n)
-                                && n.Contains(baseConnectorName)
-                                && !n.Equals(fullConnectorName, StringComparison.OrdinalIgnoreCase))
-                    .FirstOrDefault();
+                // Find sibling connector (A/B or J1/J2 type) Commented on Feb 05, 2026
+                //var pairedConnector =
+                //    Constants.listComponentsWithPartNumber
+                //    .Where(n => !string.IsNullOrEmpty(n)
+                //                && n.Contains(baseConnectorName)
+                //                && !n.Equals(fullConnectorName, StringComparison.OrdinalIgnoreCase))
+                //    .FirstOrDefault();
 
-                string siblingConnector = "";
+                //string siblingConnector = "";
 
-                if (!string.IsNullOrEmpty(pairedConnector))
-                {
-                    siblingConnector =
-                        Constants.dataExtractionListAbove.Where(row => row.ConnectorName.Equals(pairedConnector, StringComparison.OrdinalIgnoreCase) &&
-                            //!string.IsNullOrEmpty(row.CoreNumber) &&
-                            row.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
-                        .Select(row => row.ConnectorName)
-                        .FirstOrDefault();
-                }
-                bool hasSibling = !string.IsNullOrEmpty(siblingConnector);
-                // LEFT SIDE
+                //if (!string.IsNullOrEmpty(pairedConnector))
+                //{
+                //    siblingConnector =
+                //        Constants.dataExtractionListAbove.Where(row => row.ConnectorName.Equals(pairedConnector, StringComparison.OrdinalIgnoreCase) &&
+                //            //!string.IsNullOrEmpty(row.CoreNumber) &&
+                //            row.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
+                //        .Select(row => row.ConnectorName)
+                //        .FirstOrDefault();
+                //}
+                //bool hasSibling = !string.IsNullOrEmpty(siblingConnector);
+                //// LEFT SIDE
                 if (isLeft)
                 {
                     if (!isHalfLeft)
                     {
                         //writer.WriteLine($"ADD Cont_sth_mg_hal {x},{y};"); //Commented on Feb_04Commented on Feb_04
-                        writer.WriteLine($"ADD Cont_sth_mg {x},{y};");
+                        writer.WriteLine($"ADD cont_sth_half_r {x},{y};");
                         writer.WriteLine($"MOD N51 {x + 0.8},{y} 0,0 :E '{pinNumber}'; NOP;");
                         writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x},{y} :T4320 {x},{y - 2};NOP;");
                     }
                     else
                     {
-                        writer.WriteLine($"ADD Cont_sth_mg {x + 10},{y};");
+                        writer.WriteLine($"ADD cont_sth_half_l {x + 10},{y};");
                         writer.WriteLine($"MOD N254 {x + 13},{y} 0,0 :E '{pinNumber}'; NOP;");
                         writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x + 10},{y - 2} :T4320 {x + 10},{y - 2};NOP;");
                     }
 
-                    // Sibling connector drawn on left side
-                    if (hasSibling)
-                    {
-                        writer.WriteLine($"ADD Cont_sth_mg {x + 10},{y};");
-                        writer.WriteLine($"MOD N254 {x + 7},{y} 0,0 :E '{pinNumber}'; NOP;");
-                        writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x + 10},{y} :T4320 {x},{y - 2};NOP;");
-                    }
+                    // Sibling connector drawn on left side Commented on Feb 05, 2026
+                    //if (hasSibling)
+                    //{
+                    //    writer.WriteLine($"ADD Cont_sth_mg {x + 10},{y};");
+                    //    writer.WriteLine($"MOD N254 {x + 7},{y} 0,0 :E '{pinNumber}'; NOP;");
+                    //    writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x + 10},{y} :T4320 {x},{y - 2};NOP;");
+                    //}
                 }
 
                 // RIGHT SIDE
@@ -162,24 +162,24 @@ namespace PanelDrawing.Services.P1
                 {
                     if (!isHalfRight)
                     {
-                        writer.WriteLine($"ADD Cont_sth_md {x + 20},{y};");
+                        writer.WriteLine($"ADD cont_sth_half_l {x + 20},{y};");
                         writer.WriteLine($"MOD N51 {x + 11 - 2.5},{y} 0,0 :E '{pinNumber}'; NOP;");
                         writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x + 20},{y - 2} :T4320 {x + 20},{y - 2};NOP;");
                     }
                     else
                     {
-                        writer.WriteLine($"ADD Cont_sth_mg {x + 10},{y};");
-                        writer.WriteLine($"MOD N254 {x + 13},{y} 0,0 :E '{pinNumber}'; NOP;");
-                        writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x + 10},{y - 2} :T4320 {x + 10},{y - 2};NOP;");
+                        writer.WriteLine($"ADD cont_sth_half_r {x + 10},{y};");
+                        writer.WriteLine($"MOD N254 {x + 7},{y} 0,0 :E '{pinNumber}'; NOP;");
+                        writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x + 7},{y - 2} :T4320 {x + 7},{y - 2};NOP;");
                     }
 
-                    // Sibling connector drawn on right side
-                    if (hasSibling)
-                    {
-                        writer.WriteLine($"ADD Cont_sth_mg {x + 10},{y};");
-                        writer.WriteLine($"MOD N254 {x + 13},{y} 0,0 :E '{pinNumber}'; NOP;");
-                        writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x + 10},{y - 2} :T4320 {x + 10},{y - 2};NOP;");
-                    }
+                    // Sibling connector drawn on right side Commented on Feb 05, 2026
+                    //if (hasSibling)
+                    //{
+                    //    writer.WriteLine($"ADD Cont_sth_mg {x + 10},{y};");
+                    //    writer.WriteLine($"MOD N254 {x + 13},{y} 0,0 :E '{pinNumber}'; NOP;");
+                    //    writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x + 10},{y - 2} :T4320 {x + 10},{y - 2};NOP;");
+                    //}
                 }
             }
         }
@@ -212,7 +212,7 @@ namespace PanelDrawing.Services.P1
                 int widthSpaceIncrease = 0;
 
                 // VB6 behavior: cont_sth_md shifts X
-                if (tempOri.Equals("cont_sth_md", StringComparison.OrdinalIgnoreCase))
+                if (tempOri.Equals("cont_sth_half_l", StringComparison.OrdinalIgnoreCase))
                     widthSpaceIncrease = 8;
 
                 bool isLeft = orientation.Equals("L", StringComparison.OrdinalIgnoreCase);
@@ -224,20 +224,20 @@ namespace PanelDrawing.Services.P1
                     int halfOffset = tempOri.Equals("cont_sth_half_l", StringComparison.OrdinalIgnoreCase) ? 0 : 4;
 
                     // MAIN RECTANGLE
-                    //w.WriteLine($"ADD R254 {LL_x + 8 - widthSpaceIncrease + 2.5 },{LL_y} {UR_x + 12 - widthSpaceIncrease + 2.5},{UR_y + 8};");
-                    w.WriteLine($"ADD R254 {LL_x - 5},{LL_y} {LL_x + 3},{UR_y + 8};");
+                    w.WriteLine($"ADD R254 {LL_x + 8 - widthSpaceIncrease + 5 },{LL_y} {UR_x + 17 - widthSpaceIncrease + 5},{UR_y + 8};");
+                   //w.WriteLine($"ADD R254 {LL_x - 5},{LL_y} {LL_x + 3},{UR_y + 8};");
 
                     // HEADER LABEL RECTANGLE
-                    // w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3 + 10},{LL_y - 30 - 48 + 8 + 8 + 2} '{compName}' {UR_x + 8 + 10},{UR_y + 4 - 6 - 12 + 8 + 8 + 2};");
-                    w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 15},{LL_y - 30 - 48 + 8 + 8 + 4} '{compName}' {UR_x},{UR_y + 4 - 6 - 12 + 8 + 8 + 4};");
+                     w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x },{LL_y - 30 - 48 + 8 + 8 + 4} '{compName}' {UR_x + 10},{UR_y + 4 - 6 - 12 + 8 + 8 + 4};");
+                    //w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 15},{LL_y - 30 - 48 + 8 + 8 + 4} '{compName}' {UR_x},{UR_y + 4 - 6 - 12 + 8 + 8 + 4};");
 
                     // COMPONENT NAME
-                    //w.WriteLine($"ADD N253 '{compName}' {LL_x + 2 + 10},{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
-                    w.WriteLine($"ADD N253 '{compName}' {LL_x - 15},{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
+                    w.WriteLine($"ADD N253 '{compName}' {LL_x},{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
+                    //w.WriteLine($"ADD N253 '{compName}' {LL_x - 15},{LL_y + 2} :F1.0 :T1001 :D;;NOP;");
 
                     // PART NUMBER
-                    // w.WriteLine($"ADD N52 '{partNumber}' {LL_x + 3 + 10},{LL_y} :F1.0;;NOP;");
-                    w.WriteLine($"ADD N52 '{partNumber}' {LL_x - 15},{LL_y - 2} :F1.0;;NOP;");
+                     w.WriteLine($"ADD N52 '{partNumber}' {LL_x + 3},{LL_y} :F1.0;;NOP;");
+                    //w.WriteLine($"ADD N52 '{partNumber}' {LL_x - 15},{LL_y - 2} :F1.0;;NOP;");
 
                     int dy = 0;
                     // ASSOCIATED PART NUMBERS
@@ -254,48 +254,48 @@ namespace PanelDrawing.Services.P1
                     }
 
                     // N-MARKER
-                    w.WriteLine($"ADD N255 'N' {LL_x - 10},{LL_y - dy -4} :F1.0 :T4326 :D;;NOP;");
+                    w.WriteLine($"ADD N255 'N' {LL_x +5},{LL_y - dy -4} :F1.0 :T4326 :D;;NOP;");
 
                     //  OPPOSITE CONNECTOR (LEFT SIDE)
 
-                    // Find sibling connector (like J1/J2, A/B, etc.)
-                    string siblingName =
-                        Constants.listComponentsWithPartNumber
-                        .Where(x => !string.IsNullOrEmpty(x) &&
-                                    x.Contains(baseConnectorName) &&
-                                    !x.Equals(compName, StringComparison.OrdinalIgnoreCase))
-                        .FirstOrDefault();
+                    // Find sibling connector (like J1/J2, A/B, etc.) Commented on Feb 05, 2026
+                    //string siblingName =
+                    //    Constants.listComponentsWithPartNumber
+                    //    .Where(x => !string.IsNullOrEmpty(x) &&
+                    //                x.Contains(baseConnectorName) &&
+                    //                !x.Equals(compName, StringComparison.OrdinalIgnoreCase))
+                    //    .FirstOrDefault();
 
-                    if (!string.IsNullOrEmpty(siblingName))
-                    {
-                        // Get sibling part number from DATAEXTRACTION LIST
-                        string siblingPN =
-                            Constants.dataExtractionListAbove
-                            .Where(row =>
-                                row.ConnectorName.Equals(siblingName, StringComparison.OrdinalIgnoreCase) &&
-                                !string.IsNullOrEmpty(row.CoreNumber) &&
-                                row.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
-                            .Select(row => row.CoreNumber)
-                            .FirstOrDefault();
+                    //if (!string.IsNullOrEmpty(siblingName))
+                    //{
+                    //    // Get sibling part number from DATAEXTRACTION LIST
+                    //    string siblingPN =
+                    //        Constants.dataExtractionListAbove
+                    //        .Where(row =>
+                    //            row.ConnectorName.Equals(siblingName, StringComparison.OrdinalIgnoreCase) &&
+                    //            !string.IsNullOrEmpty(row.CoreNumber) &&
+                    //            row.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
+                    //        .Select(row => row.CoreNumber)
+                    //        .FirstOrDefault();
 
-                        //if (!string.IsNullOrEmpty(siblingPN))
-                       // {
-                            // Draw sibling's box
-                            w.WriteLine($"ADD R254  {LL_x - 4 + 8 + 2 + 3},{LL_y} {UR_x + 4 + 8 + 2 + 3},{UR_y + 4 + 4} ;");
+                    //    //if (!string.IsNullOrEmpty(siblingPN))
+                    //   // {
+                    //        // Draw sibling's box
+                    //        w.WriteLine($"ADD R254  {LL_x - 4 + 8 + 2 + 3},{LL_y} {UR_x + 4 + 8 + 2 + 3},{UR_y + 4 + 4} ;");
 
-                            // Header
-                            w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3 + 20 + 15},{LL_y - 30 - 48 + 8 + 8 + 2} '{siblingName}' {UR_x + 4 + 8 - 4 - 2 + 20 + 15},{UR_y + 4 - 6 - 12 + 8 + 8 + 2};");
+                    //        // Header
+                    //        w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3 + 20 + 15},{LL_y - 30 - 48 + 8 + 8 + 2} '{siblingName}' {UR_x + 4 + 8 - 4 - 2 + 20 + 15},{UR_y + 4 - 6 - 12 + 8 + 8 + 2};");
 
-                            // Name
-                            w.WriteLine($"ADD N253 '{siblingName}' {LL_x + 9},{LL_y + 3} :F1.0 :T1001 :D;;NOP;");
+                    //        // Name
+                    //        w.WriteLine($"ADD N253 '{siblingName}' {LL_x + 9},{LL_y + 3} :F1.0 :T1001 :D;;NOP;");
 
-                            // PN
-                            w.WriteLine($"ADD N52 '{siblingPN}' {LL_x + 10},{LL_y} :F1.0;;NOP;");
+                    //        // PN
+                    //        w.WriteLine($"ADD N52 '{siblingPN}' {LL_x + 10},{LL_y} :F1.0;;NOP;");
 
-                            // N
-                            w.WriteLine($"ADD N255 'N' {LL_x + 10},{LL_y - 3} :F1.0 :T4326 :D;;NOP;");
-                        //}
-                    }
+                    //        // N
+                    //        w.WriteLine($"ADD N255 'N' {LL_x + 10},{LL_y - 3} :F1.0 :T4326 :D;;NOP;");
+                    //    //}
+                    //}
 
                     return;
                 }
@@ -304,16 +304,16 @@ namespace PanelDrawing.Services.P1
                 if (isRight)
                 {
                     // MAIN RECTANGLE
-                    w.WriteLine($"ADD R254  {LL_x - 4 + 8 + 2 + widthSpaceIncrease + 2.5},{LL_y} {UR_x + 4 + 8 + 2 + widthSpaceIncrease + 2.5},{UR_y + 4 + 4} ;");
+                    w.WriteLine($"ADD R254  {LL_x - 4 + 8 + 2},{LL_y} {UR_x + 4 + 8 + 2},{UR_y + 4 + 4} ;");
 
                     // HEADER LABEL
-                    w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3 + 20 + 10},{LL_y - 30 - 48 + 8 + 8 + 2} '{compName}' {UR_x + 4 + 8 - 4 - 2 + 20 + 10},{UR_y + 4 - 6 - 12 + 8 + 8 + 2};");
+                    w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3 + 20 + 10},{LL_y - 30 - 48 + 8 + 8 + 4} '{compName}' {UR_x + 4 + 8 - 4 - 2 + 20 + 10},{UR_y + 4 - 6 - 12 + 8 + 8 + 4};");
 
                     // NAME
-                    w.WriteLine($"ADD N253 '{compName}' {LL_x + 11 + 10},{LL_y + 3} :F1.0 :T1001 :D;;NOP;");
+                    w.WriteLine($"ADD N253 '{compName}' {LL_x + 7},{LL_y + 3} :F1.0 :T1001 :D;;NOP;");
 
                     // PN
-                    w.WriteLine($"ADD N52 '{partNumber}' {LL_x + 11 + 10},{LL_y} :F1.0;;NOP;");
+                    w.WriteLine($"ADD N52 '{partNumber}' {LL_x + 7},{LL_y} :F1.0;;NOP;");
 
                     int dy = 0;
                     // ASSOCIATED PART NUMBERS
@@ -324,50 +324,50 @@ namespace PanelDrawing.Services.P1
                             if (pn != partNumber)
                             {
                                 dy += 4;
-                                w.WriteLine($"ADD N52 '{pn}' {LL_x + 13 + 10},{LL_y - dy} :F1.0;;NOP;");
+                                w.WriteLine($"ADD N52 '{pn}' {LL_x + 7},{LL_y - dy} :F1.0;;NOP;");
                             }
                         }
                     }
 
                     // N-marker
-                    w.WriteLine($"ADD N255 'N' {LL_x + 11 + 10},{LL_y - 3} :F1.0 :T4326 :D;;NOP;");
+                    w.WriteLine($"ADD N255 'N' {LL_x + 7},{LL_y - dy -4} :F1.0 :T4326 :D;;NOP;");
 
-                    //  OPPOSITE CONNECTOR — RIGHT
+                    //  OPPOSITE CONNECTOR — RIGHT Commented on Feb 05, 2026
 
-                    string sibling = Constants.listComponentsWithPartNumber
-                        .Where(x => !string.IsNullOrEmpty(x) && x.Contains(baseConnectorName) &&
-                                    !x.Equals(compName, StringComparison.OrdinalIgnoreCase))
-                        .FirstOrDefault();
+                    //string sibling = Constants.listComponentsWithPartNumber
+                    //    .Where(x => !string.IsNullOrEmpty(x) && x.Contains(baseConnectorName) &&
+                    //                !x.Equals(compName, StringComparison.OrdinalIgnoreCase))
+                    //    .FirstOrDefault();
 
-                    if (!string.IsNullOrEmpty(sibling))
-                    {
-                        string siblingPN =
-                            Constants.dataExtractionListAbove
-                            .Where(row =>
-                                row.ConnectorName.Equals(sibling, StringComparison.OrdinalIgnoreCase) &&
-                                !string.IsNullOrEmpty(row.CoreNumber) &&
-                                row.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
-                            .Select(row => row.CoreNumber)
-                            .FirstOrDefault();
+                    //if (!string.IsNullOrEmpty(sibling))
+                    //{
+                    //    string siblingPN =
+                    //        Constants.dataExtractionListAbove
+                    //        .Where(row =>
+                    //            row.ConnectorName.Equals(sibling, StringComparison.OrdinalIgnoreCase) &&
+                    //            !string.IsNullOrEmpty(row.CoreNumber) &&
+                    //            row.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
+                    //        .Select(row => row.CoreNumber)
+                    //        .FirstOrDefault();
 
-                        //if (!string.IsNullOrEmpty(siblingPN))
-                        //{
-                            // Draw sibling box
-                            w.WriteLine($"ADD R254  {LL_x - 4 + 8 + 2},{LL_y} {UR_x + 4 + 8 + 2},{UR_y + 4 + 4} ;");
+                    //    //if (!string.IsNullOrEmpty(siblingPN))
+                    //    //{
+                    //        // Draw sibling box
+                    //        w.WriteLine($"ADD R254  {LL_x - 4 + 8 + 2},{LL_y} {UR_x + 4 + 8 + 2},{UR_y + 4 + 4} ;");
 
-                            // Header
-                            w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3},{LL_y - 30 - 48 + 8 + 8 + 2} '{sibling}' {UR_x + 4 + 8 - 4 - 2},{UR_y + 4 - 6 - 12 + 8 + 8 + 2};");
+                    //        // Header
+                    //        w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3},{LL_y - 30 - 48 + 8 + 8 + 2} '{sibling}' {UR_x + 4 + 8 - 4 - 2},{UR_y + 4 - 6 - 12 + 8 + 8 + 2};");
 
-                            // Name
-                            w.WriteLine($"ADD N253 '{sibling}' {LL_x - 6},{LL_y + 3} :F1.0 :T1001 :D;;NOP;");
+                    //        // Name
+                    //        w.WriteLine($"ADD N253 '{sibling}' {LL_x - 6},{LL_y + 3} :F1.0 :T1001 :D;;NOP;");
 
-                            // PN
-                            w.WriteLine($"ADD N52 '{siblingPN}' {LL_x - 20},{LL_y} :F1.0;;NOP;");
+                    //        // PN
+                    //        w.WriteLine($"ADD N52 '{siblingPN}' {LL_x - 20},{LL_y} :F1.0;;NOP;");
 
-                            // N mark
-                            w.WriteLine($"ADD N255 'N' {LL_x},{LL_y - 3} :F1.0 :T4326 :D;;NOP;");
-                       // }
-                    }
+                    //        // N mark
+                    //        w.WriteLine($"ADD N255 'N' {LL_x},{LL_y - 3} :F1.0 :T4326 :D;;NOP;");
+                    //   // }
+                    //}
                 }
             }
         }
