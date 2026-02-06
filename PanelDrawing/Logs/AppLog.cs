@@ -19,7 +19,7 @@ namespace PanelDrawing.Logs
                 Directory.CreateDirectory(baseFolder);
             }
 
-            _logFilePath = Path.Combine(baseFolder, "paneldrawing.log");
+            _logFilePath = Path.Combine(baseFolder, $"paneldrawing_{DateTime.Now:yyyy-MM-dd}.log");
 
            // Write("INFO", "Logging initialized");
         }

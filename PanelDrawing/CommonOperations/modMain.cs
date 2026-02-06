@@ -4,6 +4,7 @@ using PanelDrawing.Objects;
 using PanelDrawing.Services.P1;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using System.Numerics;
 using System.Text.RegularExpressions;
 
 namespace PanelDrawing.CommonOperations
@@ -482,6 +483,21 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
                             }
+                            else
+                            {
+                                string msg = $"Macro or Part Number missing for component '{CompDwgName}' ({CompType}).\n" +
+                                    $"Part Number : {CompPN}\n" +
+                                    $"Please verify the part number (Y) col in 'data_extraction.csv' and the macro in library file. " +
+                                    $"Symbol placement skipped.";
+
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                            }
                             //modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, CompDwgName);
                             continue;
 
@@ -560,6 +576,22 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                string msg =
+                                    $"Macro or Part Number missing for component '{CompDwgName}' ({CompType}).\n\n" +
+                                    $"Part Number : {CompPN}\n" +
+                                    $"Please verify the entry in 'data_extraction.csv' and the library file. " +
+                                    $"Symbol placement skipped.";
+
+                                AppLog.Warn(msg);
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
                             }
                             continue;
 

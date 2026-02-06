@@ -223,11 +223,36 @@ namespace PanelDrawing.Services.P1
         {
             var list = new List<LibraryCatalog>();
 
-            var lines = File.ReadAllLines(filePath);
+            string[] lines = null;
+            try
+            {
+                lines = File.ReadAllLines(filePath);
 
-            if (lines.Length == 0)
-                throw new Exception("CSV file is empty.");
+                if (lines.Length == 0)
+                    throw new Exception("CSV file is empty.");
+            }
+            catch (IOException)
+            {
+                MessageBox.Show(
+                    $"The file:\n{filePath}\nis currently in use.\nPlease close the file (Excel or other program) and run the application again.",
+                    "File In Use",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
 
+                Application.Exit();   // closes WinForms app safely
+                Environment.Exit(1);  // ensures full termination
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Unexpected error while reading library catalog.\n\n{ex.Message}",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                Application.Exit();
+                Environment.Exit(1);
+            }
             // Detect delimiter from header row
             char delimiter = DetectDelimiter(lines[0]);
 
@@ -442,7 +467,18 @@ namespace PanelDrawing.Services.P1
                     Constants.MyDataList.Add(d);
                 }
             }
-            catch(Exception ex)
+            catch (IOException)
+            {
+                MessageBox.Show(
+                    $"The file:\n{csvPath}\nis currently in use.\nPlease close the file (Excel or other program) and run the application again.",
+                    "File In Use",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                Application.Exit();   // closes WinForms app safely
+                Environment.Exit(1);  // ensures full termination
+            }
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }

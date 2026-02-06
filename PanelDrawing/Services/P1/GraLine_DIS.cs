@@ -45,7 +45,7 @@ namespace PanelDrawing.Services.P1
                 if (match2 != null)
                     info = match2.SymbolName?.Trim() ?? "";
 
-                // shift X left by 8 (VB6 logic)
+                // shift X left by 8 
                 X0 -= 8;
             }
 
@@ -63,6 +63,35 @@ namespace PanelDrawing.Services.P1
                 return; // no valid orientation → cannot draw
             }
 
+            //var pairedConnector =
+            //      Constants.listComponentsWithPartNumber
+            //      .Where(n => !string.IsNullOrEmpty(n)
+            //                  && n.Contains(baseName)
+            //                  && !n.Equals(CompName, StringComparison.OrdinalIgnoreCase))
+            //      .FirstOrDefault();
+
+            //string siblingConnector = "";
+
+            //if (!string.IsNullOrEmpty(pairedConnector))
+            //{
+            //    siblingConnector =
+            //        Constants.dataExtractionListBelow.Where(row => row.ConnectorName.Equals(pairedConnector, StringComparison.OrdinalIgnoreCase) &&
+            //            // !string.IsNullOrEmpty(row.CoreNumber) &&
+            //            row.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
+            //        .Select(row => row.ConnectorName)
+            //        .FirstOrDefault();
+            //}
+            string siblingConnector =
+            Constants.dataExtractionListBelow
+                .Where(row =>
+                    !string.IsNullOrEmpty(row.ConnectorName) &&
+                    row.ConnectorName.StartsWith(baseName, StringComparison.OrdinalIgnoreCase) &&
+                    !row.ConnectorName.Equals(CompName, StringComparison.OrdinalIgnoreCase) &&
+                    row.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
+                .Select(row => row.ConnectorName)
+                .FirstOrDefault();
+
+
             int incre = -4;
             int T = arrpinsCollection.Count;
 
@@ -72,7 +101,7 @@ namespace PanelDrawing.Services.P1
             // Draw each pin segment
             for (int i = 0; i < arrpinsCollection.Count; i++)
             {
-                DisSeg2(X0, Y0 + incre * i, arrpinsCollection[i], Constants.el_ExecFilePath, orientation, baseName, CompName);
+                DisSeg2(X0, Y0 + incre * i, arrpinsCollection[i], Constants.el_ExecFilePath, orientation, baseName, CompName, siblingConnector);
             }
 
             // Draw vertical spine
@@ -94,7 +123,7 @@ namespace PanelDrawing.Services.P1
             Constants.processedItems.Add(baseName);
         }
 
-        public static void DisSeg1(double X0, double Y0, string filePath, string strDISOrientation)
+        public static void  DisSeg1(double X0, double Y0, string filePath, string strDISOrientation)
         {
             using (var writer = File.AppendText(filePath))
             {
@@ -104,33 +133,34 @@ namespace PanelDrawing.Services.P1
                 }
                 else
                 {
-                    writer.WriteLine($"ADD I1 cont_sth_1c_new_t {X0 + 20},{Y0};");
+                    //writer.WriteLine($"ADD I1 cont_sth_1c_new_t {X0 + 20},{Y0};");
+                    writer.WriteLine($"ADD I1 cont_sth_1c_new_t {X0 + 10},{Y0};");
                 }
             }
         }
 
-        public static void DisSeg2(double X0, double Y0, string N, string filePath, string Ori, string baseConnectorName, string fullConnectorName)
+        public static void DisSeg2(double X0, double Y0, string N, string filePath, string Ori, string baseConnectorName, string fullConnectorName, string siblingConnector)
         {
             using (var writer = File.AppendText(filePath))
             {
-                var pairedConnector =
-                   Constants.listComponentsWithPartNumber
-                   .Where(n => !string.IsNullOrEmpty(n)
-                               && n.Contains(baseConnectorName)
-                               && !n.Equals(fullConnectorName, StringComparison.OrdinalIgnoreCase))
-                   .FirstOrDefault();
+                //var pairedConnector =
+                //   Constants.listComponentsWithPartNumber
+                //   .Where(n => !string.IsNullOrEmpty(n)
+                //               && n.Contains(baseConnectorName)
+                //               && !n.Equals(fullConnectorName, StringComparison.OrdinalIgnoreCase))
+                //   .FirstOrDefault();
 
-                string siblingConnector = "";
+                //string siblingConnector = "";
 
-                if (!string.IsNullOrEmpty(pairedConnector))
-                {
-                    siblingConnector =
-                        Constants.dataExtractionListAbove.Where(row => row.ConnectorName.Equals(pairedConnector, StringComparison.OrdinalIgnoreCase) &&
-                            // !string.IsNullOrEmpty(row.CoreNumber) &&
-                            row.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
-                        .Select(row => row.ConnectorName)
-                        .FirstOrDefault();
-                }
+                //if (!string.IsNullOrEmpty(pairedConnector))
+                //{
+                //    siblingConnector =
+                //        Constants.dataExtractionListAbove.Where(row => row.ConnectorName.Equals(pairedConnector, StringComparison.OrdinalIgnoreCase) &&
+                //            // !string.IsNullOrEmpty(row.CoreNumber) &&
+                //            row.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
+                //        .Select(row => row.ConnectorName)
+                //        .FirstOrDefault();
+                //}
                 bool hasSibling = !string.IsNullOrEmpty(siblingConnector);
 
                 if (Ori.Equals("L"))
@@ -149,16 +179,15 @@ namespace PanelDrawing.Services.P1
                 }
                 else if (Ori.Equals("R"))//Right Side Pins
                 {
-                    writer.WriteLine($"ADD contact_sth_receptacle {X0 + 10},{Y0};");
-                    writer.WriteLine($"MOD N254 {X0 + 11 - 2.5},{Y0} 0,0 :E '{N}'; NOP;");
-                    writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0 + 10},{Y0 - 2} :T4320 {X0 + 10},{Y0 - 2};NOP;");
+                    writer.WriteLine($"ADD contact_sth_receptacle {X0},{Y0};");
+                    writer.WriteLine($"MOD N254 {X0 + 0.8},{Y0} 0,0 :E '{N}'; NOP;");
+                    writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0},{Y0} :T4320 {X0},{Y0 - 2};NOP;");                  
 
                     if (hasSibling)
                     {
-                        //writer.WriteLine($"ADD Cont_sth_mg_hal {X0},{Y0};");//Commented on Feb_04
-                        writer.WriteLine($"ADD Cont_sth_mg {X0},{Y0};");
-                        writer.WriteLine($"MOD N51 {X0 + 0.8},{Y0} 0,0 :E '{N}'; NOP;");
-                        writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0},{Y0} :T4320 {X0},{Y0 - 2};NOP;");
+                        writer.WriteLine($"ADD Cont_sth_md {X0 + 10},{Y0};");
+                        writer.WriteLine($"MOD N51 {X0 + 11 - 2.5},{Y0} 0,0 :E '{N}'; NOP;");
+                        writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0 + 6},{Y0 - 2} :T4320 {X0 + 6},{Y0 - 2};NOP;");
                     }
                 }
             }
@@ -176,10 +205,10 @@ namespace PanelDrawing.Services.P1
                 }
                 if (strOri.Equals("R"))
                 {
-                    writer.WriteLine($"ADD L214 {X0 + 10},{Y0} {X0 + 10},{Y0 + L}; ; ; ; NOP;");
+                    writer.WriteLine($"ADD L214 {X0},{Y0} {X0},{Y0 + L}; ; ; ; NOP;");
                     //writer.WriteLine($"ADD L214 {X0 + 7.9 + 5 - 0.3 - 0.01 - 0.002},{Y0} {X0 + 7.9 + 5 - 0.3 - 0.01 - 0.002},{Y0 + L}; ; ; ; NOP;");
-                    writer.WriteLine($"ADD L214 {X0 + 7.9 + 5 - 0.3},{Y0} {X0 + 7.9 + 5 - 0.3},{Y0 + L}; ; ; ; NOP;");
-                    writer.WriteLine($"ADD L214 {X0 + 10 + 10},{Y0} {X0 + 10 + 10},{Y0 + L}; ; ; ; NOP;");
+                    writer.WriteLine($"ADD L214 {X0 + 2.5},{Y0} {X0 + 2.5},{Y0 + L}; ; ; ; NOP;");
+                    writer.WriteLine($"ADD L214 {X0 + 10},{Y0} {X0 + 10},{Y0 + L}; ; ; ; NOP;");
                 }
             }
         }
@@ -227,7 +256,8 @@ namespace PanelDrawing.Services.P1
                     }
                     else
                     {
-                        writer.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 4},{UR_y + 8} ;");
+                        writer.WriteLine($"ADD R254  {LL_x + 6},{LL_y} {UR_x + 14},{UR_y + 8} ;");
+                        //writer.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 4},{UR_y + 8} ;");
                         writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x + 38},{UR_y + 8} '{CompName}' {LL_x + 38},{UR_y + 8};");
                         writer.WriteLine($"ADD N253 '{CompName}' {LL_x + 10},{LL_y} :F1.0 :T1001 :D;;NOP;");
                         writer.WriteLine($"ADD N52 '{partnumber}' {LL_x + 10},{LL_y - 4} :F1.0;;NOP;");
@@ -236,7 +266,8 @@ namespace PanelDrawing.Services.P1
 
                         if (!string.IsNullOrEmpty(siblingName))
                         {
-                            writer.WriteLine($"ADD R254  {LL_x + 6},{LL_y} {UR_x + 14},{UR_y + 8} ;");
+                            //writer.WriteLine($"ADD R254  {LL_x + 6},{LL_y} {UR_x + 14},{UR_y + 8} ;");
+                            writer.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 4},{UR_y + 8} ;");
                             writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 2},{UR_y + 8} '{siblingName}' {LL_x - 2},{UR_y + 8};");
                             writer.WriteLine($"ADD N253 '{siblingName}' {LL_x - 18},{LL_y} :F1.0 :T1001 :D;;NOP;");
                             writer.WriteLine($"ADD N52 '{siblingPN}' {LL_x - 24},{LL_y - 4} :F1.0;;NOP;");
@@ -275,7 +306,8 @@ namespace PanelDrawing.Services.P1
                     }
                     else
                     {
-                        writer.WriteLine($"ADD R254  {LL_x + 6},{LL_y} {UR_x + 14},{UR_y + 8} ;");
+                        //writer.WriteLine($"ADD R254  {LL_x + 6},{LL_y} {UR_x + 14},{UR_y + 8} ;");
+                        writer.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 4},{UR_y + 8} ;");
                         writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 2},{UR_y + 8}'{CompName}' {LL_x - 2},{UR_y + 8};");
                         writer.WriteLine($"ADD N253 '{CompName}' {LL_x - 18},{LL_y} :F1.0 :T1001 :D;;NOP;");
                         writer.WriteLine($"ADD N52 '{partnumber}'  {LL_x - 24},{LL_y - 4} :F1.0;;NOP;");
@@ -284,7 +316,8 @@ namespace PanelDrawing.Services.P1
 
                         if (!string.IsNullOrEmpty(siblingName))
                         {
-                            writer.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 4},{UR_y + 8} ;");
+                            writer.WriteLine($"ADD R254  {LL_x + 6},{LL_y} {UR_x + 14},{UR_y + 8} ;");
+                            //writer.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 4},{UR_y + 8} ;");
                             writer.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x + 38},{UR_y + 8} '{siblingName}' {LL_x + 38},{UR_y + 8};");
                             writer.WriteLine($"ADD N253 '{siblingName}' {LL_x + 10},{LL_y} :F1.0 :T1001 :D;;NOP;");
                             writer.WriteLine($"ADD N52 '{siblingPN}' {LL_x + 10},{LL_y - 4} :F1.0;;NOP;");
@@ -323,7 +356,7 @@ namespace PanelDrawing.Services.P1
                 }
                 if (strOri.Equals("R"))
                 {
-                    writer.WriteLine($"ADD I1 cont_sth_lastc_new_t {X0 + 20},{Y0 + 2};");
+                    writer.WriteLine($"ADD I1 cont_sth_lastc_new_t {X0 + 10},{Y0 + 2};");
                     writer.WriteLine("$$ DisSeg - End...");
                 }
             }
@@ -349,6 +382,62 @@ namespace PanelDrawing.Services.P1
 
             }
         }
+
+        //Commented on 06, Feb, 26 Backup
+        //public static void DisSeg2(double X0, double Y0, string N, string filePath, string Ori, string baseConnectorName, string fullConnectorName)
+        //{
+        //    using (var writer = File.AppendText(filePath))
+        //    {
+        //        var pairedConnector =
+        //           Constants.listComponentsWithPartNumber
+        //           .Where(n => !string.IsNullOrEmpty(n)
+        //                       && n.Contains(baseConnectorName)
+        //                       && !n.Equals(fullConnectorName, StringComparison.OrdinalIgnoreCase))
+        //           .FirstOrDefault();
+
+        //        string siblingConnector = "";
+
+        //        if (!string.IsNullOrEmpty(pairedConnector))
+        //        {
+        //            siblingConnector =
+        //                Constants.dataExtractionListAbove.Where(row => row.ConnectorName.Equals(pairedConnector, StringComparison.OrdinalIgnoreCase) &&
+        //                    // !string.IsNullOrEmpty(row.CoreNumber) &&
+        //                    row.Panel.Equals(Constants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
+        //                .Select(row => row.ConnectorName)
+        //                .FirstOrDefault();
+        //        }
+        //        bool hasSibling = !string.IsNullOrEmpty(siblingConnector);
+
+        //        if (Ori.Equals("L"))
+        //        {
+        //            // writer.WriteLine($"ADD Cont_sth_mg_hal {X0},{Y0};");// Commented on Feb_04
+        //            writer.WriteLine($"ADD Cont_sth_mg {X0},{Y0};");//oRIG
+        //            writer.WriteLine($"MOD N51 {X0 + 0.8},{Y0} 0,0 :E '{N}'; NOP;");
+        //            writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0},{Y0} :T4320 {X0},{Y0 - 2};NOP;");
+
+        //            if (hasSibling)
+        //            {
+        //                writer.WriteLine($"ADD contact_sth_receptacle {X0 + 10},{Y0};");
+        //                writer.WriteLine($"MOD N254 {X0 + 11 - 2.5},{Y0} 0,0 :E '{N}'; NOP;");
+        //                writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0 + 10},{Y0 - 2} :T4320 {X0 + 10},{Y0 - 2};NOP;");
+        //            }
+        //        }
+        //        else if (Ori.Equals("R"))//Right Side Pins
+        //        {
+        //            writer.WriteLine($"ADD contact_sth_receptacle {X0 + 10},{Y0};");
+        //            writer.WriteLine($"MOD N254 {X0 + 11 - 2.5},{Y0} 0,0 :E '{N}'; NOP;");
+        //            writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0 + 10},{Y0 - 2} :T4320 {X0 + 10},{Y0 - 2};NOP;");
+
+        //            if (hasSibling)
+        //            {
+        //                //writer.WriteLine($"ADD Cont_sth_mg_hal {X0},{Y0};");//Commented on Feb_04
+        //                writer.WriteLine($"ADD Cont_sth_mg {X0},{Y0};");
+        //                writer.WriteLine($"MOD N51 {X0 + 0.8},{Y0} 0,0 :E '{N}'; NOP;");
+        //                writer.WriteLine($"Add N254 'DIS' :F1.0 :R0 :AC I0 {X0},{Y0} :T4320 {X0},{Y0 - 2};NOP;");
+        //            }
+        //        }
+        //    }
+        //}
 
 
         #region //Commented DisSeg2 on Dec 8, 2025

@@ -1,4 +1,5 @@
 ﻿using PanelDrawing.CommonOperations;
+using PanelDrawing.Logs;
 using PanelDrawing.Objects;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,35 @@ namespace PanelDrawing.Services.P2
                 string toConnector = row.ToConnector;
                 string fromType = row.FromType;
                 string toType = row.ToType;
+
+                if (fromType == "TBK")
+                {
+                    string baseWireCode = (row.WireCode ?? "").Split('/')[0];
+
+                    var fromExtract = Constants.dataExtractionListBelow.FirstOrDefault(x =>
+                        string.Equals(x.ConnectorName, row.FromConnector, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(x.PinNumber, row.FromPin, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals((x.WireNumber ?? "").Trim(), baseWireCode, StringComparison.OrdinalIgnoreCase));
+
+                    if (fromExtract != null)
+                    {
+                        row.FromOrientation = fromExtract.Ends;   // L or R
+                    }     
+                }
+                if(toType == "TBK")
+                {
+                    string baseWireCode = (row.WireCode ?? "").Split('/')[0];
+
+                    var toExtract = Constants.dataExtractionListBelow.FirstOrDefault(x =>
+                        string.Equals(x.ConnectorName, row.ToConnector, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(x.PinNumber, row.ToPin, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals((x.WireNumber ?? "").Trim(), baseWireCode, StringComparison.OrdinalIgnoreCase));
+
+                    if (toExtract != null)
+                    {
+                        row.ToOrientation = toExtract.Ends;   // L or R
+                    }
+                }
 
                 if (fromType == "EQU")
                 {
@@ -87,10 +117,17 @@ namespace PanelDrawing.Services.P2
                         md.ConnectorName == pd.ToConnector &&
                         md.PinNumber == pd.ToPin && string.Equals(md.Column22, Constants.textPanelPartNumber, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (md.ComponentType == "TBK" && !string.IsNullOrEmpty(pd.FromOrientation) && pd.FromOrientation != md.Orientation &&
-                        Constants.MyDataList.Count(x => x.ConnectorName == md.ConnectorName && x.PinNumber == md.PinNumber && x.Column22 == Constants.textPanelPartNumber) > 1)
+                        //if (md.ComponentType == "TBK" && !string.IsNullOrEmpty(pd.FromOrientation) && pd.FromOrientation != md.Orientation &&
+                        //Constants.MyDataList.Count(x => x.ConnectorName == md.ConnectorName && x.PinNumber == md.PinNumber && x.Column22 == Constants.textPanelPartNumber) > 1)
+                        //{
+                        //    continue;
+                        //}
+
+                        if (md.ComponentType == "TBK")
                         {
-                            continue;
+                            if (!string.IsNullOrEmpty(pd.ToOrientation) &&
+                                !string.Equals(md.Orientation, pd.ToOrientation, StringComparison.OrdinalIgnoreCase))
+                                continue;
                         }
                         pd.TPinX = md.PinX;
                         pd.TPinY = md.PinY;
@@ -111,16 +148,22 @@ namespace PanelDrawing.Services.P2
                         md.ConnectorName == pd.FromConnector &&
                         md.PinNumber == pd.FromPin && string.Equals(md.Column22, Constants.textPanelPartNumber, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (md.ComponentType == "TBK" && !string.IsNullOrEmpty(pd.ToOrientation) && pd.ToOrientation != md.Orientation &&
-                        Constants.MyDataList.Count(x => x.ConnectorName == md.ConnectorName && x.PinNumber == md.PinNumber && x.Column22 == Constants.textPanelPartNumber) > 1)
+                        //if (md.ComponentType == "TBK" && !string.IsNullOrEmpty(pd.ToOrientation) && pd.ToOrientation != md.Orientation &&
+                        //Constants.MyDataList.Count(x => x.ConnectorName == md.ConnectorName && x.PinNumber == md.PinNumber && x.Column22 == Constants.textPanelPartNumber) > 1)
+                        //{
+                        //    continue;
+                        //}
+                        if (md.ComponentType == "TBK")
                         {
-                            continue;
+                            if (!string.IsNullOrEmpty(pd.FromOrientation) &&
+                                !string.Equals(md.Orientation, pd.FromOrientation, StringComparison.OrdinalIgnoreCase))
+                                continue;
                         }
                         pd.PinX = md.PinX;
                         pd.PinY = md.PinY;
                         pd.FromType = md.ComponentType;
                         pd.Usage = md.Usage;
-
+                                            
                         // update Usage for matching T_Pin row
                         var rowFrom = Constants.panelDetailsList.FirstOrDefault(x => x.ToPin == md.PinNumber);
 
@@ -140,9 +183,13 @@ namespace PanelDrawing.Services.P2
 
                     DeactivateRepetitiveConnections(pd.ToConnector,pd.ToPin, pd.FromConnector, pd.FromPin);
                 }
+                else
+                {
+                    AppLog.Warn($"{pd.FromConnector}, {pd.FromPin} to {pd.ToConnector}, {pd.ToPin} routing will not happen, Symbol/Pin name doesnot match with Master drawing(.d file) and Macro (lib file) or MyData.csv file ");
+                }
 
-                //   UPDATE GroupId / Wire Length / WireType
-                string baseWireCode = (pd.WireCode ?? "").Split('/')[0];
+                    //   UPDATE GroupId / Wire Length / WireType
+                    string baseWireCode = (pd.WireCode ?? "").Split('/')[0];
 
                 var rowDE = Constants.dataExtractionListBelow
                     .FirstOrDefault(x =>

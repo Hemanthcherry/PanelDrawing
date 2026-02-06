@@ -50,10 +50,10 @@ namespace PanelDrawing.Services.P2
                 Wire_Type = pd.WireType ?? string.Empty;
                 Wire_Type_Number = pd.WireTypeNumber ?? string.Empty;
 
-                if (c1.EndsWith("_F"))
-                {
-                    X1 += 10;
-                }
+                //if (c1.EndsWith("_F"))
+                //{
+                //    X1 += 10;
+                //}
 
                 //if (!Constants.fromConnectorProcessed_P2.Contains(c1))
                 //{
