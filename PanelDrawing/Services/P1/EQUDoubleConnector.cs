@@ -39,8 +39,11 @@ namespace PanelDrawing.Services.P1
                 AppLog.Warn($"EQU component '{CompName}' orientation not found for info '{info}', skipping symbol placement.");
                 return;
             }
-            bool isHalfL = info == "cont_sth_half_l";
-            bool isHalfR = info == "cont_sth_half_r";
+            bool isHalfL = info == "cont_sth_half_l" || info == "cont_sth_mg";
+            bool isHalfR = info == "cont_sth_half_r" || info == "cont_sth_md";
+
+            //bool isHalfL = info == "cont_sth_half_l";
+            //bool isHalfR = info == "cont_sth_half_r";
 
             //using (var writer = File.AppendText(Constants.el_ExecFilePath))
             //{
@@ -49,7 +52,7 @@ namespace PanelDrawing.Services.P1
 
             //  SEGMENT 1 (HEADER)
             string o1 = isHalfL ? "R" : isHalfR ? "L" : baseOrientation;
-            EquSeg1(X0, Y0, Constants.el_ExecFilePath, o1);
+            EquSeg1(X0, Y0, Constants.el_ExecFilePath, o1, info);
 
             //  SEGMENT 2 (PINS)
             string o2 = isHalfL ? "L" : isHalfR ? "R" : baseOrientation;
@@ -60,7 +63,7 @@ namespace PanelDrawing.Services.P1
             //  SEGMENT 3 (VERTICAL BODY)
             string o3 = isHalfL ? "R" : isHalfR ? "L" : baseOrientation;
 
-            EquSeg3(X0, Y0, pinStep * iNumberOfPins, Constants.el_ExecFilePath, o3);
+            EquSeg3(X0, Y0, pinStep * iNumberOfPins, Constants.el_ExecFilePath, o3, info);
 
             //  SEGMENT 4 (RECTANGLE FRAME)
             string o4 = isHalfL ? "L" : isHalfR ? "R" : baseOrientation;
@@ -70,7 +73,7 @@ namespace PanelDrawing.Services.P1
             //  SEGMENT 5 (FOOTER)
             string o5 = isHalfL ? "R" : isHalfR ? "L" : baseOrientation;
 
-            EquSeg5(X0, Y0 + pinStep * iNumberOfPins, Constants.el_ExecFilePath, o5);
+            EquSeg5(X0, Y0 + pinStep * iNumberOfPins, Constants.el_ExecFilePath, o5, info);
 
             //  EQUIPMENT BOX
             if (!string.IsNullOrWhiteSpace(equipmentBoxName) && equipmentBoxName != "+" && !equipmentBoxName.Equals("LOC", StringComparison.OrdinalIgnoreCase))
@@ -86,8 +89,16 @@ namespace PanelDrawing.Services.P1
             Constants.processedItems.Add(baseConnectorName);
         }
 
-        public static void EquSeg1(double X0, double Y0, string filePath, string strDISOrientation)
+        public static void EquSeg1(double X0, double Y0, string filePath, string strDISOrientation, string info)
         {
+            if (info.Equals("cont_sth_md", StringComparison.OrdinalIgnoreCase))
+            {
+                strDISOrientation = "R";
+            }
+            else if (info.Equals("cont_sth_mg", StringComparison.OrdinalIgnoreCase))
+            {
+                strDISOrientation = "L";
+            }
             using (var writer = File.AppendText(filePath))
             {
                 if (strDISOrientation.Equals("L"))
@@ -139,7 +150,7 @@ namespace PanelDrawing.Services.P1
                 {
                     if (!isHalfLeft)
                     {
-                        writer.WriteLine($"ADD cont_sth_half_r {x},{y};"); //Cont_sth_mg
+                        writer.WriteLine($"ADD {tempOrientation} {x},{y};"); //Cont_sth_mg
                         writer.WriteLine($"MOD N51 {x + 0.8},{y} 0,0 :E '{pinNumber}'; NOP;");
                         writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x},{y} :T4320 {x},{y - 2};NOP;");
                     }
@@ -164,9 +175,9 @@ namespace PanelDrawing.Services.P1
                 {
                     if (!isHalfRight)
                     {
-                        writer.WriteLine($"ADD cont_sth_half_l {x + 20},{y};"); // Cont_sth_md
-                        writer.WriteLine($"MOD N51 {x + 11 - 2.5},{y} 0,0 :E '{pinNumber}'; NOP;");
-                        writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x + 20},{y - 2} :T4320 {x + 20},{y - 2};NOP;");
+                        writer.WriteLine($"ADD {tempOrientation} {x+20},{y};"); // Cont_sth_md
+                        writer.WriteLine($"MOD N51 {x + 20},{y} 0,0 :E '{pinNumber}'; NOP;");
+                        writer.WriteLine($"Add N254 'EQU' :F1.0 :R0 :AC I0 {x+20},{y - 2} :T4320 {x + 20},{y - 2};NOP;");
                     }
                     else
                     {
@@ -186,8 +197,16 @@ namespace PanelDrawing.Services.P1
             }
         }
 
-        public static void EquSeg3(double X0, double Y0, double L, string filePath, string strOri)
+        public static void EquSeg3(double X0, double Y0, double L, string filePath, string strOri, string info)
         {
+            if (info.Equals("cont_sth_md", StringComparison.OrdinalIgnoreCase))
+            {
+                strOri = "R";
+            }
+            else if (info.Equals("cont_sth_mg", StringComparison.OrdinalIgnoreCase))
+            {
+                strOri = "L";
+            }
             using (var writer = File.AppendText(filePath))
             {
                 if (strOri.Equals("L"))
@@ -205,7 +224,7 @@ namespace PanelDrawing.Services.P1
             }
         }
 
-        public static void EquSeg4(double LL_x,double LL_y,double UR_x,double UR_y,string compName,string filePath,string partNumber,string orientation,string associatedPNs,string baseConnectorName,string tempOri)
+        public static void EquSeg4(double LL_x,double LL_y,double UR_x,double UR_y,string compName,string filePath,string partNumber,string orientation,string associatedPNs,string baseConnectorName,string info)
         {
             using (var writer = File.AppendText(filePath))
             {
@@ -218,7 +237,14 @@ namespace PanelDrawing.Services.P1
                 if (isLeft)
                 {
                     // MAIN RECTANGLE
-                    w.WriteLine($"ADD R254 {LL_x + 5 },{LL_y} {UR_x + 14},{UR_y + 8};");
+                    if (info.Equals("cont_sth_mg", StringComparison.OrdinalIgnoreCase))
+                    {
+                        w.WriteLine($"ADD R254  {LL_x - 4},{LL_y} {UR_x + 5},{UR_y + 4 + 4} ;");
+                    }
+                    else
+                    {
+                        w.WriteLine($"ADD R254 {LL_x + 5},{LL_y} {UR_x + 14},{UR_y + 8};");
+                    }
                    //w.WriteLine($"ADD R254 {LL_x - 5},{LL_y} {LL_x + 3},{UR_y + 8};");
 
                     // HEADER LABEL RECTANGLE
@@ -298,9 +324,16 @@ namespace PanelDrawing.Services.P1
                 if (isRight)
                 {
                     // MAIN RECTANGLE
-                    w.WriteLine($"ADD R254  {LL_x - 4 + 8 + 2},{LL_y} {UR_x + 4 + 8 + 2},{UR_y + 4 + 4} ;");
+                    if (info.Equals("cont_sth_md", StringComparison.OrdinalIgnoreCase))
+                    {
+                        w.WriteLine($"ADD R254 {LL_x + 16},{LL_y} {UR_x + 16 +9},{UR_y + 8};");
+                    }
+                    else
+                    {
+                        w.WriteLine($"ADD R254  {LL_x - 4 + 8 + 2},{LL_y} {UR_x + 4 + 8 + 2},{UR_y + 4 + 4} ;");
+                    }
 
-                    // HEADER LABEL
+                        // HEADER LABEL
                     w.WriteLine($"ADD N53 :T1001 :F3.0 :D :J7 :AC R254 {LL_x - 4 - 3 + 20 + 10},{LL_y - 30 - 48 + 8 + 8 + 4} '{compName}' {UR_x + 4 + 8 - 4 - 2 + 20 + 10},{UR_y + 4 - 6 - 12 + 8 + 8 + 4};");
 
                     // NAME
@@ -366,8 +399,16 @@ namespace PanelDrawing.Services.P1
             }
         }
 
-        public static void EquSeg5(double X0, double Y0, string filePath, string strOri)
+        public static void EquSeg5(double X0, double Y0, string filePath, string strOri, string info)
         {
+            if (info.Equals("cont_sth_md", StringComparison.OrdinalIgnoreCase))
+            {
+                strOri = "R";
+            }
+            else if (info.Equals("cont_sth_mg", StringComparison.OrdinalIgnoreCase))
+            {
+                strOri = "L";
+            }
             using (var writer = File.AppendText(filePath))
             {
                 if (strOri.Equals("L"))

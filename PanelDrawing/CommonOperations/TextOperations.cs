@@ -44,11 +44,30 @@ namespace PanelDrawing.CommonOperations
 
         //    return result;
         //}
+
+        private static int GetConnectorPriority(string connector)
+        {
+            if (string.IsNullOrWhiteSpace(connector))
+                return 2;
+
+            // Tier 0 → EQU J-connectors
+            if (Regex.IsMatch(connector, @"_[Jj](?:[1-9]|1\d|2[0-4])$"))
+                return 0;
+
+            // Tier 1 → EQU lowercase connectors only (_a to _z excluding i & o)
+            if (Regex.IsMatch(connector, @"_[a-hj-np-z]$"))
+                return 1;
+
+            // Tier 2 → everything else (DIS, REL, TBK, etc.)
+            return 2;
+        }
+
         public static List<PanelDetailsRow> SortPanelDetails(List<PanelDetailsRow> rows)
         {
             // 1️⃣ Pin-first ordering
             var pinSorted = rows
-                .OrderBy(r => r.FromConnector, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(r => GetConnectorPriority(r.FromConnector)) // Connector comes first for Pin sequence
+                .ThenBy(r => r.FromConnector, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(r => NormalizePin(r.FromPin))
                 .ToList();
 

@@ -238,32 +238,32 @@ namespace PanelDrawing.Services.P2
             try
             {
                 using (var writer = File.AppendText(Constants.el_ExecFilePath))
-            {
-                writer.WriteLine($"GRI 0.5, 2;");
-                writer.WriteLine($"ADD L154 :W0");
+                {
+                    writer.WriteLine($"GRI 0.5, 2;");
+                    writer.WriteLine($"ADD L154 :W0");
 
-                if (Y1 == Y2) // Straight Line wiring if both source and destination components are in same horizontal location
-                {
-                    DrawStraightWire(X1, Y1, X2, Y2, writer, iWireCode, iWireGauge,wire_Type_Core_Number, wire_Length, wire_symbol, wire_Type, groupId);
-                }
-                else if (isCType) // C type wiring if Source and destination components are in same horizontal location with 50 margin
-                {
-                    Draw_C_TypeWire(X1, Y1, X2, Y2, X3, Y3, X4, Y4, iWireCode, iWireGauge, wire_Type_Core_Number, wire_Length, FromOrientation, ToOrientation, writer, wire_symbol, wire_Type, groupId);
-                }                
-                else // Z shaped wire routing
-                {
-                    Draw_Z_TypeWire(X1, Y1, X2, Y2, X3, Y3, X4, Y4, iWireCode, iWireGauge, wire_Type_Core_Number, wire_Length, writer, wire_symbol, wire_Type, groupId);
-                }
+                    if (Y1 == Y2) // Straight Line wiring if both source and destination components are in same horizontal location
+                    {
+                        DrawStraightWire(X1, Y1, X2, Y2, writer, iWireCode, iWireGauge,wire_Type_Core_Number, wire_Length, wire_symbol, wire_Type, groupId);
+                    }
+                    else if (isCType) // C type wiring if Source and destination components are in same horizontal location with 50 margin
+                    {
+                        Draw_C_TypeWire(X1, Y1, X2, Y2, X3, Y3, X4, Y4, iWireCode, iWireGauge, wire_Type_Core_Number, wire_Length, FromOrientation, ToOrientation, writer, wire_symbol, wire_Type, groupId);
+                    }                
+                    else // Z shaped wire routing
+                    {
+                        Draw_Z_TypeWire(X1, Y1, X2, Y2, X3, Y3, X4, Y4, iWireCode, iWireGauge, wire_Type_Core_Number, wire_Length, writer, wire_symbol, wire_Type, groupId);
+                    }
               
-                //writer.WriteLine($":GRI");
-                //writer.WriteLine($"pm_files_sav;;");
-                //writer.WriteLine($"GRI ELECTRE_GRID_STH;");
+                    //writer.WriteLine($":GRI");
+                    //writer.WriteLine($"pm_files_sav;;");
+                    //writer.WriteLine($"GRI ELECTRE_GRID_STH;");
 
-                Constants.WiringOffset+=4;
+                    Constants.WiringOffset+=4;
 
-                if (!Constants.lst_WireCodes_Info_Processed.Contains(iWireCode))
-                    Constants.lst_WireCodes_Info_Processed.Add(iWireCode);
-            }
+                    if (!Constants.lst_WireCodes_Info_Processed.Contains(iWireCode))
+                        Constants.lst_WireCodes_Info_Processed.Add(iWireCode);
+                }
                 AppLog.Info($"Wire {iWireCode} routed successfully " + $"from {c1} to {c2}");
             }
             catch (Exception ex)

@@ -2,6 +2,7 @@
 using PanelDrawing.Logs;
 using PanelDrawing.Objects;
 using PanelDrawing.Services.P1;
+using System;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Numerics;
@@ -440,7 +441,29 @@ namespace PanelDrawing.CommonOperations
 
                             if (isDouble)
                             {
-                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeightEQU, CompType);
+                                string info =
+                                   Constants.dataExtractionListBelow.FirstOrDefault(x => string.Equals(x.ConnectorName, CompDwgName, StringComparison.OrdinalIgnoreCase))
+                                   ?.SymbolName?.Trim() ?? "";
+
+                                // 2. Base orientation
+                                string Ori = info switch
+                                {
+                                    "cont_sth_md" => "L",
+                                    "cont_sth_mg" => "R",
+                                    "cont_sth_half_l" => "R",
+                                    "cont_sth_half_r" => "L",
+                                    _ => ""
+                                };
+
+                                Constants.sPanelEQUori_File = string.Concat(Constants.Electre_Temp_Folder_Path, Constants.textPanelPartNumber, " " + "- " + Constants.txtEquName, " - PanelEquOri.txt");
+
+                                using (StreamWriter writer = new StreamWriter(Constants.sPanelEQUori_File))
+                                {
+                                    TextOperations.Export_PanelEquOri(writer, equPins, Ori);
+                                }
+
+                                (CompXdist, CompYdist) = GetNextEquPosition(Ori, 40, CompHeightEQU);
+                                //(CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeightEQU, CompType);
 
                                 string root = CompDwgName.Split('_')[0];
 
