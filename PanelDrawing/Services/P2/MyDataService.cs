@@ -135,7 +135,7 @@ namespace PanelDrawing.Services.P2
                         pd.Usage = md.Usage;
 
                         // update Usage for matching F_Pin row
-                        var rowTo = Constants.panelDetailsList.FirstOrDefault(x => x.FromPin == md.PinNumber);
+                        var rowTo = Constants.panelDetailsList.FirstOrDefault(x => x.FromConnector == md.ConnectorName && x.FromPin == md.PinNumber);//FirstOrDefault(x => x.FromPin == md.PinNumber);
 
                         if (rowTo != null)
                             rowTo.Usage = md.Usage;
@@ -163,9 +163,9 @@ namespace PanelDrawing.Services.P2
                         pd.PinY = md.PinY;
                         pd.FromType = md.ComponentType;
                         pd.Usage = md.Usage;
-                                            
+
                         // update Usage for matching T_Pin row
-                        var rowFrom = Constants.panelDetailsList.FirstOrDefault(x => x.ToPin == md.PinNumber);
+                        var rowFrom = Constants.panelDetailsList.FirstOrDefault(x => x.ToConnector == md.ConnectorName && x.FromPin == md.PinNumber);//FirstOrDefault(x => x.ToPin == md.PinNumber);
 
                         if (rowFrom != null)
                             rowFrom.Usage = md.Usage;
@@ -189,7 +189,7 @@ namespace PanelDrawing.Services.P2
                 }
 
                     //   UPDATE GroupId / Wire Length / WireType
-                    string baseWireCode = (pd.WireCode ?? "").Split('/')[0];
+                string baseWireCode = (pd.WireCode ?? "").Split('/')[0];
 
                 var rowDE = Constants.dataExtractionListBelow
                     .FirstOrDefault(x =>

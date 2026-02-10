@@ -325,11 +325,32 @@ namespace PanelDrawing.CommonOperations
 
                 double CompXdist = 0.0;
                 double CompYdist = 0.0;
-                frmPanelOri frmpanelori = new frmPanelOri();
+                //frmPanelOri frmpanelori = new frmPanelOri();
+
+                string msg = $"Macro or Part Number missing for component '{CompDwgName}' ({CompType}).\n" +
+                                   $"Part Number : {CompPN}\n" +
+                                   $"Please verify the part number (Y) col in 'data_extraction.csv' and the macro in library file. " +
+                                   $"Symbol placement skipped.";
 
                 AppLog.Info($"Component {CompDwgName} ({CompType}) started placement");
                 try
                 {
+                    foreach (var row in Constants.panelDetailsList)
+                    {
+                        if (row.FromConnector == CompDwgName)
+                        {
+                            row.Usage = SampleEquPinNumber;
+                            row.FromType = CompType;
+                            row.GroupId = GroupId;
+                            row.WireLength = Wire_Length;
+                            row.WireType = Wire_Type;
+                        }
+
+                        if (row.ToConnector == CompDwgName)
+                        {
+                            row.ToType = CompType;
+                        }
+                    }
                     switch (CompType)
                     {
                         case "SPL":
@@ -364,6 +385,14 @@ namespace PanelDrawing.CommonOperations
                                 MessageBox.Show($"{CompDwgName} Pins Not Available");
                                 continue;
                             }
+                            //foreach (var row in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
+                            //{
+                            //    row.Usage = SampleEquPinNumber;
+                            //    row.FromType = CompType;
+                            //    row.GroupId = GroupId;
+                            //    row.WireLength = Wire_Length;
+                            //    row.WireType = Wire_Type;
+                            //}
                             if (string.IsNullOrEmpty(MacroName))
                             {
                                 (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
@@ -390,14 +419,14 @@ namespace PanelDrawing.CommonOperations
                             Constants.txtEquName = CompDwgName;
 
                             // Update panelDetailsList
-                            foreach (var row in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
-                            {
-                                row.Usage = SampleEquPinNumber;
-                                row.FromType = CompType;
-                                row.GroupId = GroupId;
-                                row.WireLength = Wire_Length;
-                                row.WireType = Wire_Type;
-                            }
+                            //foreach (var row in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
+                            //{
+                            //    row.Usage = SampleEquPinNumber;
+                            //    row.FromType = CompType;
+                            //    row.GroupId = GroupId;
+                            //    row.WireLength = Wire_Length;
+                            //    row.WireType = Wire_Type;
+                            //}
 
                             //bool isDouble = CompDwgName.Contains("_J") ||
                             //    Regex.IsMatch(CompDwgName.Last().ToString(), "[a-hj-np-zA-HJ-NP-Z]");
@@ -456,11 +485,19 @@ namespace PanelDrawing.CommonOperations
                             }
                             int yCoordinate_DIS = (disPins.Count * 4) + 12 + 18;
 
-                            foreach (var pd in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
-                            {
-                                pd.Usage = SampleEquPinNumber;
-                                pd.FromType = CompType;
-                            }
+                            //foreach (var pd in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
+                            //{
+                            //    pd.Usage = SampleEquPinNumber;
+                            //    pd.FromType = CompType;
+                            //}
+                            //foreach (var row in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
+                            //{
+                            //    row.Usage = SampleEquPinNumber;
+                            //    row.FromType = CompType;
+                            //    row.GroupId = GroupId;
+                            //    row.WireLength = Wire_Length;
+                            //    row.WireType = Wire_Type;
+                            //}
 
                             string baseName = CompDwgName.Length > 2 ? CompDwgName[..^2] : CompDwgName;
 
@@ -485,12 +522,7 @@ namespace PanelDrawing.CommonOperations
                             }
                             else
                             {
-                                string msg = $"Macro or Part Number missing for component '{CompDwgName}' ({CompType}).\n" +
-                                    $"Part Number : {CompPN}\n" +
-                                    $"Please verify the part number (Y) col in 'data_extraction.csv' and the macro in library file. " +
-                                    $"Symbol placement skipped.";
-
-                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.");
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
 
                                 MessageBox.Show(
                                     msg,
@@ -508,6 +540,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
                             }
                             continue;
 
@@ -535,6 +577,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddCBSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, CBVoltage, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
                             }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                            }
                             continue;
 
                         case "TCB":
@@ -544,6 +596,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
                                 modOPCommand.AddCBSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, CBVoltage, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
                             }
                             continue;
 
@@ -579,13 +641,7 @@ namespace PanelDrawing.CommonOperations
                             }
                             else
                             {
-                                string msg =
-                                    $"Macro or Part Number missing for component '{CompDwgName}' ({CompType}).\n\n" +
-                                    $"Part Number : {CompPN}\n" +
-                                    $"Please verify the entry in 'data_extraction.csv' and the library file. " +
-                                    $"Symbol placement skipped.";
-
-                                AppLog.Warn(msg);
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
 
                                 MessageBox.Show(
                                     msg,
@@ -603,6 +659,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
                             }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                            }
                             continue;
 
                         case "ANT":
@@ -612,6 +678,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
                             }
                             continue;
 
@@ -623,6 +699,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
                             }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                            }
                             continue;
 
                         case "FUS":
@@ -632,6 +718,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
                             }
                             continue;
 
@@ -648,6 +744,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
                             }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                            }
                             continue;
 
                         //case "ML":
@@ -663,6 +769,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
                             }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                            }
                             continue;
 
                         case "LMP":
@@ -672,6 +788,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
                             }
                             continue;
 
@@ -688,6 +814,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
                             }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                            }
                             continue;
 
                         case "NEW":
@@ -697,6 +833,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
                             }
                             continue;
 
@@ -708,6 +854,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
                             }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                            }
                             continue;
 
                         case "CAP":
@@ -717,6 +873,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
                             }
                             continue;
 
@@ -728,6 +894,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
                             }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                            }
                             continue;
 
                         case "POT":
@@ -737,6 +913,16 @@ namespace PanelDrawing.CommonOperations
                                 modOPCommand.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath);
                                 modOPCommand.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, Constants.el_ExecFilePath, CompType);
                                 AppLog.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file.Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
                             }
                             continue;
 
@@ -750,7 +936,13 @@ namespace PanelDrawing.CommonOperations
                             }
                             else
                             {
-                                AppLog.Warn($"No Macro defined for Component {CompDwgName} ({CompType}). Skipping placement.");
+                                AppLog.Warn($"Macro or Part Number missing for component '{CompDwgName}' ({CompType}) Please verify the part number(Y) col in 'data_extraction.csv' and the macro in library file. Skipping Placement");
+
+                                MessageBox.Show(
+                                    msg,
+                                    "Macro / Part Number Missing",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
                             }
                             continue;
                     }
