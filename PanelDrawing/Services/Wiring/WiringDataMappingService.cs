@@ -1,0 +1,223 @@
+﻿using PanelDrawing.Core.Constants;
+using PanelDrawing.Logging;
+using PanelDrawing.Services.Connectors;
+
+namespace PanelDrawing.Services.Wiring
+{
+    public static class WiringDataMappingService
+    {
+        public static void AssignOrientation()
+        {
+            List<string> processedEquList = new List<string>();
+
+            foreach (var row in PanelConstants.panelDetailsList)
+            {
+                string fromConnector = row.FromConnector;
+                string toConnector = row.ToConnector;
+                string fromType = row.FromType;
+                string toType = row.ToType;
+
+                if (fromType == "TBK")
+                {
+                    string baseWireCode = (row.WireCode ?? "").Split('/')[0];
+
+                    var fromExtract = PanelConstants.dataExtractionListBelow.FirstOrDefault(x =>
+                        string.Equals(x.ConnectorName, row.FromConnector, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(x.PinNumber, row.FromPin, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals((x.WireNumber ?? "").Trim(), baseWireCode, StringComparison.OrdinalIgnoreCase));
+
+                    if (fromExtract != null)
+                    {
+                        row.FromOrientation = fromExtract.Ends;   // L or R
+                    }     
+                }
+                if(toType == "TBK")
+                {
+                    string baseWireCode = (row.WireCode ?? "").Split('/')[0];
+
+                    var toExtract = PanelConstants.dataExtractionListBelow.FirstOrDefault(x =>
+                        string.Equals(x.ConnectorName, row.ToConnector, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(x.PinNumber, row.ToPin, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals((x.WireNumber ?? "").Trim(), baseWireCode, StringComparison.OrdinalIgnoreCase));
+
+                    if (toExtract != null)
+                    {
+                        row.ToOrientation = toExtract.Ends;   // L or R
+                    }
+                }
+
+                if (fromType == "EQU")
+                {
+                    PanelConstants.txtEquName = fromConnector;
+                }
+
+                if (ConnectorPinService.SearchAndAppend(PanelConstants.txtEquName, processedEquList))
+                {
+                    string filePath =  $"{PanelConstants.Electre_Temp_Folder_Path}{PanelConstants.textPanelPartNumber} - {PanelConstants.txtEquName} - PanelEquOri.txt";
+
+                    PanelConstants.sPanelEQUori_File = filePath;
+
+                    if (!ConnectorPinService.ValidateFileSelection(filePath))
+                    {
+                        Console.WriteLine($"{filePath} - PanelOri file is missing");
+                        continue;
+                    }
+
+                    try
+                    {
+                        foreach (var line in File.ReadLines(filePath))
+                        {
+                            string[] parts = line.Split(';');
+                            if (parts.Length < 3) continue;
+
+                            string pinNumber = parts[1];
+                            string orientation = parts[2];
+
+                            // Assign orientation to From side
+                            var matchFrom = PanelConstants.panelDetailsList
+                                .Where(x => x.FromConnector == PanelConstants.txtEquName &&
+                                            x.FromPin == pinNumber);
+
+                            foreach (var r in matchFrom)
+                                r.FromOrientation = orientation;
+
+                            // Assign orientation to To side
+                            var matchTo = PanelConstants.panelDetailsList
+                                .Where(x => x.ToConnector == PanelConstants.txtEquName &&
+                                            x.ToPin == pinNumber);
+
+                            foreach (var r in matchTo)
+                                r.ToOrientation = orientation;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error reading file: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        public static void CoordinatesToPDPin()
+        {
+            foreach (var pd in PanelConstants.panelDetailsList)
+            {
+                bool Tdetails = false;
+                bool Fdetails = false;
+
+                foreach (var md in PanelConstants.MyDataList) // MyDataList = list of ElectreMyDataRow
+                {
+                    //   MATCH T (TO side)
+                    if (!Tdetails &&
+                        md.ConnectorName == pd.ToConnector &&
+                        md.PinNumber == pd.ToPin && string.Equals(md.Column22, PanelConstants.textPanelPartNumber, StringComparison.OrdinalIgnoreCase))
+                    {
+                        //if (md.ComponentType == "TBK" && !string.IsNullOrEmpty(pd.FromOrientation) && pd.FromOrientation != md.Orientation &&
+                        //Constants.MyDataList.Count(x => x.ConnectorName == md.ConnectorName && x.PinNumber == md.PinNumber && x.Column22 == Constants.textPanelPartNumber) > 1)
+                        //{
+                        //    continue;
+                        //}
+
+                        if (md.ComponentType == "TBK")
+                        {
+                            if (!string.IsNullOrEmpty(pd.ToOrientation) &&
+                                !string.Equals(md.Orientation, pd.ToOrientation, StringComparison.OrdinalIgnoreCase))
+                                continue;
+                        }
+                        pd.TPinX = md.PinX;
+                        pd.TPinY = md.PinY;
+                        pd.ToType = md.ComponentType;
+                        pd.Usage = md.Usage;
+
+                        // update Usage for matching F_Pin row
+                        var rowTo = PanelConstants.panelDetailsList.FirstOrDefault(x => x.FromConnector == md.ConnectorName && x.FromPin == md.PinNumber);//FirstOrDefault(x => x.FromPin == md.PinNumber);
+
+                        if (rowTo != null)
+                            rowTo.Usage = md.Usage;
+
+                        Tdetails = true;
+                    }
+
+                    //   MATCH F (FROM side)
+                    if (!Fdetails &&
+                        md.ConnectorName == pd.FromConnector &&
+                        md.PinNumber == pd.FromPin && string.Equals(md.Column22, PanelConstants.textPanelPartNumber, StringComparison.OrdinalIgnoreCase))
+                    {
+                        //if (md.ComponentType == "TBK" && !string.IsNullOrEmpty(pd.ToOrientation) && pd.ToOrientation != md.Orientation &&
+                        //Constants.MyDataList.Count(x => x.ConnectorName == md.ConnectorName && x.PinNumber == md.PinNumber && x.Column22 == Constants.textPanelPartNumber) > 1)
+                        //{
+                        //    continue;
+                        //}
+                        if (md.ComponentType == "TBK")
+                        {
+                            if (!string.IsNullOrEmpty(pd.FromOrientation) &&
+                                !string.Equals(md.Orientation, pd.FromOrientation, StringComparison.OrdinalIgnoreCase))
+                                continue;
+                        }
+                        pd.PinX = md.PinX;
+                        pd.PinY = md.PinY;
+                        pd.FromType = md.ComponentType;
+                        pd.Usage = md.Usage;
+
+                        // update Usage for matching T_Pin row
+                        var rowFrom = PanelConstants.panelDetailsList.FirstOrDefault(x => x.ToConnector == md.ConnectorName && x.FromPin == md.PinNumber);//FirstOrDefault(x => x.ToPin == md.PinNumber);
+
+                        if (rowFrom != null)
+                            rowFrom.Usage = md.Usage;
+
+                        Fdetails = true;
+                    }
+
+                    if (Tdetails && Fdetails)
+                        break;
+                }
+                // DEACTIVATE REPEATED CONNECTIONS
+                if (Tdetails && Fdetails)
+                {
+                    pd.Usage = "1";
+
+                    DeactivateRepetitiveConnections(pd.ToConnector,pd.ToPin, pd.FromConnector, pd.FromPin);
+                }
+                else
+                {
+                    ApplicationLogger.Warn($"{pd.FromConnector}, {pd.FromPin} to {pd.ToConnector}, {pd.ToPin} routing will not happen, Symbol/Pin name doesnot match with Master drawing(.d file) and Macro (lib file) or MyData.csv file ");
+                }
+
+                    //   UPDATE GroupId / Wire Length / WireType
+                string baseWireCode = (pd.WireCode ?? "").Split('/')[0];
+
+                var rowDE = PanelConstants.dataExtractionListBelow
+                    .FirstOrDefault(x =>
+                        string.Equals(x.ConnectorName?.Trim(), pd.FromConnector?.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(x.PinNumber?.Trim(), pd.FromPin?.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals((x.WireNumber ?? "").Trim(), baseWireCode, StringComparison.OrdinalIgnoreCase)
+                    );
+
+                if (rowDE != null)
+                {
+                    pd.GroupId = rowDE.Group;
+                    pd.WireLength = rowDE.Length;
+                    pd.WireType = rowDE.CableType;
+                    var corenumber = !string.IsNullOrEmpty(rowDE.CoreNumber) && rowDE.CoreNumber.Length <=2 ? rowDE.CoreNumber : string.Empty;
+                    //pd.WireTypeNumber = rowDE.CoreNumber;
+                    pd.WireTypeNumber = corenumber;
+                }
+            }
+        }
+
+        private static void DeactivateRepetitiveConnections(string FC, string FP, string TC, string TP)
+        {
+            foreach (var md in PanelConstants.MyDataList)
+            {
+                if (md.ConnectorName == FC &&      // FromConnector
+                    md.PinNumber == FP &&      // FromPin
+                    md.ConnectorName == TC &&      // ToConnector  (NOTE: original code reused same array!)
+                    md.PinNumber == TP)        // ToPin
+                {
+                    md.Usage = "2";       // Usage column
+                    break;
+                }
+            }
+        }       
+    }
+}
