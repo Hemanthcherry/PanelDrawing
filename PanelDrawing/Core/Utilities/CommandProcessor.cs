@@ -16,15 +16,9 @@ namespace PanelDrawing.Core.Utilities
     {
         public static void NewSheetWithTB(string el_Execfilpath, string pnlnum, string strnum, string SheetTemplateName)
         {
-            //FileStream fileStream = new FileStream(el_ExecfilePath, FileMode.OpenOrCreate, FileAccess.Write);
             using (var writer = File.AppendText(el_Execfilpath))
             {
-                //// Save the new drawing using the specified project path
-                //EDI mytemp_new_a4; SAV(CHR(34) + 'C:\ELECTRE\electre_projects\PANEL_DR03\Schem\CCCCC_12345' + CHR(34));
                 writer.WriteLine("EDI " + SheetTemplateName + "; SAV (CHR(34)+" + PanelConstants.quotationMark + "" + PanelConstants.Elec_Proj_Schem_Folder_Path + "\\" + pnlnum + "" + PanelConstants.quotationMark + "+CHR(34));");
-                //Open the new drawing
-                // writer.WriteLine("NEW_OPEN_DRAWING " + Constants.quotationMark + pnlnum + Constants.quotationMark + ";"); //'Open the new drawing
-                // writer.WriteLine($"EDI {pnlnum}"); // Commented this line on Jan, 30, 2026
                 writer.WriteLine($"EDI (CHR(34)+{PanelConstants.quotationMark}{pnlnum}{PanelConstants.quotationMark}+CHR(34));");
                 writer.WriteLine($"MOD_TAG 2012 '{pnlnum}';");
                 writer.WriteLine($"MOD_TAG 2011 '{strnum}';");
@@ -34,7 +28,6 @@ namespace PanelDrawing.Core.Utilities
                 writer.WriteLine("GRID 0.5,2;");
                 writer.WriteLine("REMOVE :A;");
             }
-            //FileStream fileStream = new FileStream(el_ExecfilePath,File.);
         }
 
         public static void AddSymbol(string iSymbolname, string iConnectorNameForComment, double X0, double Y0, string iPartNumber, string el_Execfilpath)  //'Symbolname is Macroname

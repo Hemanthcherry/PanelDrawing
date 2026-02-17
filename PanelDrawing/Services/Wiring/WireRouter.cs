@@ -51,16 +51,6 @@ namespace PanelDrawing.Services.Wiring
                 Wire_Type = pd.WireType ?? string.Empty;
                 Wire_Type_Number = pd.WireTypeNumber ?? string.Empty;
 
-                //if (c1.EndsWith("_F"))
-                //{
-                //    X1 += 10;
-                //}
-
-                //if (!Constants.fromConnectorProcessed_P2.Contains(c1))
-                //{
-                //    Constants.fromConnectorProcessed_P2.Add(c1);
-                //    Constants.WiringOffset = 0;  // Assigning Offest to default when New Connector wiring starts
-                //}
                 // preserve original behaviour: only route if X1 < X2 => only left to right
                 if (X1 <= X2)
                 {

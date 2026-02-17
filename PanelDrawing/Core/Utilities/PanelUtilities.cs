@@ -14,9 +14,6 @@ namespace PanelDrawing.Core.Utilities
             vbScriptProcess.StartInfo.UseShellExecute = false;
             vbScriptProcess.Start();
 
-            // Wait for the script to execute (optional)
-            //vbScriptProcess.WaitForExit();
-
             // Close the process if still running
             if (!vbScriptProcess.HasExited)
             {

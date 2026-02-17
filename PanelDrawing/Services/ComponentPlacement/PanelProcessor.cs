@@ -28,9 +28,6 @@ namespace PanelDrawing.Services.ComponentPlacement
                     File.Create(el_ExecfilePath).Close();
                 }
                 File.WriteAllText(el_ExecfilePath, string.Empty);
-
-                //if (File.Exists(el_ExecfilePath)) { File.Delete(el_ExecfilePath); }
-                //File.Create(el_ExecfilePath).Close();
             }
             catch (Exception ex)
             {
@@ -41,7 +38,6 @@ namespace PanelDrawing.Services.ComponentPlacement
         public static void ReadLibCatalog()
         {
             PanelConstants.libCatalogList = DataReader.LibraryCatalogReader(PanelConstants.Library_File_Path);
-            // Constants.arrTableOfLibCatalog = ExcelOperations.ConvertCSVDataInto2DArray(Constants.Library_File_Path,StringComparer.OrdinalIgnoreCase);//ReadLibCatalog
         }       
 
         public static (double X, double Y) GetNextEquPosition(string side, double compWidth, double compHeight)
@@ -102,26 +98,28 @@ namespace PanelDrawing.Services.ComponentPlacement
                 PanelConstants.CursorX_EQU_DIS = PanelConstants.CursorX_EQU_Left + 80;
             }
 
-            posX = Math.Round(posX);
-            if(posX % 2 != 0)
-            {
-                posX = posX + 1;
-            }
-
-            posY = Math.Round(posY);
-            if(posY % 2 != 0)
-            {
-                posY = posY + 1;
-            }
+            posX = getEvenPosition(posX);
+            posY = getEvenPosition(posY);
 
             return (posX, posY);
+        }
+
+        private static double getEvenPosition(double pos)
+        {
+            pos = Math.Round(pos);
+            if (pos % 2 != 0)
+            {
+                pos = pos + 1;
+            }
+
+            return pos;
         }
 
         public static (double X, double Y) GetNextComponentPosition(double compWidth, double compHeight, string compType)
         {
             // If next component X exceeds sheet width → go to new row
 
-            if (compType =="DIS" || compType == "EQU")
+            if (compType =="DIS")
             {
                 if(PanelConstants.CursorY_EQU_DIS - compHeight < PanelConstants.MarginYEQU)
                 {
@@ -134,10 +132,10 @@ namespace PanelDrawing.Services.ComponentPlacement
 
                 double posX = PanelConstants.CursorX_EQU_DIS;
                 // Current component position
-                if (compType == "DIS") 
-                {
+                //if (compType == "DIS") 
+                //{
                     posX = PanelConstants.CursorX_EQU_DIS + 30;
-                }
+                //}
                 
                 double posY = PanelConstants.CursorY_EQU_DIS; //- compHeight;
 
@@ -154,17 +152,8 @@ namespace PanelDrawing.Services.ComponentPlacement
                     PanelConstants.CursorX = PanelConstants.CursorX_EQU_DIS + compWidth;
                 }
 
-                posX = Math.Round(posX);
-                if (posX % 2 != 0)
-                {
-                    posX = posX + 1;
-                }
-
-                posY = Math.Round(posY);
-                if (posY % 2 != 0)
-                {
-                    posY = posY + 1;
-                }
+                posX = getEvenPosition(posX);
+                posY = getEvenPosition(posY);
 
                 return (posX, posY);
             }
@@ -196,17 +185,8 @@ namespace PanelDrawing.Services.ComponentPlacement
                 if (compHeight > PanelConstants.RowHeight)
                     PanelConstants.RowHeight = compHeight;
 
-                posX = Math.Round(posX);
-                if (posX % 2 != 0)
-                {
-                    posX = posX + 1;
-                }
-
-                posY = Math.Round(posY);
-                if (posY % 2 != 0)
-                {
-                    posY = posY + 1;
-                }
+                posX = getEvenPosition(posX);
+                posY = getEvenPosition(posY);
 
                 return (posX, posY);
             }            
@@ -473,7 +453,7 @@ namespace PanelDrawing.Services.ComponentPlacement
 
                                 if (!PanelConstants.remainingItems.Contains(root))
                                 {
-                                    DoubleConnectorPlacementService.GraLine(CompXdist, CompYdist, PanelConstants.listPinsOfEqu.Count, CompDwgName, PanelConstants.listPinsOfEqu, CompPN, AssocPNs, EquipBox, root);
+                                    DoubleConnectorPlacementService.DrawDoubleConnectorSymbol(CompXdist, CompYdist, PanelConstants.listPinsOfEqu.Count, CompDwgName, PanelConstants.listPinsOfEqu, CompPN, AssocPNs, EquipBox, root);
 
                                     PanelConstants.remainingItems.Add(root);
                                 }
@@ -497,7 +477,7 @@ namespace PanelDrawing.Services.ComponentPlacement
                                 //(CompXdist, CompYdist) = GetNextEquPosition(side,40,compHeight: Constants.arrPinsOfEqu.Length * 10);
                                 (CompXdist, CompYdist) = GetNextEquPosition(Ori, 40, CompHeightEQU);
 
-                                SingleConnectorPlacementService.DrawEquSymbolUsedPins(CompXdist, CompYdist, CompMaxPin, CompDwgName, Ori, SampleEquPinNumber, CompPN, /*frmpanelori,*/ AssocPNs, EquipBox, Looms);
+                                SingleConnectorPlacementService.DrawSingleConnectorSymbol(CompXdist, CompYdist, CompMaxPin, CompDwgName, Ori, SampleEquPinNumber, CompPN, /*frmpanelori,*/ AssocPNs, EquipBox, Looms);
                                 //frmpanelori.Close();
                             }
                             ApplicationLogger.Info($"OOTB Component {CompDwgName} ({CompType}) placed at X={CompXdist}, Y={CompYdist}");
@@ -512,20 +492,6 @@ namespace PanelDrawing.Services.ComponentPlacement
                             }
                             int yCoordinate_DIS = (disPins.Count * 4) + 12 + 18;
 
-                            //foreach (var pd in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
-                            //{
-                            //    pd.Usage = SampleEquPinNumber;
-                            //    pd.FromType = CompType;
-                            //}
-                            //foreach (var row in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
-                            //{
-                            //    row.Usage = SampleEquPinNumber;
-                            //    row.FromType = CompType;
-                            //    row.GroupId = GroupId;
-                            //    row.WireLength = Wire_Length;
-                            //    row.WireType = Wire_Type;
-                            //}
-
                             string baseName = CompDwgName.Length > 2 ? CompDwgName[..^2] : CompDwgName;
 
                             // If already processed → exit
@@ -534,8 +500,31 @@ namespace PanelDrawing.Services.ComponentPlacement
 
                             (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, yCoordinate_DIS, CompType);
 
-                            BreakConnectorPlacementService.GraLine(CompXdist, CompYdist, disPins.Count, CompDwgName, disPins, CompPN, AssocPNs, EquipBox);
+                            BreakConnectorPlacementService.DrawBreakConnectorSymbol(CompXdist, CompYdist, disPins.Count, CompDwgName, disPins, CompPN, AssocPNs, EquipBox);
                             ApplicationLogger.Info($"OOTB Component {CompDwgName} ({CompType}) placed at X={CompXdist}, Y={CompYdist}"); 
+                            continue;
+
+
+                        case "REL":
+                            var relPins = ConnectorPinService.GetPinsofOOTBRelay(CompDwgName);
+                            int yCoordinateREL = (relPins.Count * 5) + 40;
+
+                            //(CompXdist, CompYdist) = GetNextComponentPosition(60, yCoordinateREL);
+                            //modOPCommand.AddSymbolREL_OOTB(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, relPins);
+
+                            if (string.IsNullOrEmpty(MacroName))
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, yCoordinateREL, CompType);
+                                CommandProcessor.AddSymbolREL_OOTB(CompDwgName, CompXdist, CompYdist, CompPN, PanelConstants.el_ExecFilePath, relPins);
+                                ApplicationLogger.Info($"OOTB Component {CompDwgName} ({CompType}) placed at X={CompXdist}, Y={CompYdist}");
+                            }
+                            else
+                            {
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                CommandProcessor.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, PanelConstants.el_ExecFilePath);
+                                CommandProcessor.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, PanelConstants.el_ExecFilePath, CompType);
+                                ApplicationLogger.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
+                            }
                             continue;
 
                         case "SWT":
@@ -633,28 +622,6 @@ namespace PanelDrawing.Services.ComponentPlacement
                                     "Macro / Part Number Missing",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Warning);
-                            }
-                            continue;
-
-                        case "REL":
-                            var relPins = ConnectorPinService.GetPinsofOOTBRelay(CompDwgName);
-                            int yCoordinateREL = (relPins.Count * 5) + 40;
-
-                            //(CompXdist, CompYdist) = GetNextComponentPosition(60, yCoordinateREL);
-                            //modOPCommand.AddSymbolREL_OOTB(CompDwgName, CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, relPins);
-
-                            if (string.IsNullOrEmpty(MacroName))
-                            {
-                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, yCoordinateREL, CompType);
-                                CommandProcessor.AddSymbolREL_OOTB(CompDwgName, CompXdist, CompYdist, CompPN, PanelConstants.el_ExecFilePath, relPins);
-                                ApplicationLogger.Info($"OOTB Component {CompDwgName} ({CompType}) placed at X={CompXdist}, Y={CompYdist}");
-                            }
-                            else
-                            {
-                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
-                                CommandProcessor.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, PanelConstants.el_ExecFilePath);
-                                CommandProcessor.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, PanelConstants.el_ExecFilePath, CompType);
-                                ApplicationLogger.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
                             }
                             continue;
 
@@ -1025,17 +992,12 @@ namespace PanelDrawing.Services.ComponentPlacement
 
             // Save lines to file
             File.WriteAllLines(PanelConstants.PanelDetailsFullFileName, outputLines);
-
-            // Store in constants for later use
-           // Constants.arrUpdatedPanelDetails = outputLines.ToArray();
         }
 
         public static void ComponentsCreatedTextFileCreation()
         {
-            //Constants.
-            //Constants.arrComponentsCreated[0] = string.Concat(Constants.textPanelPartNumber,Constants.textPanelPartName, lstSelectedItemTemplateName,);
             File.WriteAllLines(string.Concat(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.ComponentsCreatedTextFileName), PanelConstants.arrComponentsCreated);
-            File.WriteAllLines(string.Concat(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.NewSheetDetails), PanelConstants.arrComponentsCreated);
+            //File.WriteAllLines(string.Concat(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.NewSheetDetails), PanelConstants.arrComponentsCreated);
         }
 
         public static void ExitOutputFile(string filepath)
@@ -1048,7 +1010,6 @@ namespace PanelDrawing.Services.ComponentPlacement
                 writer.WriteLine("FCLOSE;");
                 writer.WriteLine("NOP;");
                 writer.WriteLine(";");
-                // writer.Close();
             }
         }
 

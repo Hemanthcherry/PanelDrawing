@@ -9,7 +9,7 @@ namespace PanelDrawing
         [STAThread]
         static void Main(string[] args)
         {
-           PanelConstants.Electre_Proj_Path = "C:\\ELECTRE\\electre_projects\\PANELDRAWING_FEB07\\";
+           PanelConstants.Electre_Proj_Path = "C:\\ELECTRE\\electre_projects\\PANELDRAWING_17FEB26\\";
 
             if (args.Length > 0)
             {

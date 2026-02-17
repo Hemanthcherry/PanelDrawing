@@ -10,7 +10,7 @@ namespace PanelDrawing.Services.ComponentPlacement
 {
     public class SingleConnectorPlacementService
     {
-        public static void DrawEquSymbolUsedPins(double X0, double Y0, string iNumberOfMaxPins, string iEquName, string Ori, string iSamplePinNumber,
+        public static void DrawSingleConnectorSymbol(double X0, double Y0, string iNumberOfMaxPins, string iEquName, string Ori, string iSamplePinNumber,
              string iPartNumber, /*frmPanelOri f,*/ string assoPNs, string EquBoxExist, string LoomsExist)
         {
             List<string> arrPins = new List<string>();
@@ -213,7 +213,6 @@ namespace PanelDrawing.Services.ComponentPlacement
             //}
             #endregion
         }
-
 
         public static void EquSeg1(double X0, double Y0, string iOrientation, string iCRepSymbol, string iEquName, string filePath)
         {

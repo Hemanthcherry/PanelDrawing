@@ -10,7 +10,7 @@ namespace PanelDrawing.Services.ComponentPlacement
 {
     public class DoubleConnectorPlacementService
     {
-        public static void GraLine(double X0,double Y0,int iNumberOfPins,string CompName,List<string> pinList,string partNumber,string associatedPNs,string equipmentBoxName,string baseConnectorName)
+        public static void DrawDoubleConnectorSymbol(double X0,double Y0,int iNumberOfPins,string CompName,List<string> pinList,string partNumber,string associatedPNs,string equipmentBoxName,string baseConnectorName)
         {
             // Skip if already drawn
             if (PanelConstants.processedItems.Contains(baseConnectorName))

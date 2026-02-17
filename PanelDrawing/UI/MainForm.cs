@@ -161,16 +161,16 @@ namespace Panel_Drawing.Forms
                 MessageBox.Show(PanelConstants.Panel_Main_Fields_Not_Empty, PanelConstants.PD_Title);
                 return;
             }
-            if (!File.Exists(string.Concat(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.ComponentsCreatedTextFileName)))
-            {
-               var result = MessageBox.Show("Click 'OK' if panel components are placed; otherwise click 'Cancel'.", PanelConstants.PD_Title, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            //if (!File.Exists(string.Concat(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.ComponentsCreatedTextFileName)))
+            //{
+            //   var result = MessageBox.Show("Click 'OK' if panel components are placed; otherwise click 'Cancel'.", PanelConstants.PD_Title, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
-                if (result == DialogResult.Cancel)
-                {
-                    Application.Exit();
-                    return;
-                }
-            }
+            //    if (result == DialogResult.Cancel)
+            //    {
+            //        Application.Exit();
+            //        return;
+            //    }
+            //}
             lstSheetSizes.Enabled = false;
             PanelProcessor.InitiateOutPutFile(PanelConstants.el_ExecFilePath);//Create el_exec file
             DataReader.LoadMyDataFile(PanelConstants.My_Data_File_Path);

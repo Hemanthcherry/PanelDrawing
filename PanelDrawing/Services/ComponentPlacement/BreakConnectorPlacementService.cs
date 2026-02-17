@@ -11,7 +11,7 @@ namespace PanelDrawing.Services.ComponentPlacement
 {
     public class BreakConnectorPlacementService
     {
-        public static void GraLine(double X0, double Y0, int iNumberOfPins, string CompName, List<string> arrpinsCollection, string partnumber, string assopns, string DisEquipmentBoxRefName)
+        public static void DrawBreakConnectorSymbol(double X0, double Y0, int iNumberOfPins, string CompName, List<string> arrpinsCollection, string partnumber, string assopns, string DisEquipmentBoxRefName)
         {
             // Break connector base name (removes last 2 chars)
             string baseName = CompName.Length > 2 ? CompName[..^2] : CompName;
@@ -383,6 +383,7 @@ namespace PanelDrawing.Services.ComponentPlacement
             }
         }
 
+
         //Commented on 06, Feb, 26 Backup
         //public static void DisSeg2(double X0, double Y0, string N, string filePath, string Ori, string baseConnectorName, string fullConnectorName)
         //{
@@ -438,7 +439,6 @@ namespace PanelDrawing.Services.ComponentPlacement
         //        }
         //    }
         //}
-
 
         #region //Commented DisSeg2 on Dec 8, 2025
         //public static void DisSeg2_OLD(double X0, double Y0, string N, string filePath, string Ori)
