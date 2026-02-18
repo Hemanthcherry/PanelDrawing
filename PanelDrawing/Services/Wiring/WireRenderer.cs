@@ -177,15 +177,6 @@ namespace PanelDrawing.Services.P2
             }  
         }
 
-        //public static double GetUniqueX3(double X3)
-        //{
-        //    if (Constants.UsedX3Values.Contains(X3))
-        //    {
-        //        return CheckX3Exists(X3 + 2);
-        //    }
-        //    return X3;           
-        //}
-
         public static double GetUniqueX3(double x3)
         {
             const double step = 2.0;
@@ -254,10 +245,6 @@ namespace PanelDrawing.Services.P2
                     {
                         Draw_Z_TypeWire(X1, Y1, X2, Y2, X3, Y3, X4, Y4, iWireCode, iWireGauge, wire_Type_Core_Number, wire_Length, writer, wire_symbol, wire_Type, groupId);
                     }
-              
-                    //writer.WriteLine($":GRI");
-                    //writer.WriteLine($"pm_files_sav;;");
-                    //writer.WriteLine($"GRI ELECTRE_GRID_STH;");
 
                     PanelConstants.WiringOffset+=4;
 
