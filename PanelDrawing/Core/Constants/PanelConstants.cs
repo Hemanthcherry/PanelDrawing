@@ -28,8 +28,8 @@ namespace PanelDrawing.Core.Constants
         // Coordinates section
         public static double CursorX = 0;  // Horizontal (X) Coordinate
         public static double CursorY = 0;  // Vertical (Y) Coordinate
-        public static double CursorY_EQU_DIS = 0;
-        public static double CursorX_EQU_DIS = 0;
+        public static double CursorY_DIS = 0;
+        public static double CursorX_DIS = 0;
 
         public static double CursorX_EQU_Left = 0;
         public static double CursorX_EQU_Right = 0;

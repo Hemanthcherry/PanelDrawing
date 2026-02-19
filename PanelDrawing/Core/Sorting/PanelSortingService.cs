@@ -149,7 +149,7 @@ namespace PanelDrawing.Core.Sorting
                 parts.Add(isDigit ? int.Parse(current.ToString()) : current.ToString());
 
             return parts;
-        }    
+        }     
     }
     public sealed class WireInfo
     {
@@ -344,32 +344,6 @@ namespace PanelDrawing.Core.Sorting
      var parts = SplitAlphaNumeric(pin);
      return string.Join("_", parts.Select(p => p is int n ? n.ToString("D6") : p.ToString()));
  }*/
-
-//public static string[] ConvertListInto1DArray(List<string> lstlist)
-//{
-//    string[] arrtemp = new string[lstlist[0].Split(',').Count() * lstlist.Count];
-//    int intTempCount = 0;
-//    for (int i = 0; i <= lstlist.Count - 1; i++)
-//    {
-//        for (int j = 0; j <= lstlist[i].Split(',').Count() - 1; j++)
-//        {
-//            string[] temparr = lstlist[i].Split(',');
-//            arrtemp[intTempCount] = temparr[j];//lstlist[i].Split(',').ToString();
-//            intTempCount++;
-//        }
-//    }
-//    return arrtemp;
-//}
-
-//public static List<string> ConvertTextFileIntoList(string txtFileName)
-//{
-//    List<string> lstlineInfo = new List<string>();
-//    foreach (string line in File.ReadLines(txtFileName))
-//    {
-//        lstlineInfo.Add(line);
-//    }
-//    return lstlineInfo;
-//}
 
 
 /*public static string[,] ConvertTextFileDataInto2DArray(string textFilePath)

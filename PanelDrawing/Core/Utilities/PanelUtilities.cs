@@ -37,6 +37,32 @@ namespace PanelDrawing.Core.Utilities
             File.Copy(PanelConstants.el_ExecFilePath, PanelConstants.el_Exec_Temp_FilePath);
         }
 
+        public static string[] ConvertListInto1DArray(List<string> lstlist)
+        {
+            string[] arrtemp = new string[lstlist[0].Split(',').Count() * lstlist.Count];
+            int intTempCount = 0;
+            for (int i = 0; i <= lstlist.Count - 1; i++)
+            {
+                for (int j = 0; j <= lstlist[i].Split(',').Count() - 1; j++)
+                {
+                    string[] temparr = lstlist[i].Split(',');
+                    arrtemp[intTempCount] = temparr[j];//lstlist[i].Split(',').ToString();
+                    intTempCount++;
+                }
+            }
+            return arrtemp;
+        }
+
+        public static List<string> ConvertTextFileIntoList(string txtFileName)
+        {
+            List<string> lstlineInfo = new List<string>();
+            foreach (string line in File.ReadLines(txtFileName))
+            {
+                lstlineInfo.Add(line);
+            }
+            return lstlineInfo;
+        }
+
         #region // Commented old code on Jan 27, 2026
         //public static string[,] Conver1DArrayto2DArray(string[] OneDimArray, string fileName)
         //{

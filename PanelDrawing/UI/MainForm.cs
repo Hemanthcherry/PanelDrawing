@@ -26,18 +26,40 @@ namespace Panel_Drawing.Forms
                 Application.Exit();
             }
 
-            PanelConstants.panelInfoFilePath = string.Concat(PanelConstants.Electre_Proj_Path, @"\templ\TempFiles\PanelInfo.txt");
-            PanelConstants.Electre_Temp_Folder_Path = string.Concat(PanelConstants.Electre_Proj_Path, @"\templ\TempFiles\");
-            PanelConstants.dataExtractionFilePath = string.Concat(PanelConstants.Electre_Proj_Path, @"\schema\data_extraction.csv"); 
-            PanelConstants.My_Data_File_Path = string.Concat(PanelConstants.Electre_Proj_Path, @"\schema\My_Data.csv");
-            PanelConstants.Elec_Proj_Schem_Folder_Path = string.Concat(PanelConstants.Electre_Proj_Path, @"\schem");
+            PanelConstants.panelInfoFilePath =
+                Path.Combine(PanelConstants.Electre_Proj_Path, "templ", "TempFiles", "PanelInfo.txt");
 
-            //Electre_Customize_Path
-            PanelConstants.Electre_Customize_Path = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ELECTRE_CUSTOMIZE", EnvironmentVariableTarget.Machine)) ? null : Environment.GetEnvironmentVariable("ELECTRE_CUSTOMIZE", EnvironmentVariableTarget.Machine);
-            PanelConstants.borderInfoFilePath = string.Concat(PanelConstants.Electre_Customize_Path, @"\system\", Environment.GetEnvironmentVariable("Border_File", EnvironmentVariableTarget.Machine)); ;
-            PanelConstants.Library_File_Path = string.Concat(PanelConstants.Electre_Customize_Path, @"\",Environment.GetEnvironmentVariable("Lib_File", EnvironmentVariableTarget.Machine));
-            PanelConstants.Custom_Programs_File = string.Concat(PanelConstants.Electre_Customize_Path, @"\system\vbs\custom_programs.vbs");
-            PanelConstants.el_ExecFilePath = string.Concat(@"C:\Users\", Environment.GetEnvironmentVariable("USERNAME", EnvironmentVariableTarget.Machine), @"\el_exec");
+            PanelConstants.Electre_Temp_Folder_Path =
+                Path.Combine(PanelConstants.Electre_Proj_Path, "templ", "TempFiles");
+
+            PanelConstants.dataExtractionFilePath =
+                Path.Combine(PanelConstants.Electre_Proj_Path, "schema", "data_extraction.csv");
+
+            PanelConstants.My_Data_File_Path =
+                Path.Combine(PanelConstants.Electre_Proj_Path, "schema", "My_Data.csv");
+
+            PanelConstants.Elec_Proj_Schem_Folder_Path =
+                Path.Combine(PanelConstants.Electre_Proj_Path, "schem");
+
+            // Read environment variables
+            string electreCustomize = Environment.GetEnvironmentVariable("ELECTRE_CUSTOMIZE", EnvironmentVariableTarget.Machine);
+            string borderFile = Environment.GetEnvironmentVariable("Border_File", EnvironmentVariableTarget.Machine);
+            string libFile = Environment.GetEnvironmentVariable("Lib_File", EnvironmentVariableTarget.Machine);
+            string userName = Environment.GetEnvironmentVariable("USERNAME", EnvironmentVariableTarget.Process);
+
+            // Validate main path
+            if (string.IsNullOrWhiteSpace(electreCustomize))
+            {
+                throw new Exception("ELECTRE_CUSTOMIZE environment variable is not set.");
+            }
+
+            PanelConstants.Electre_Customize_Path = electreCustomize;
+
+            // Build paths safely
+            PanelConstants.borderInfoFilePath = Path.Combine(electreCustomize, "system", borderFile ?? "");
+            PanelConstants.Library_File_Path = Path.Combine(electreCustomize, libFile ?? "");
+            PanelConstants.Custom_Programs_File = Path.Combine(electreCustomize, "system", "vbs", "custom_programs.vbs");
+            PanelConstants.el_ExecFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "el_exec");
             #endregion
 
             #region//Form level & Input Files Validation
@@ -51,17 +73,17 @@ namespace Panel_Drawing.Forms
                 MessageBox.Show(string.Concat("Border Info ",PanelConstants.msg_file_Missing, PanelConstants.borderInfoFilePath), PanelConstants.PD_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(0);
             }
-            else if (!PanelUtilities.IsFileExist(PanelConstants.dataExtractionFilePath))
+            if (!PanelUtilities.IsFileExist(PanelConstants.dataExtractionFilePath))
             {
                 MessageBox.Show(string.Concat("Data Extraction ",PanelConstants.msg_file_Missing, PanelConstants.dataExtractionFilePath),PanelConstants.PD_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(0);
             }
-            else if (!PanelUtilities.IsFileExist(PanelConstants.Custom_Programs_File))
+            if (!PanelUtilities.IsFileExist(PanelConstants.Custom_Programs_File))
             {
                 MessageBox.Show(string.Concat("Custom Programs VBS ", PanelConstants.msg_file_Missing, PanelConstants.Custom_Programs_File),PanelConstants.PD_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(0);
             }
-            else if (!PanelUtilities.IsFileExist(PanelConstants.Library_File_Path))
+            if (!PanelUtilities.IsFileExist(PanelConstants.Library_File_Path))
             {
                 MessageBox.Show(string.Concat("Component Library ", PanelConstants.msg_file_Missing, PanelConstants.Library_File_Path), PanelConstants.PD_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(0);
@@ -90,20 +112,21 @@ namespace Panel_Drawing.Forms
             #endregion
 
             #region // Commented P2 EXE Auto fill sheet details for Production Release Purpose --- Button Validation
-            //if (File.Exists(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails)))// && Environment.GetEnvironmentVariable("PD1_Flag", EnvironmentVariableTarget.Machine).Equals("PD1") && Environment.GetEnvironmentVariable("PD2_Flag", EnvironmentVariableTarget.Machine).Equals("PD2"))
+            //if (File.Exists(Path.Combine(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.ComponentsCreatedTextFileName)))
             //{
-            //   // Load Form for Create Wiring
+            //    // Load Form for Create Wiring
             //    lstSheetSizes.Enabled = false;
             //    btnPanelComponents.Enabled = false;
-            //    string[] arrtemp = TextOperations.ConvertListInto1DArray(TextOperations.ConvertTextFileIntoList(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.ComponentsCreatedTextFileName)));
+            //    string[] arrtemp = PanelUtilities.ConvertListInto1DArray(PanelUtilities.ConvertTextFileIntoList(Path.Combine(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.ComponentsCreatedTextFileName)));
             //    lstSheetSizes.SelectedItem = arrtemp[2];
             //    txtSize.Text = arrtemp[3];
             //    txtWidth.Text = arrtemp[4];
             //    txtHeight.Text = arrtemp[5];
             //}
-            //else if (!File.Exists(string.Concat(Constants.Electre_Temp_Folder_Path, Constants.NewSheetDetails)))// && Environment.GetEnvironmentVariable("PD1_Flag", EnvironmentVariableTarget.Machine).Equals("PD") && Environment.GetEnvironmentVariable("PD2_Flag", EnvironmentVariableTarget.Machine).Equals("PD2"))
+            //else if (!File.Exists(Path.Combine(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.ComponentsCreatedTextFileName)))
             //{
-            //    MessageBox.Show(Constants.msgComponentsWiring);
+            //    MessageBox.Show(PanelConstants.msgComponentsWiring);
+            //    ApplicationLogger.Warn($"{Path.Combine(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.ComponentsCreatedTextFileName)} not found");
             //    this.Close();
             //}
             #endregion
@@ -115,7 +138,9 @@ namespace Panel_Drawing.Forms
         private void btnPanelComponents_Click(object sender, EventArgs e)
         {
             #region//Validation Part
-            PanelConstants.PanelDetails_FilePath = string.Concat(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.textPanelPartNumber, PanelConstants.dashMark, PanelConstants.panelDetailsTextFileName);
+            string panelDetailsFileName = $"{PanelConstants.textPanelPartNumber}-{PanelConstants.panelDetailsTextFileName}";
+            PanelConstants.PanelDetails_FilePath = Path.Combine(PanelConstants.Electre_Temp_Folder_Path, panelDetailsFileName);
+
             if (!PanelUtilities.IsFileExist(PanelConstants.PanelDetails_FilePath))
             {
                 MessageBox.Show(string.Concat("Panel Details ", PanelConstants.msg_file_Missing, PanelConstants.PanelDetails_FilePath), PanelConstants.PD_Title);
@@ -150,7 +175,9 @@ namespace Panel_Drawing.Forms
 
         public void btnWires_Click(object sender, EventArgs e)
         {
-            PanelConstants.PanelDetails_FilePath = string.Concat(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.textPanelPartNumber, PanelConstants.dashMark, PanelConstants.panelDetailsTextFileName);
+            string fileName = $"{PanelConstants.textPanelPartNumber}-{PanelConstants.panelDetailsTextFileName}";
+            PanelConstants.PanelDetails_FilePath = Path.Combine(PanelConstants.Electre_Temp_Folder_Path, fileName);
+
             if (string.IsNullOrEmpty(PanelConstants.textPanelPartName))
             {
                 MessageBox.Show("Please select the Sheet Name from list", PanelConstants.PD_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -161,16 +188,6 @@ namespace Panel_Drawing.Forms
                 MessageBox.Show(PanelConstants.Panel_Main_Fields_Not_Empty, PanelConstants.PD_Title);
                 return;
             }
-            //if (!File.Exists(string.Concat(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.ComponentsCreatedTextFileName)))
-            //{
-            //   var result = MessageBox.Show("Click 'OK' if panel components are placed; otherwise click 'Cancel'.", PanelConstants.PD_Title, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-
-            //    if (result == DialogResult.Cancel)
-            //    {
-            //        Application.Exit();
-            //        return;
-            //    }
-            //}
             lstSheetSizes.Enabled = false;
             PanelProcessor.InitiateOutPutFile(PanelConstants.el_ExecFilePath);//Create el_exec file
             DataReader.LoadMyDataFile(PanelConstants.My_Data_File_Path);

@@ -91,11 +91,11 @@ namespace PanelDrawing.Services.ComponentPlacement
             //// Move Y downward for next EQU component
             //Constants.CursorY_EQU = Constants.CursorY_EQU  - compHeight - Constants.ComponentSpacingY;
 
-            if (PanelConstants.CursorX_EQU_Left >= PanelConstants.CursorX) // = added on Jan 14
+            if (PanelConstants.CursorX_EQU_Left + compWidth >= PanelConstants.CursorX) // = added on Jan 14
             {
-                PanelConstants.CursorX = PanelConstants.CursorX_EQU_Left + compWidth;
+                PanelConstants.CursorX = PanelConstants.CursorX_EQU_Left + 200;
 
-                PanelConstants.CursorX_EQU_DIS = PanelConstants.CursorX_EQU_Left + 80;
+                PanelConstants.CursorX_DIS = PanelConstants.CursorX_EQU_Left + 100;
             }
 
             posX = getEvenPosition(posX);
@@ -119,27 +119,27 @@ namespace PanelDrawing.Services.ComponentPlacement
         {
             // If next component X exceeds sheet width → go to new row
 
-            if (compType =="DIS")
+            if (compType =="DIS" || compType == "TBK" || compType == "TER" || compType == "REL")
             {
-                if(PanelConstants.CursorY_EQU_DIS - compHeight < PanelConstants.MarginYEQU)
+                if(PanelConstants.CursorY_DIS - compHeight < PanelConstants.MarginYEQU)
                 {
-                    PanelConstants.CursorY_EQU_DIS = PanelConstants.SheetHeight - PanelConstants.MarginYEQU;
+                    PanelConstants.CursorY_DIS = PanelConstants.SheetHeight - PanelConstants.MarginYEQU;
 
-                    PanelConstants.CursorX_EQU_DIS += PanelConstants.ComponentSpacingX + PanelConstants.ColumnWidth;
+                    PanelConstants.CursorX_DIS += PanelConstants.ComponentSpacingX + PanelConstants.ColumnWidth;
 
                     PanelConstants.ColumnWidth = 0;
                 }
 
-                double posX = PanelConstants.CursorX_EQU_DIS;
+                double posX = PanelConstants.CursorX_DIS;
                 // Current component position
                 //if (compType == "DIS") 
                 //{
-                    posX = PanelConstants.CursorX_EQU_DIS + 30;
+                    posX = PanelConstants.CursorX_DIS + 30;
                 //}
                 
-                double posY = PanelConstants.CursorY_EQU_DIS; //- compHeight;
+                double posY = PanelConstants.CursorY_DIS; //- compHeight;
 
-                PanelConstants.CursorY_EQU_DIS = PanelConstants.CursorY_EQU_DIS - compHeight - PanelConstants.ComponentSpacingY;
+                PanelConstants.CursorY_DIS = PanelConstants.CursorY_DIS - compHeight - PanelConstants.ComponentSpacingY;
 
                 // Update widest component in this column
                 if (compWidth > PanelConstants.ColumnWidth)
@@ -147,9 +147,9 @@ namespace PanelDrawing.Services.ComponentPlacement
                     PanelConstants.ColumnWidth = compWidth;
                 }
             
-                if (PanelConstants.CursorX_EQU_DIS >= PanelConstants.CursorX)
+                if (PanelConstants.CursorX_DIS >= PanelConstants.CursorX)
                 {
-                    PanelConstants.CursorX = PanelConstants.CursorX_EQU_DIS + compWidth;
+                    PanelConstants.CursorX = PanelConstants.CursorX_DIS + compWidth;
                 }
 
                 posX = getEvenPosition(posX);
@@ -158,20 +158,19 @@ namespace PanelDrawing.Services.ComponentPlacement
                 return (posX, posY);
             }
             else
-            {               
-                //if (Constants.CursorX + compWidth > Constants.SheetWidth - Constants.MarginX)
-                if (PanelConstants.CursorX + compWidth > PanelConstants.CursorX_EQU_Right - PanelConstants.MarginX)
+            {
+                if (PanelConstants.CursorY + compHeight > PanelConstants.SheetHeight - PanelConstants.MarginYEQU)
                 {
-                    // Move to NEXT ROW
+                    // Move to NEXT Column
                     // Constants.CursorX = Constants.MarginX;
-                   PanelConstants.CursorX = PanelConstants.CursorX_EQU_DIS + 80; // commented on Jan 14th
+                    PanelConstants.CursorY = PanelConstants.MarginY;
 
-                   // Constants.CursorX = Constants.CursorX_EQU_Left + 40;
+                    // Constants.CursorX = Constants.CursorX_EQU_Left + 40;
 
-                    PanelConstants.CursorY += PanelConstants.RowHeight + PanelConstants.ComponentSpacingY;
+                    PanelConstants.CursorX += PanelConstants.ColumnWidth + PanelConstants.ComponentSpacingX;
 
                     // Reset Row Height
-                    PanelConstants.RowHeight = 0;
+                    PanelConstants.ColumnWidth = 0;
                 }
 
                 // Current component position
@@ -179,16 +178,46 @@ namespace PanelDrawing.Services.ComponentPlacement
                 double posY = PanelConstants.CursorY; //- compHeight;
 
                 // Move X cursor to right for next component
-                PanelConstants.CursorX += compWidth + PanelConstants.ComponentSpacingX;
+                PanelConstants.CursorY += compHeight + PanelConstants.ComponentSpacingY;
 
                 // Update tallest component in this row
-                if (compHeight > PanelConstants.RowHeight)
-                    PanelConstants.RowHeight = compHeight;
+                if (compHeight > PanelConstants.ColumnWidth)
+                    PanelConstants.ColumnWidth = compWidth;
 
                 posX = getEvenPosition(posX);
                 posY = getEvenPosition(posY);
 
                 return (posX, posY);
+
+                //if (PanelConstants.CursorX + compWidth > PanelConstants.CursorX_EQU_Right - PanelConstants.MarginX)
+                //{
+                //    // Move to NEXT ROW
+                //    // Constants.CursorX = Constants.MarginX;
+                //   PanelConstants.CursorX = PanelConstants.CursorX_DIS + 80; // commented on Jan 14th
+
+                //   // Constants.CursorX = Constants.CursorX_EQU_Left + 40;
+
+                //    PanelConstants.CursorY += PanelConstants.RowHeight + PanelConstants.ComponentSpacingY;
+
+                //    // Reset Row Height
+                //    PanelConstants.RowHeight = 0;
+                //}
+
+                //// Current component position
+                //double posX = PanelConstants.CursorX;
+                //double posY = PanelConstants.CursorY; //- compHeight;
+
+                //// Move X cursor to right for next component
+                //PanelConstants.CursorX += compWidth + PanelConstants.ComponentSpacingX;
+
+                //// Update tallest component in this row
+                //if (compHeight > PanelConstants.RowHeight)
+                //    PanelConstants.RowHeight = compHeight;
+
+                //posX = getEvenPosition(posX);
+                //posY = getEvenPosition(posY);
+
+                //return (posX, posY);
             }            
         }
 
@@ -197,7 +226,7 @@ namespace PanelDrawing.Services.ComponentPlacement
             // X starts at left margin
             PanelConstants.CursorX = PanelConstants.MarginX;
 
-            PanelConstants.CursorX_EQU_DIS = /*Constants.MarginX + */120;  //180 commented on Jan 14
+            PanelConstants.CursorX_DIS = /*Constants.MarginX + */120;  //180 commented on Jan 14
 
             PanelConstants.CursorX_EQU_Left = PanelConstants.MarginXEQU;
 
@@ -213,7 +242,7 @@ namespace PanelDrawing.Services.ComponentPlacement
             PanelConstants.CursorY_EQU_Right = PanelConstants.SheetHeight - PanelConstants.MarginYEQU;
             PanelConstants.CursorY_EQU_Left = PanelConstants.SheetHeight - PanelConstants.MarginYEQU;
 
-            PanelConstants.CursorY_EQU_DIS = PanelConstants.SheetHeight - PanelConstants.MarginYEQU ;
+            PanelConstants.CursorY_DIS = PanelConstants.SheetHeight - PanelConstants.MarginYEQU ;
 
             // Track tallest component in the current row
             PanelConstants.RowHeight = 0;
@@ -228,8 +257,8 @@ namespace PanelDrawing.Services.ComponentPlacement
                 "SPL" => (50, 50),
                 "SCB" => (30, 30),
                 "TCB" => (50, 50),
-                "TBK" => (80, 140),
-                "TER" => (80, 140),
+                "TBK" => (80, 100),
+                "TER" => (80, 100),
                 "SWT" => (80, 140),
                 "EQU" => (100, 200),
                 "DIS" => (100, 200),
@@ -387,7 +416,7 @@ namespace PanelDrawing.Services.ComponentPlacement
                             }
                             else
                             {
-                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, "TER_CUST");
 
                                 CommandProcessor.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, PanelConstants.el_ExecFilePath);
                                 CommandProcessor.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, PanelConstants.el_ExecFilePath, CompType);
@@ -423,6 +452,10 @@ namespace PanelDrawing.Services.ComponentPlacement
                             //(CompXdist, CompYdist) = GetNextComponentPosition(80, 100);
                             int CompHeightEQU = (NoOfPins * 4) + 20 + 20;
 
+                            string fileName = $"{PanelConstants.textPanelPartNumber} - {PanelConstants.txtEquName} - PanelEquOri.txt";
+
+                            PanelConstants.sPanelEQUori_File = Path.Combine(PanelConstants.Electre_Temp_Folder_Path, fileName);
+
                             if (isDouble)
                             {
                                 string info =
@@ -439,14 +472,12 @@ namespace PanelDrawing.Services.ComponentPlacement
                                     _ => ""
                                 };
 
-                                PanelConstants.sPanelEQUori_File = string.Concat(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.textPanelPartNumber, " " + "- " + PanelConstants.txtEquName, " - PanelEquOri.txt");
-
                                 using (StreamWriter writer = new StreamWriter(PanelConstants.sPanelEQUori_File))
                                 {
                                     PanelSortingService.Export_PanelEquOri(writer, equPins, Ori);
                                 }
 
-                                (CompXdist, CompYdist) = GetNextEquPosition(Ori, 40, CompHeightEQU);
+                                (CompXdist, CompYdist) = GetNextEquPosition(Ori, 60, CompHeightEQU);
                                 //(CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeightEQU, CompType);
 
                                 string root = CompDwgName.Split('_')[0];
@@ -466,8 +497,6 @@ namespace PanelDrawing.Services.ComponentPlacement
                               
                                 var Ori = comp.SymbolName.Trim().Contains("contact_sth_mr") ? "L" : "R";
 
-                                PanelConstants.sPanelEQUori_File = string.Concat(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.textPanelPartNumber, " " + "- " + PanelConstants.txtEquName, " - PanelEquOri.txt");
-
                                 using (StreamWriter writer = new StreamWriter(PanelConstants.sPanelEQUori_File))
                                 {
                                     PanelSortingService.Export_PanelEquOri(writer, equPins, Ori);
@@ -475,7 +504,7 @@ namespace PanelDrawing.Services.ComponentPlacement
 
                                 // Get position based on LEFT / RIGHT
                                 //(CompXdist, CompYdist) = GetNextEquPosition(side,40,compHeight: Constants.arrPinsOfEqu.Length * 10);
-                                (CompXdist, CompYdist) = GetNextEquPosition(Ori, 40, CompHeightEQU);
+                                (CompXdist, CompYdist) = GetNextEquPosition(Ori, 60, CompHeightEQU);
 
                                 SingleConnectorPlacementService.DrawSingleConnectorSymbol(CompXdist, CompYdist, CompMaxPin, CompDwgName, Ori, SampleEquPinNumber, CompPN, /*frmpanelori,*/ AssocPNs, EquipBox, Looms);
                                 //frmpanelori.Close();
@@ -520,7 +549,7 @@ namespace PanelDrawing.Services.ComponentPlacement
                             }
                             else
                             {
-                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
+                                (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, "REL_CUST");
                                 CommandProcessor.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, PanelConstants.el_ExecFilePath);
                                 CommandProcessor.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, PanelConstants.el_ExecFilePath, CompType);
                                 ApplicationLogger.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
@@ -996,8 +1025,8 @@ namespace PanelDrawing.Services.ComponentPlacement
 
         public static void ComponentsCreatedTextFileCreation()
         {
-            File.WriteAllLines(string.Concat(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.ComponentsCreatedTextFileName), PanelConstants.arrComponentsCreated);
-            //File.WriteAllLines(string.Concat(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.NewSheetDetails), PanelConstants.arrComponentsCreated);
+            string filePath = Path.Combine(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.ComponentsCreatedTextFileName);
+            File.WriteAllLines(filePath, PanelConstants.arrComponentsCreated);
         }
 
         public static void ExitOutputFile(string filepath)
