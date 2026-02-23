@@ -15,31 +15,7 @@ using System.Text.RegularExpressions;
 namespace PanelDrawing.Services.ComponentPlacement
 {
     public class PanelProcessor
-    {
-        public static void InitiateOutPutFile(string el_ExecfilePath)
-        {
-            try
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-
-                if (!File.Exists(el_ExecfilePath))
-                {
-                    File.Create(el_ExecfilePath).Close();
-                }
-                File.WriteAllText(el_ExecfilePath, string.Empty);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"An error occured {ex.Message}");
-            }
-        }
-        
-        public static void ReadLibCatalog()
-        {
-            PanelConstants.libCatalogList = DataReader.LibraryCatalogReader(PanelConstants.Library_File_Path);
-        }       
-
+    {           
         public static (double X, double Y) GetNextEquPosition(string side, double compWidth, double compHeight)
         {
             // Validate
@@ -349,6 +325,7 @@ namespace PanelDrawing.Services.ComponentPlacement
                 ApplicationLogger.Info($"Component {CompDwgName} ({CompType}) started placement");
                 try
                 {
+                    // Populating panel details with the below panelComponentProperties data for the P2 action
                     foreach (var row in PanelConstants.panelDetailsList)
                     {
                         if (row.FromConnector == CompDwgName)
@@ -393,20 +370,12 @@ namespace PanelDrawing.Services.ComponentPlacement
                         continue;*/
 
                         case "TER":
-                            var tbkPins = ConnectorPinService.PinsOfConnector(CompDwgName);
+                            var tbkPins = ConnectorPinService.getPinsOfComponent(CompDwgName);
                             if (tbkPins.Count == 0)
                             {
-                                MessageBox.Show($"{CompDwgName} Pins Not Available");
+                                MessageBox.Show($"{CompDwgName} Pins Not Available, skipping symbol placement");
                                 continue;
                             }
-                            //foreach (var row in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
-                            //{
-                            //    row.Usage = SampleEquPinNumber;
-                            //    row.FromType = CompType;
-                            //    row.GroupId = GroupId;
-                            //    row.WireLength = Wire_Length;
-                            //    row.WireType = Wire_Type;
-                            //}
                             if (string.IsNullOrEmpty(MacroName))
                             {
                                 (CompXdist, CompYdist) = GetNextComponentPosition(CompWidth, CompHeight, CompType);
@@ -421,33 +390,19 @@ namespace PanelDrawing.Services.ComponentPlacement
                                 CommandProcessor.AddSymbol(MacroName, CompDwgName, CompXdist, CompYdist, CompPN, PanelConstants.el_ExecFilePath);
                                 CommandProcessor.AddSymbolAttributes(CompXdist, CompYdist, CompDwgName, CBType_Name, CompPN, PanelConstants.el_ExecFilePath, CompType);
                                 ApplicationLogger.Info($"Custom Component {CompDwgName} ({CompType}) with macro {MacroName} placed at X={CompXdist}, Y={CompYdist}");
-                                //modOPCommand.AddSWTSymbolAttributes(CompXdist, CompYdist, CompPN, Constants.el_ExecFilePath, CompDwgName);
                             }
                             continue;
 
                         case "EQU":
-                            var equPins = ConnectorPinService.PinsOfConnector(CompDwgName);
+                            var equPins = ConnectorPinService.getPinsOfComponent(CompDwgName);
                             PanelConstants.listPinsOfEqu = equPins;
 
                             int NoOfPins = equPins.Count;
                             PanelConstants.txtEquName = CompDwgName;
 
-                            // Update panelDetailsList
-                            //foreach (var row in Constants.panelDetailsList.Where(x => x.FromConnector == CompDwgName))
-                            //{
-                            //    row.Usage = SampleEquPinNumber;
-                            //    row.FromType = CompType;
-                            //    row.GroupId = GroupId;
-                            //    row.WireLength = Wire_Length;
-                            //    row.WireType = Wire_Type;
-                            //}
-
-                            //bool isDouble = CompDwgName.Contains("_J") ||
-                            //    Regex.IsMatch(CompDwgName.Last().ToString(), "[a-hj-np-zA-HJ-NP-Z]");
                             bool isDouble =
                                 Regex.IsMatch(CompDwgName, @"_[Jj](?:[1-9]|1\d|2[0-4])$") ||
                                 Regex.IsMatch(CompDwgName, @"_[A-HJ-NP-Za-hj-np-z]$");
-
 
                             //(CompXdist, CompYdist) = GetNextComponentPosition(80, 100);
                             int CompHeightEQU = (NoOfPins * 4) + 20 + 20;
@@ -513,7 +468,7 @@ namespace PanelDrawing.Services.ComponentPlacement
                             continue;
 
                         case "DIS":
-                            var disPins = ConnectorPinService.PinsOfConnector(CompDwgName);
+                            var disPins = ConnectorPinService.getPinsOfComponent(CompDwgName);
                             if (disPins.Count == 0)
                             {
                                 MessageBox.Show($"{CompDwgName} Pins Not Available");
@@ -978,181 +933,6 @@ namespace PanelDrawing.Services.ComponentPlacement
             }
 
             ApplicationLogger.Info($"P1 Components Placement Completed............");
-        }
-
-        public static void UpdatePanelDetailsTextFile(List<PanelDetailsRow> panelDetailsList)
-        {
-            if (panelDetailsList == null || panelDetailsList.Count == 0)
-                return;
-
-            // Prepare file name
-            PanelConstants.PanelDetailsFullFileName =
-                Path.Combine(PanelConstants.Electre_Temp_Folder_Path,
-                             $"{PanelConstants.textPanelPartNumber}-{PanelConstants.panelDetailsTextFileName}");
-
-            List<string> outputLines = new List<string>();
-
-            foreach (var pd in panelDetailsList)
-            {
-                string[] rowValues =
-                {
-                pd.FromConnector?.Trim() ?? "",
-                pd.FromPin?.Trim() ?? "",
-                pd.ToConnector?.Trim() ?? "",
-                pd.ToPin?.Trim() ?? "",
-                pd.WireCode?.Trim() ?? "",
-                pd.PinX?.Trim() ?? "",
-                pd.PinY?.Trim() ?? "",
-                pd.TPinX?.Trim() ?? "",
-                pd.TPinY?.Trim() ?? "",
-                pd.Usage?.Trim() ?? "",
-                pd.FromType?.Trim() ?? "",
-                pd.ToType?.Trim() ?? "",
-                pd.FromOrientation?.Trim() ?? "",
-                pd.ToOrientation?.Trim() ?? "",
-                pd.GroupId?.Trim() ?? "",
-                pd.WireLength?.Trim() ?? "",
-                pd.WireType?.Trim() ?? "",
-                pd.WireTypeNumber?.Trim() ?? ""
-               };
-                // Join all fields into one CSV row
-                outputLines.Add(string.Join(",", rowValues));
-            }
-
-            // Save lines to file
-            File.WriteAllLines(PanelConstants.PanelDetailsFullFileName, outputLines);
-        }
-
-        public static void ComponentsCreatedTextFileCreation()
-        {
-            string filePath = Path.Combine(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.ComponentsCreatedTextFileName);
-            File.WriteAllLines(filePath, PanelConstants.arrComponentsCreated);
-        }
-
-        public static void ExitOutputFile(string filepath)
-        {
-            using (var writer = File.AppendText(filepath))
-            {
-                writer.WriteLine("GRI ELECTRE_GRID_STH;");
-                writer.WriteLine("FOPEN (TYC+FEXEC+TYC);");
-                writer.WriteLine("FWRITE (TYC+';;'+TYC) ;");
-                writer.WriteLine("FCLOSE;");
-                writer.WriteLine("NOP;");
-                writer.WriteLine(";");
-            }
-        }
-
-        public static List<PanelComponentProperties> GatherPanelComponentProperties(string panelName)
-        {
-           // GatherPanelComponentProperties(panelName);
-            // Clear previous results
-            PanelConstants.panelComponentProperties.Clear();
-
-            // STEP 1: Get all components belonging to panel & having part number
-            var panelComponents = PanelConstants.dataExtractionList
-              //  Constants.dataExtractionListAbove
-                .Where(x => x.Panel == panelName &&
-                            PanelConstants.listComponentsWithPartNumber.Contains(x.ConnectorName))
-                .Select(x => x.ConnectorName)
-                .Distinct()
-                .ToList();
-
-            var GNDcomponents = PanelConstants.dataExtractionList.
-                Where(x =>  x.Panel == panelName && (x.ComponentType == "GND" || x.ComponentType == "GROUND")).Select(x => x.ConnectorName).Distinct().ToList();
-
-            panelComponents.AddRange(GNDcomponents);
-
-            panelComponents = panelComponents.Distinct().ToList();
-
-            foreach (var compName in panelComponents)
-            {
-                // STEP 2: Get all DEAbove rows for this component
-                //var compDEAbove = Constants.dataExtractionListAbove  // commented this line on Dec,1 2025
-                var compDEAbove = PanelConstants.dataExtractionList
-                    .Where(x => x.ConnectorName == compName && x.Panel == panelName)
-                    .ToList();
-
-                // STEP 3: Get associated part numbers
-                var associatedPNs = compDEAbove
-                    .Select(x => x.CoreNumber)     // CoreNumber = PartNumber
-                    .Where(x => !string.IsNullOrEmpty(x)
-                            && (!int.TryParse(x, out int coreNum) || coreNum < 1 || coreNum > 18)) // added extra line on Dec,1 2025
-                    .Distinct()
-                    .ToList();
-
-                // STEP 4: Primary part number
-                string primaryPN = CommandProcessor.GetPrimaryPartNumber(associatedPNs);
-
-                // STEP 5: Get extra properties DEBelow
-                var firstDEBelow = PanelConstants.dataExtractionListBelow
-                    .FirstOrDefault(x => x.ConnectorName == compName &&
-                                         x.Panel == panelName);
-
-                string compType = firstDEBelow?.ComponentType ?? "";
-                string samplePin = firstDEBelow?.PinNumber ?? "";
-                string cbTypeName = firstDEBelow?.EquipmentName ?? "";
-                string cbVoltage = firstDEBelow?.Voltage ?? "";
-                string symbolName = firstDEBelow?.SymbolName ?? "";
-
-                // STEP 6: Shunts (for TBK/TER)
-                var shuntList = "";
-                if (compType == "TBK" || compType == "TER")
-                {
-                    shuntList = string.Join(";",
-                            PanelConstants.dataExtractionListBelow
-                            .Where(x => x.ConnectorName == compName &&
-                                        !string.IsNullOrEmpty(x.Shunt))
-                            .Select(x => $"{x.ConnectorName},{x.PinNumber},{x.FunctionalDesignation},{x.ComponentType},{x.Shunt}"));
-                }             
-
-                // STEP 7: Get info from Library Catalog
-                var lib = PanelConstants.libCatalogList
-                    .FirstOrDefault(x =>
-                        (x.RefInternal ?? "") == primaryPN ||
-                        (x.MandatoryAccessory1 ?? "") == primaryPN //||
-                       // (x.MandatoryAccessory2 ?? "") == primaryPN
-                    );
-
-                string macroName = lib?.Symbol2D ?? "";
-                string maxPins = lib?.MaxPins ?? "";
-                string accessory = lib?.MandatoryAccessory1 ?? "";
-
-                double CompWidth = lib?.CompWidth ?? 0.0;
-                double CompHeight = lib?.CompHeight ?? 0.0;
-                //string acc2 = lib?.MandatoryAccessory2 ?? "";
-
-                // STEP 8: Equipment Box & Looms
-                string equipInfo = compDEAbove.FirstOrDefault()?.EquipmentName ?? "";
-                string loomsInfo = compDEAbove.FirstOrDefault()?.BundleName ?? "";
-
-                // STEP 9: Construct modern object
-                var compProps = new PanelComponentProperties
-                {
-                    ComponentName = compName,
-                    ComponentType = compType,
-                    MacroName = macroName,
-                    MaxPin = maxPins,
-                    PartNumber = primaryPN,
-                    Accessory = $"{accessory}",
-                    SamplePin = samplePin,
-                    GroupId = firstDEBelow?.Group ?? "",
-                    WireLength = firstDEBelow?.Length ?? "",
-                    WireType = firstDEBelow?.CableType ?? "",
-                    CBTypeName = cbTypeName,
-                    SymbolName = symbolName,
-                    CBVoltage = cbVoltage,
-                    AssociatedPartNumbers = string.Join(";", associatedPNs),
-                    EquipmentBox = equipInfo,
-                    Looms = loomsInfo,
-                    ShuntList = shuntList,
-                    CompWidth = CompWidth,
-                    CompHeight = CompHeight
-                };
-
-                PanelConstants.panelComponentProperties.Add(compProps);
-            }        
-            
-            return PanelConstants.panelComponentProperties;
         }
 
         #region // Commented on Jan 27, 2026    

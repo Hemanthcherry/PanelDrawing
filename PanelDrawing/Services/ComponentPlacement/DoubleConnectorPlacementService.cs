@@ -42,14 +42,6 @@ namespace PanelDrawing.Services.ComponentPlacement
             bool isHalfL = info == "cont_sth_half_l" || info == "cont_sth_mg";
             bool isHalfR = info == "cont_sth_half_r" || info == "cont_sth_md";
 
-            //bool isHalfL = info == "cont_sth_half_l";
-            //bool isHalfR = info == "cont_sth_half_r";
-
-            //using (var writer = File.AppendText(Constants.el_ExecFilePath))
-            //{
-            //    writer.WriteLine($"$$ EQU Double Start");
-            //}
-
             //  SEGMENT 1 (HEADER)
             string o1 = isHalfL ? "R" : isHalfR ? "L" : baseOrientation;
             EquSeg1(X0, Y0, PanelConstants.el_ExecFilePath, o1, info);
@@ -80,10 +72,6 @@ namespace PanelDrawing.Services.ComponentPlacement
             {
                 EquipmentBoxSeg(X0,Y0 - Math.Abs(pinStep) * totalPins,X0,Y0,equipmentBoxName,o4,PanelConstants.el_ExecFilePath);
             }
-            //using (var writer = File.AppendText(Constants.el_ExecFilePath))
-            //{
-            //    writer.WriteLine($"$$ EQU Double end");
-            //}
 
             // Mark connector as processed
             PanelConstants.processedItems.Add(baseConnectorName);

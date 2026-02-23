@@ -26,20 +26,15 @@ namespace Panel_Drawing.Forms
                 Application.Exit();
             }
 
-            PanelConstants.panelInfoFilePath =
-                Path.Combine(PanelConstants.Electre_Proj_Path, "templ", "TempFiles", "PanelInfo.txt");
+            PanelConstants.panelInfoFilePath = Path.Combine(PanelConstants.Electre_Proj_Path, "templ", "TempFiles", "PanelInfo.txt");
 
-            PanelConstants.Electre_Temp_Folder_Path =
-                Path.Combine(PanelConstants.Electre_Proj_Path, "templ", "TempFiles");
+            PanelConstants.Electre_Temp_Folder_Path = Path.Combine(PanelConstants.Electre_Proj_Path, "templ", "TempFiles");
 
-            PanelConstants.dataExtractionFilePath =
-                Path.Combine(PanelConstants.Electre_Proj_Path, "schema", "data_extraction.csv");
+            PanelConstants.dataExtractionFilePath = Path.Combine(PanelConstants.Electre_Proj_Path, "schema", "data_extraction.csv");
 
-            PanelConstants.My_Data_File_Path =
-                Path.Combine(PanelConstants.Electre_Proj_Path, "schema", "My_Data.csv");
+            PanelConstants.My_Data_File_Path = Path.Combine(PanelConstants.Electre_Proj_Path, "schema", "My_Data.csv");
 
-            PanelConstants.Elec_Proj_Schem_Folder_Path =
-                Path.Combine(PanelConstants.Electre_Proj_Path, "schem");
+            PanelConstants.Elec_Proj_Schem_Folder_Path = Path.Combine(PanelConstants.Electre_Proj_Path, "schem");
 
             // Read environment variables
             string electreCustomize = Environment.GetEnvironmentVariable("ELECTRE_CUSTOMIZE", EnvironmentVariableTarget.Machine);
@@ -155,20 +150,20 @@ namespace Panel_Drawing.Forms
 
             ApplicationLogger.Info($"Project started. Path = {PanelConstants.Electre_Proj_Path}");
             lstSheetSizes.Enabled = false;
-            PanelProcessor.InitiateOutPutFile(PanelConstants.el_ExecFilePath);
+            PanelUtilities.InitiateOutPutFile(PanelConstants.el_ExecFilePath);
             CommandProcessor.NewSheetWithTB(PanelConstants.el_ExecFilePath, lblPanelNumber.Text, "001", PanelConstants.SheetTemplateName);
-            PanelProcessor.ReadLibCatalog();
-            PanelProcessor.GatherPanelComponentProperties(PanelConstants.textPanelPartName);
+            DataReader.ReadLibCatalog();
+            PanelUtilities.GatherPanelComponentProperties(PanelConstants.textPanelPartName);
             DataReader.ReadPanelDetails();
             PanelProcessor.InitiateStep1();
-            PanelProcessor.ExitOutputFile(PanelConstants.el_ExecFilePath);
+            PanelUtilities.ExitOutputFile(PanelConstants.el_ExecFilePath);
             PanelUtilities.CreateTemp_El_Exec_File(PanelConstants.El_Exec_Temp_P1);
             PanelUtilities.CloseVbsFiles(PanelConstants.Custom_Programs_File);//C:\ELECTRE\electre_customize\system\Custom_Programs.vbs
             // modMain.UpdatePanelDetailsTextFile(Constants.arrPanelDetails);
-            PanelProcessor.UpdatePanelDetailsTextFile(PanelConstants.panelDetailsList); 
+            PanelUtilities.UpdatePanelDetailsTextFile(PanelConstants.panelDetailsList); 
             PanelConstants.arrComponentsCreated = new string[1];
             PanelConstants.arrComponentsCreated[0] = string.Concat(lblPanelNumber.Text, PanelConstants.strComma, txtPanelName.Text, PanelConstants.strComma, lstSheetSizes.SelectedItem, PanelConstants.strComma, txtSize.Text, PanelConstants.strComma, txtWidth.Text, PanelConstants.strComma, txtHeight.Text);
-            PanelProcessor.ComponentsCreatedTextFileCreation();
+            PanelUtilities.ComponentsCreatedTextFileCreation();
             MessageBox.Show("Panel Component Process Completed", PanelConstants.PD_Title,MessageBoxButtons.OK,MessageBoxIcon.Information);
             this.Close();
         }
@@ -189,13 +184,13 @@ namespace Panel_Drawing.Forms
                 return;
             }
             lstSheetSizes.Enabled = false;
-            PanelProcessor.InitiateOutPutFile(PanelConstants.el_ExecFilePath);//Create el_exec file
+            PanelUtilities.InitiateOutPutFile(PanelConstants.el_ExecFilePath);//Create el_exec file
             DataReader.LoadMyDataFile(PanelConstants.My_Data_File_Path);
             DataReader.ReadPanelDetails();
             WiringDataMappingService.AssignOrientation();
             WiringDataMappingService.CoordinatesToPDPin();
             WireRouter.DrawWireLine();
-            PanelProcessor.UpdatePanelDetailsTextFile(PanelConstants.panelDetailsList); // Update PanelDetails file
+            PanelUtilities.UpdatePanelDetailsTextFile(PanelConstants.panelDetailsList); // Update PanelDetails file
             // modMain.ExitOutputFile(Constants.el_ExecFilePath);//Generate OutputFile and Exit
             PanelUtilities.CreateTemp_El_Exec_File(PanelConstants.El_Exec_Temp_P2);
             PanelUtilities.CloseVbsFiles(PanelConstants.Custom_Programs_File);

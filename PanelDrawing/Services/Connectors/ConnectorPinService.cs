@@ -11,10 +11,10 @@ namespace PanelDrawing.Services.Connectors
 {
     public class ConnectorPinService
     {
-        public static bool ValidateFileSelection(string filePath)
-        {
-            return File.Exists(filePath);
-        }
+        //public static bool ValidateFileSelection(string filePath)
+        //{
+        //    return File.Exists(filePath);
+        //}
 
         public static bool SearchAndAppend(string istrName, List<string> list)
         {
@@ -27,7 +27,7 @@ namespace PanelDrawing.Services.Connectors
             return true;
         }
       
-        public static List<string> PinsOfConnector(string connector)
+        public static List<string> getPinsOfComponent(string connector)
         {
             if (string.IsNullOrWhiteSpace(connector))
                 return new List<string>();

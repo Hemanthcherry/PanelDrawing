@@ -57,7 +57,7 @@ namespace PanelDrawing.Services.Wiring
 
                     PanelConstants.sPanelEQUori_File = filePath;
 
-                    if (!ConnectorPinService.ValidateFileSelection(filePath))
+                    if (!File.Exists(filePath))
                     {
                         Console.WriteLine($"{filePath} - PanelOri file is missing");
                         continue;
@@ -112,12 +112,6 @@ namespace PanelDrawing.Services.Wiring
                         md.ConnectorName == pd.ToConnector &&
                         md.PinNumber == pd.ToPin && string.Equals(md.Column22, PanelConstants.textPanelPartNumber, StringComparison.OrdinalIgnoreCase))
                     {
-                        //if (md.ComponentType == "TBK" && !string.IsNullOrEmpty(pd.FromOrientation) && pd.FromOrientation != md.Orientation &&
-                        //Constants.MyDataList.Count(x => x.ConnectorName == md.ConnectorName && x.PinNumber == md.PinNumber && x.Column22 == Constants.textPanelPartNumber) > 1)
-                        //{
-                        //    continue;
-                        //}
-
                         if (md.ComponentType == "TBK")
                         {
                             if (!string.IsNullOrEmpty(pd.ToOrientation) &&
@@ -143,11 +137,6 @@ namespace PanelDrawing.Services.Wiring
                         md.ConnectorName == pd.FromConnector &&
                         md.PinNumber == pd.FromPin && string.Equals(md.Column22, PanelConstants.textPanelPartNumber, StringComparison.OrdinalIgnoreCase))
                     {
-                        //if (md.ComponentType == "TBK" && !string.IsNullOrEmpty(pd.ToOrientation) && pd.ToOrientation != md.Orientation &&
-                        //Constants.MyDataList.Count(x => x.ConnectorName == md.ConnectorName && x.PinNumber == md.PinNumber && x.Column22 == Constants.textPanelPartNumber) > 1)
-                        //{
-                        //    continue;
-                        //}
                         if (md.ComponentType == "TBK")
                         {
                             if (!string.IsNullOrEmpty(pd.FromOrientation) &&
@@ -176,7 +165,7 @@ namespace PanelDrawing.Services.Wiring
                 {
                     pd.Usage = "1";
 
-                    DeactivateRepetitiveConnections(pd.ToConnector,pd.ToPin, pd.FromConnector, pd.FromPin);
+                    //DeactivateRepetitiveConnections(pd.ToConnector,pd.ToPin, pd.FromConnector, pd.FromPin);
                 }
                 else
                 {
@@ -205,19 +194,19 @@ namespace PanelDrawing.Services.Wiring
             }
         }
 
-        private static void DeactivateRepetitiveConnections(string FC, string FP, string TC, string TP)
-        {
-            foreach (var md in PanelConstants.MyDataList)
-            {
-                if (md.ConnectorName == FC &&      // FromConnector
-                    md.PinNumber == FP &&      // FromPin
-                    md.ConnectorName == TC &&      // ToConnector  (NOTE: original code reused same array!)
-                    md.PinNumber == TP)        // ToPin
-                {
-                    md.Usage = "2";       // Usage column
-                    break;
-                }
-            }
-        }       
+        //private static void DeactivateRepetitiveConnections(string FC, string FP, string TC, string TP)
+        //{
+        //    foreach (var md in PanelConstants.MyDataList)
+        //    {
+        //        if (md.ConnectorName == FC &&      // FromConnector
+        //            md.PinNumber == FP &&      // FromPin
+        //            md.ConnectorName == TC &&      // ToConnector  (NOTE: original code reused same array!)
+        //            md.PinNumber == TP)        // ToPin
+        //        {
+        //            md.Usage = "2";       // Usage column
+        //            break;
+        //        }
+        //    }
+        //}       
     }
 }
