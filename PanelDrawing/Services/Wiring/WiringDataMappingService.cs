@@ -53,7 +53,7 @@ namespace PanelDrawing.Services.Wiring
 
                 if (ConnectorPinService.SearchAndAppend(PanelConstants.txtEquName, processedEquList))
                 {
-                    string filePath =  $"{PanelConstants.Electre_Temp_Folder_Path}{PanelConstants.textPanelPartNumber} - {PanelConstants.txtEquName} - PanelEquOri.txt";
+                    string filePath =  $"{PanelConstants.Electre_Temp_Folder_Path}\\{PanelConstants.textPanelPartNumber} - {PanelConstants.txtEquName} - PanelEquOri.txt";
 
                     PanelConstants.sPanelEQUori_File = filePath;
 

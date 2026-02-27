@@ -306,8 +306,13 @@ namespace PanelDrawing.Services.ComponentPlacement
                     // PRIORITY 2: DIS Components
                     if (c.ComponentType == "DIS") return 2;
 
+                    if (c.ComponentType == "TBK") return 3;
+
+                    if (c.ComponentType == "REL") return 4;
+
+
                     // PRIORITY 3: Everything else
-                    return 3;
+                    return 5;
                 })
                 .ThenBy(c => c.ComponentType) // Group remaining types together
                 .ThenBy(c => c.ComponentName) // Ensure alphabetical order within groups
