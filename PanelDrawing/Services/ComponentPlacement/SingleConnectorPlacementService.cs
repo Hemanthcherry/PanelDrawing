@@ -24,7 +24,7 @@ namespace PanelDrawing.Services.ComponentPlacement
             int numberOfPins = 0;
             if (string.IsNullOrWhiteSpace(iNumberOfMaxPins) || !int.TryParse(iNumberOfMaxPins.Trim(), out numberOfPins))
             {
-                numberOfPins = 0; // fallback (same as your old code)
+                numberOfPins = 0;
             }
 
             int l = 0;
@@ -40,10 +40,10 @@ namespace PanelDrawing.Services.ComponentPlacement
                 IsFullConnector = "yes";
             }
 
-            // keep same call so existing seg methods will handle file writing
+            // Header
             EquSeg1(X0, Y0, Ori, "Full", iEquName, PanelConstants.el_ExecFilePath);
 
-            // iterate pins with original indexing (1 .. T-1)
+            // Pins
             for (int i = 0; i < arrPins.Count; i++)
             {
                 double yPin = Y0 + incre_y * (I - 1) + l - 4;

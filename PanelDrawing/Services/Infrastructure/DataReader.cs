@@ -333,6 +333,10 @@ namespace PanelDrawing.Services.Infrastructure
             return list;
         }
 
+        public static void ReadLibCatalog()
+        {
+            PanelConstants.libCatalogList = DataReader.LibraryCatalogReader(PanelConstants.Library_File_Path);
+        }
         private static char DetectDelimiter(string headerLine)
         {
             int commaCount = headerLine.Split(',').Length;

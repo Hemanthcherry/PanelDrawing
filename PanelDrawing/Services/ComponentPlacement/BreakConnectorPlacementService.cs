@@ -44,9 +44,6 @@ namespace PanelDrawing.Services.ComponentPlacement
 
                 if (match2 != null)
                     info = match2.SymbolName?.Trim() ?? "";
-
-                // shift X left by 8 
-                X0 -= 8;
             }
 
             // 3. Convert info → orientation
@@ -81,25 +78,25 @@ namespace PanelDrawing.Services.ComponentPlacement
             //        .Select(row => row.ConnectorName)
             //        .FirstOrDefault();
             //}
-            string siblingConnector =
-            PanelConstants.dataExtractionListBelow
-                .Where(row =>
-                    !string.IsNullOrEmpty(row.ConnectorName) &&
-                    row.ConnectorName.StartsWith(baseName, StringComparison.OrdinalIgnoreCase) &&
-                    !row.ConnectorName.Equals(CompName, StringComparison.OrdinalIgnoreCase) &&
-                    row.Panel.Equals(PanelConstants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
-                .Select(row => row.ConnectorName)
-                .FirstOrDefault();
+
+            string siblingConnector = PanelConstants.dataExtractionListBelow
+                                        .Where(row =>
+                                            !string.IsNullOrEmpty(row.ConnectorName) &&
+                                            row.ConnectorName.StartsWith(baseName, StringComparison.OrdinalIgnoreCase) &&
+                                            !row.ConnectorName.Equals(CompName, StringComparison.OrdinalIgnoreCase) &&
+                                            row.Panel.Equals(PanelConstants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
+                                        .Select(row => row.ConnectorName)
+                                        .FirstOrDefault();
 
 
             int incre = -4;
-            int T = arrpinsCollection.Count;
+            int pinCount = arrpinsCollection.Count;
 
             // Draw DIS Header
             DisSeg1(X0, Y0, PanelConstants.el_ExecFilePath, orientation);
 
             // Draw each pin segment
-            for (int i = 0; i < arrpinsCollection.Count; i++)
+            for (int i = 0; i < pinCount; i++)
             {
                 DisSeg2(X0, Y0 + incre * i, arrpinsCollection[i], PanelConstants.el_ExecFilePath, orientation, baseName, CompName, siblingConnector);
             }
@@ -108,7 +105,7 @@ namespace PanelDrawing.Services.ComponentPlacement
             DisSeg3(X0, Y0, incre * iNumberOfPins, PanelConstants.el_ExecFilePath, orientation);
 
             // Draw rectangle (DisSeg4)
-            DisSeg4(X0, Y0 - Math.Abs(incre) * T - 6, X0, Y0, CompName, PanelConstants.el_ExecFilePath, orientation, partnumber, assopns, baseName);
+            DisSeg4(X0, Y0 - Math.Abs(incre) * pinCount - 6, X0, Y0, CompName, PanelConstants.el_ExecFilePath, orientation, partnumber, assopns, baseName);
 
             // Draw footer
             DisSeg5(X0, Y0 + incre * iNumberOfPins, PanelConstants.el_ExecFilePath, orientation);
@@ -116,7 +113,7 @@ namespace PanelDrawing.Services.ComponentPlacement
             // Equipment Box
             if (!string.IsNullOrWhiteSpace(DisEquipmentBoxRefName) && DisEquipmentBoxRefName != "+" && !DisEquipmentBoxRefName.Equals("LOC", StringComparison.OrdinalIgnoreCase))
             {
-                DISSegEquipmentBox(X0, Y0 - Math.Abs(incre) * T, X0, Y0, DisEquipmentBoxRefName, orientation, PanelConstants.el_ExecFilePath);
+                DISSegEquipmentBox(X0, Y0 - Math.Abs(incre) * pinCount, X0, Y0, DisEquipmentBoxRefName, orientation, PanelConstants.el_ExecFilePath);
             }
 
             // Mark as processed
