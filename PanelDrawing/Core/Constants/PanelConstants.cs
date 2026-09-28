@@ -57,7 +57,7 @@ namespace PanelDrawing.Core.Constants
         // Coordinates section end
 
         public static double WiringOffset = 0;
-        public static List<string> fromConnectorProcessed_P2 = new List<string>();
+        public static HashSet<string> fromConnectorProcessed_P2 = new HashSet<string>(StringComparer.Ordinal);
 
         public static HashSet<double> UsedX3Values = new HashSet<double>();
 
@@ -109,33 +109,6 @@ namespace PanelDrawing.Core.Constants
         public const string El_Exec_Temp_P1 ="el_exec_temp_P1";
         public const string El_Exec_Temp_P2 = "el_exec_temp_P2";
         public const char dashMark = '-';
-        //public const char frontslash = '\';
-        public const int colBI_UserSheetName = 6;
-        public const int colBI_Width = 4;
-        public const int colBI_Height = 5;
-        public const int colBI_Size = 2;
-        public const int colBI_ProgSheetName = 1;
-        //Data Extraction Xl File Columns 
-        public const int colDE_Connector = 7;
-        public const int colDE_Panels = 29;
-        public const int colDE_EquipmentBox = 6;
-        public const int colDE_Looms = 5;
-        public const int colDE_Info = 11;
-        public const int colDE_PartNumber = 25;
-        public const int colDE_TBKTER_Shunt_Value = 24;
-        public const int colDE_Type = 12;
-        public const int colDE_CBType_Name = 6;
-        public const int colDE_CBType_Voltage = 28;
-        public const int colDE_PinNumber = 8;
-        public const int colDE_WireCode = 13;//wire code in DE
-        public const int colDE_GroupId = 14;//14 col data will store here from data extraction excel file 
-        public const int colDE_Wire_Type = 16;//16 col data will store here from data extraction excel file
-        public const int colDE_Wire_Length = 17;//17 col data will store here from data extraction excel file
-        //Lib Xl File Columns 
-        public const int colLibCatalog_Accessory = 10;
-        public const int colLibCatalog_InternalPartNumber = 3;
-        public const int colLibCatalog_Macro = 1;
-        public const int ColLibCatalog_MaxPin = 8;
         public const int temp_rownum = 9999;
         public const int arrPanelComponentsPropertiesMaxCols = 16;//changed 7 to 10
         public const int WireSpacing_X = 5;
@@ -158,126 +131,13 @@ namespace PanelDrawing.Core.Constants
         public static string txtEquName = string.Empty;
         public static string SheetTemplateName=string.Empty;
         public static string PanelDetailsFullFileName = string.Empty;
-        public static string strPDlines = string.Empty;
-        public static string strAssosiatePNinfo = string.Empty;
-        public static string[] arrUpdatedPanelDetails;
-        public static bool bIsComponentPlaced = false;
-        // public static string[] arrPinsOfEqu;
-        public static List<string> listPinsOfEqu;
-        public static string[] arrComponentsCreated;
-        public static string[,] arrBorderInfo;
-        public static string[] arrInfo;
-        // public static string[] arrPanelInfo;
-        public static string[,] arrSlantSPL;
-        public static string[] arrCompNameForWireOffset;
-        public static string[] arrCountForWireOffset;
-        public static string[] arrSlantJUN;
-        public static int SlantSPL_RowCounter;
-        public static string[,] arrDEabove;
-        public static string strDEPanelaboveAssosiatePNList;
-        public static string strDEBelowTERTBK_Shunt_List;
-        public static string[,] arrDEbelow;
-        public static string[,] arrTableOfLibCatalog;
-        public static string[,] arrPanelComponentsProperties;
-        public static string[,] arrPanelDetails;
-        public static List<string> lstInfo;
-        public static List<string> remainingItems;
-        public static List<string> processedItems;
-        public static string[,] arr2Dinfo;
-        public static string[] arrOriPininfo;
-        public static string[] arrPanels;//= new string[10];
-        public static string[] arrComponents;
-        public static string[] arrComponentsWithPartNumber;
-        public static string[] arrComponentsWitOuthPartNumber;
-        public static string[] arrDEWireTypes;
-        public static string[] arrTemp;
-        public static List<string> lst_Size_Width_Height_Info;
-        public static List<string> lst_Border_Info;
-        public static List<string> lst_Orientation_Info;
-        public static List<string> lst_WireCodes_Info_Processed;
-        public static string[,] arr_My_Data;
+        public static List<string>? listPinsOfEqu;
+        public static string[]? arrComponentsCreated;
+        public static List<string>? lstInfo;
+        public static List<string>? remainingItems;
+        public static List<string>? processedItems;
+        public static HashSet<string> lst_WireCodes_Info_Processed = new HashSet<string>(StringComparer.Ordinal);
 
-        // Wires Variables
-        //public const int colLibCatalog_Macro = 1;
-        //public const int colLibCatalog_InternalPartNumber = 3;
-        //public const int colLibCatalog_Accessory = 10;
-        //public const int ColLibCatalog_MaxPin = 8;
-        public const int colMD_PinX = 19;//changed 19 to 17 
-        public const int colMD_PinY = 20;// changed 20 to 18
-        public const int colMD_TextX = 17;
-        public const int colMD_TextY = 18;
-        public const int colMD_Connector = 2;
-        public const int colMD_PinNumber = 3;
-        public const int colMD_Type = 5;
-        public const int colMD_SheetName = 22;
-
-        public const int colPD_F_Connector = 1;
-        public const int colPD_F_Pin = 2;
-        public const int colPD_T_Connector = 3;
-        public const int colPD_T_Pin = 4;
-        public const int colPD_WireCode = 5;
-        public const int colPD_F_PinX = 6;
-        public const int colPD_F_PinY = 7;
-        public const int colPD_T_PinX = 8;
-        public const int colPD_T_PinY = 9;
-        public const int colPD_Usage = 10;
-        public const int colPD_F_Type = 11;
-        public const int colPD_T_Type = 12;
-        public const int colPD_F_Ori = 13;
-        public const int colPD_T_Ori = 14;
-        public const int colPD_F_GroupId = 15;//14 col data will store here from data extraction excel file 
-        public const int colPD_F_Wire_Length = 16;//17 col data will store here from data extraction excel file
-        public const int colPD_F_Wire_Type = 17;//16 col data will store here from data extraction excel file
-        public const int colPD_F_Wire_Type_Number = 18;//16 col data will store here from data extraction excel file
-        public const int colPD_Max_Columns = 18;//Panel Details max columns defined here
-        public static int Sample_Equ_Left_Cur_Height_Count = 1;
-        public static int Sample_Equ_Right_Cur_Height_Count = 1;
-        public static int CB_Cur_Height_Count = 1;
-        public static int SWT_Cur_Height_Count = 1;
-        public static int DIS_Cur_Height_Count = 1;
-        public static int Cur_Height_Incre_Count = 0;
-        public static int Simple_EQU_Right_Cur_Height_Decre_Count = 0;
-        public static int Simple_EQU_Left_Cur_Height_Incre_Count = 0;
-        public static int CB_Cur_Height_Incre_Count = 0;
-        public static int CB_Cur_Width_Incre_Count = 0;
-        public static int SWT_Cur_Height_Incre_Count = 0;
-        public static int SWT_Cur_Width_Incre_Count = 0;
-
-        public static int DIS_Cur_Height_Incre_Count = 0;
-        public static int CB_Cur_Height_Decre_Count = 0;
-        public static int SWT_Cur_Height_Decre_Count = 0;
-        public static int DIS_Cur_Height_Decre_Count = 0;
-        public static int Simple_EQU_Cur_Height_Incre_Count = 0;
-        public static int TBK_Cur_Height_Decre_Count = 0;
-        public static int TBK_Height_Temp_Decre_Count = 0;
-        public static int TBK_Cur_Width_Incre_Count = 0;
-        public static int Simple_EQU_Right_CON_Height_Decre_Count = 0;
-        public static int SPL_Cur_Height_Incre_Count = 0;
-        public static int SPL_Height_Decre_Count = 0;
-        public static int SPL_Cur_Width_Incre_Count = 0;
-        public static int DTC_Cur_Width_Incre_Count = 0;
-        public static int DTC_Cur_Height_Decre_Count = 0;
-        public static int DTC_Cur_Height_Count = 0;
-        public static int RELMSW_Cur_Height_Count = 0;
-        public static int RELMSW_Cur_Height_Decre_Count = 0;
-        public static int RELMSW_Cur_Width_Incre_Count = 0;
-        public static int IND_Cur_Width_Incre_Count = 0;
-        public static int IND_Cur_Height_Decre_Count = 0;
-
-        public static int BUS_Cur_Width_Incre_Count = 0;
-        public static int BUS_Cur_Height_Decre_Count = 0;
-
-        public static int ANT_Cur_Width_Incre_Count = 0;
-        public static int ANT_Cur_Height_Decre_Count = 0;
-
-        public static int DD_Cur_Width_Incre_Count = 0;
-        public static int DD_Cur_Height_Decre_Count = 0;
-
-        public static int FUS_Cur_Width_Incre_Count = 0;
-        public static int FUS_Cur_Height_Decre_Count = 0;
-
-        public static int ERM_Cur_Width_Incre_Count = 0;
-        public static int ERM_Cur_Height_Decre_Count = 0;
         //public static int Remove_Wire_OverLap_Add_Count = 2;//To remove the over lap issue adding count 2 for average of x coordinate for each wire required
 
         public static string GetWireSymbol(string wire_Type)

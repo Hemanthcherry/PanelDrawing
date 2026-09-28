@@ -28,7 +28,7 @@ namespace PanelDrawing.Services.ComponentPlacement
             }
 
             int l = 0;
-            arrPins = PanelConstants.listPinsOfEqu;
+            arrPins = PanelConstants.listPinsOfEqu ?? new List<string>();
 
             // The VB6 code used "T - 1" checks repeatedly; replicate those semantics
             if (arrPins.Count - 1 < numberOfPins)

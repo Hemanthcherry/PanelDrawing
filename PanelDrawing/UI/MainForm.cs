@@ -37,10 +37,9 @@ namespace Panel_Drawing.Forms
             PanelConstants.Elec_Proj_Schem_Folder_Path = Path.Combine(PanelConstants.Electre_Proj_Path, "schem");
 
             // Read environment variables
-            string electreCustomize = Environment.GetEnvironmentVariable("ELECTRE_CUSTOMIZE", EnvironmentVariableTarget.Machine);
-            string borderFile = Environment.GetEnvironmentVariable("Border_File", EnvironmentVariableTarget.Machine);
-            string libFile = Environment.GetEnvironmentVariable("Lib_File", EnvironmentVariableTarget.Machine);
-            string userName = Environment.GetEnvironmentVariable("USERNAME", EnvironmentVariableTarget.Process);
+            string? electreCustomize = Environment.GetEnvironmentVariable("ELECTRE_CUSTOMIZE", EnvironmentVariableTarget.Machine);
+            string? borderFile = Environment.GetEnvironmentVariable("Border_File", EnvironmentVariableTarget.Machine);
+            string? libFile = Environment.GetEnvironmentVariable("Lib_File", EnvironmentVariableTarget.Machine);
 
             // Validate main path
             if (string.IsNullOrWhiteSpace(electreCustomize))
@@ -102,7 +101,7 @@ namespace Panel_Drawing.Forms
 
             foreach (var border in borderInfoList)
             {
-                lstSheetSizes.Items.Add(border.Description);
+                lstSheetSizes.Items.Add(border.Description ?? string.Empty);
             }
             #endregion
 
@@ -211,17 +210,17 @@ namespace Panel_Drawing.Forms
                 MessageBox.Show("Please select a size first.");
                 return;
             }
-            string selectedSize = lstSheetSizes.SelectedItem.ToString();
+            string selectedSize = lstSheetSizes.SelectedItem.ToString() ?? string.Empty;
 
             List<BorderInfo> selectedItem = PanelConstants.borderInfoList.Where(b => b.Description == selectedSize).ToList();
 
             if (selectedItem.Count > 0)
             {
                 BorderInfo border = selectedItem[0];
-                PanelConstants.SheetTemplateName = border.Template;
-                txtSize.Text = border.Size;
-                txtWidth.Text = border.Width;
-                txtHeight.Text = border.Height;
+                PanelConstants.SheetTemplateName = border.Template ?? string.Empty;
+                txtSize.Text = border.Size ?? string.Empty;
+                txtWidth.Text = border.Width ?? string.Empty;
+                txtHeight.Text = border.Height ?? string.Empty;
                 PanelConstants.SheetHeight = Convert.ToInt16(txtHeight.Text);
                 PanelConstants.SheetWidth = Convert.ToInt16(txtWidth.Text);
                 PanelConstants.SheetSize = txtSize.Text;

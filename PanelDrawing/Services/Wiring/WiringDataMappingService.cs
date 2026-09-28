@@ -12,10 +12,10 @@ namespace PanelDrawing.Services.Wiring
 
             foreach (var row in PanelConstants.panelDetailsList)
             {
-                string fromConnector = row.FromConnector;
-                string toConnector = row.ToConnector;
-                string fromType = row.FromType;
-                string toType = row.ToType;
+                string? fromConnector = row.FromConnector;
+                string? toConnector = row.ToConnector;
+                string? fromType = row.FromType;
+                string? toType = row.ToType;
 
                 if (fromType == "TBK")
                 {
@@ -48,7 +48,7 @@ namespace PanelDrawing.Services.Wiring
 
                 if (fromType == "EQU")
                 {
-                    PanelConstants.txtEquName = fromConnector;
+                    PanelConstants.txtEquName = fromConnector ?? string.Empty;
                 }
 
                 if (ConnectorPinService.SearchAndAppend(PanelConstants.txtEquName, processedEquList))

@@ -136,8 +136,8 @@ namespace Panel_Drawing.Forms
 
             using (StreamWriter writer = new StreamWriter(PanelConstants.sPanelEQUori_File))
             {
-                Export_PanelEquOri(writer, (string)grdOriInfo[1, 0].Value?.ToString(), "L");
-                Export_PanelEquOri(writer, (string)grdOriInfo[1, 1].Value?.ToString(), "R");
+                Export_PanelEquOri(writer, grdOriInfo[1, 0].Value?.ToString() ?? string.Empty, "L");
+                Export_PanelEquOri(writer, grdOriInfo[1, 1].Value?.ToString() ?? string.Empty, "R");
                 //Export_PanelEquOri(writer, (string)grdOriInfo[1, 2].Value?.ToString(), "T");
                 //Export_PanelEquOri(writer, (string)grdOriInfo[1, 3].Value?.ToString(), "B");
             }
@@ -157,7 +157,7 @@ namespace Panel_Drawing.Forms
                 }
                 else
                 {
-                    PanelConstants.remainingItems.Add(listBox.Items[i].ToString());
+                    PanelConstants.remainingItems.Add(listBox.Items[i].ToString() ?? string.Empty);
                 }
             }
 

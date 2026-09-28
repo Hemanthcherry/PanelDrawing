@@ -94,13 +94,13 @@ namespace PanelDrawing.Services.Infrastructure
 
             PanelConstants.listPanels = PanelConstants.dataExtractionList
                .Where(x => !string.IsNullOrEmpty(x.Panel))
-               .Select(x => x.Panel)
+               .Select(x => x.Panel!)
                .Distinct()
                .ToList();
 
             PanelConstants.listComponents = PanelConstants.dataExtractionList
                 .Where(x => !string.IsNullOrEmpty(x.ConnectorName))
-                .Select(x => x.ConnectorName)
+                .Select(x => x.ConnectorName!)
                 .Distinct()
                 .ToList();
 
@@ -113,8 +113,8 @@ namespace PanelDrawing.Services.Infrastructure
             //     .ToList();
 
             PanelConstants.listComponentsWithPartNumber = PanelConstants.dataExtractionListBelow
-                .Where(x => !string.IsNullOrEmpty(x.ConnectorName) && x.Panel.Equals(PanelConstants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
-                .Select(x => x.ConnectorName)
+                .Where(x => !string.IsNullOrEmpty(x.ConnectorName) && x.Panel?.Equals(PanelConstants.textPanelPartName, StringComparison.OrdinalIgnoreCase) == true)
+                .Select(x => x.ConnectorName!)
                 .Distinct()
                 .ToList();
 
@@ -195,7 +195,7 @@ namespace PanelDrawing.Services.Infrastructure
         {
             var list = new List<LibraryCatalog>();
 
-            string[] lines = null;
+            string[]? lines = null;
             try
             {
                 lines = File.ReadAllLines(filePath);
@@ -225,6 +225,9 @@ namespace PanelDrawing.Services.Infrastructure
                 Application.Exit();
                 Environment.Exit(1);
             }
+            if (lines is null)
+                return list;
+
             // Detect delimiter from header row
             char delimiter = DetectDelimiter(lines[0]);
 

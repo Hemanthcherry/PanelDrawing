@@ -110,7 +110,7 @@ namespace PanelDrawing.Core.Utilities
         public static void ComponentsCreatedTextFileCreation()
         {
             string filePath = Path.Combine(PanelConstants.Electre_Temp_Folder_Path, PanelConstants.ComponentsCreatedTextFileName);
-            File.WriteAllLines(filePath, PanelConstants.arrComponentsCreated);
+            File.WriteAllLines(filePath, PanelConstants.arrComponentsCreated ?? Array.Empty<string>());
         }
 
         public static void ExitOutputFile(string filepath)
@@ -136,7 +136,7 @@ namespace PanelDrawing.Core.Utilities
             var panelComponents = PanelConstants.dataExtractionList
                 //  Constants.dataExtractionListAbove
                 .Where(x => x.Panel == panelName &&
-                            PanelConstants.listComponentsWithPartNumber.Contains(x.ConnectorName))
+                            PanelConstants.listComponentsWithPartNumber.Contains(x.ConnectorName ?? string.Empty))
                 .Select(x => x.ConnectorName)
                 .Distinct()
                 .ToList();
@@ -161,6 +161,7 @@ namespace PanelDrawing.Core.Utilities
                     .Select(x => x.CoreNumber)     // CoreNumber = PartNumber
                     .Where(x => !string.IsNullOrEmpty(x)
                             && (!int.TryParse(x, out int coreNum) || coreNum < 1 || coreNum > 18)) // corenumber and part number is in same column, so get only part number as corenumber is 1 to 18
+                    .Select(x => x!)
                     .Distinct()
                     .ToList();
 
@@ -251,65 +252,6 @@ namespace PanelDrawing.Core.Utilities
             }
         }
 
-        #region // Commented old code on Jan 27, 2026
-        //public static string[,] Conver1DArrayto2DArray(string[] OneDimArray, string fileName)
-        //{
-        //    int rows = OneDimArray.Length;
-        //    int cols = 0;
-        //    string fileExtention = string.Empty;
-        //    fileExtention = Path.GetExtension(fileName).Trim();
-        //    if (fileExtention.Equals(".txt", StringComparison.CurrentCultureIgnoreCase))
-        //    { cols = OneDimArray[0].Split(",").Count(); }
-        //    else if (fileExtention.Equals(".csv", StringComparison.CurrentCultureIgnoreCase))
-        //    { cols = OneDimArray[0].Split(";").Count(); }
-        //    //NOTE :This BELOW  Only for PanelDetails.txt file not applicable for other text files,pls be causion - START 
-        //    int colincrese = 0; int totalcols = 0;
-        //    if (fileExtention.Equals(".txt", StringComparison.CurrentCultureIgnoreCase) && fileName.Contains(Constants.panelDetailsTextFileName, StringComparison.CurrentCultureIgnoreCase))
-        //    {
-        //        colincrese = Constants.colPD_Max_Columns - cols;
-        //        totalcols = cols + colincrese;
-        //    }
-        //    //NOTE :This BELOW  Only for PanelDetails.txt file not applicable for other text files,pls be causion - END
-        //    if (fileExtention.Equals(".txt", StringComparison.CurrentCultureIgnoreCase) && fileName.Contains(Constants.panelDetailsTextFileName, StringComparison.CurrentCultureIgnoreCase))
-        //    {
-        //        Constants.arr2Dinfo = new string[rows, totalcols];
-        //    }
-        //    else
-        //        Constants.arr2Dinfo = new string[rows, cols];
-        //    try
-        //    {
-        //        Cursor.Current = Cursors.WaitCursor;
-        //        for (int r = 0; r <= rows - 1; r++)
-        //        {
-        //            if (fileExtention.Equals(".txt"))
-        //            { Constants.arrInfo = OneDimArray[r].Trim().Split(","); }
-        //            else if (fileExtention.Equals(".csv"))
-        //            { Constants.arrInfo = OneDimArray[r].Trim().Split(";"); }
-        //            for (int col = 0; col <= cols - 1; col++)
-        //            {
-        //                Constants.arr2Dinfo[r, col] = Constants.arrInfo[col];
-        //            }
-        //            //NOTE :This BELOW  Only for PanelDetails.txt file not applicable for other text files,pls be causion - START 
-        //            if (fileExtention.Equals(".txt", StringComparison.CurrentCultureIgnoreCase) && fileName.Contains(Constants.panelDetailsTextFileName, StringComparison.CurrentCultureIgnoreCase))
-        //            {
-        //                for (int clmn = cols; clmn <= totalcols-1; clmn++)
-        //                {
-        //                    Constants.arr2Dinfo[r, clmn] = string.Empty;
-        //                }
-
-        //            }
-        //            //NOTE :This BELOW  Only for PanelDetails.txt file not applicable for other text files,pls be causion - END
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show(ex.Message);
-        //        return null;
-        //    }
-        //    Cursor.Current = Cursors.Default;
-        //    return Constants.arr2Dinfo;
-        //}
-        #endregion
     }
 }
 

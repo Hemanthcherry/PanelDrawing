@@ -17,7 +17,7 @@ namespace PanelDrawing.Services.ComponentPlacement
             string baseName = CompName.Length > 2 ? CompName[..^2] : CompName;
 
             // If already processed → exit
-            if (PanelConstants.processedItems.Contains(baseName))
+            if (PanelConstants.processedItems?.Contains(baseName) == true)
                 return;
 
             // Orientation lookup result
@@ -84,9 +84,9 @@ namespace PanelDrawing.Services.ComponentPlacement
                                             !string.IsNullOrEmpty(row.ConnectorName) &&
                                             row.ConnectorName.StartsWith(baseName, StringComparison.OrdinalIgnoreCase) &&
                                             !row.ConnectorName.Equals(CompName, StringComparison.OrdinalIgnoreCase) &&
-                                            row.Panel.Equals(PanelConstants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
+                                            row.Panel?.Equals(PanelConstants.textPanelPartName, StringComparison.OrdinalIgnoreCase) == true)
                                         .Select(row => row.ConnectorName)
-                                        .FirstOrDefault();
+                                        .FirstOrDefault() ?? string.Empty;
 
 
             int incre = -4;
@@ -117,7 +117,7 @@ namespace PanelDrawing.Services.ComponentPlacement
             }
 
             // Mark as processed
-            PanelConstants.processedItems.Add(baseName);
+            PanelConstants.processedItems?.Add(baseName);
         }
 
         public static void  DisSeg1(double X0, double Y0, string filePath, string strDISOrientation)
@@ -219,23 +219,23 @@ namespace PanelDrawing.Services.ComponentPlacement
                 bool isLeft = Ori.Equals("L", StringComparison.OrdinalIgnoreCase);
                 bool isRight = Ori.Equals("R", StringComparison.OrdinalIgnoreCase);
 
-                string siblingName = PanelConstants.panelComponentProperties
+                string? siblingName = PanelConstants.panelComponentProperties
                     .Where(x => x.ComponentName != null &&
                                 x.ComponentName.StartsWith(BaseName) &&
                                 !x.ComponentName.Equals(CompName, StringComparison.OrdinalIgnoreCase))
                     .Select(x => x.ComponentName)
                     .FirstOrDefault();
 
-                string siblingPN = null;
+                string? siblingPN = null;
 
                 if (!string.IsNullOrEmpty(siblingName))
                 {
                     siblingPN =
                          PanelConstants.dataExtractionListAbove
                          .Where(row =>
-                             row.ConnectorName.Equals(siblingName, StringComparison.OrdinalIgnoreCase) &&
+                             row.ConnectorName?.Equals(siblingName, StringComparison.OrdinalIgnoreCase) == true &&
                              !string.IsNullOrEmpty(row.CoreNumber) &&
-                             row.Panel.Equals(PanelConstants.textPanelPartName, StringComparison.OrdinalIgnoreCase))
+                             row.Panel?.Equals(PanelConstants.textPanelPartName, StringComparison.OrdinalIgnoreCase) == true)
                          .Select(row => row.CoreNumber)
                          .FirstOrDefault();
                 }
